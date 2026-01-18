@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { CompanySettingsForm } from "@/components/settings/CompanySettingsForm";
+import { QuickActions } from "@/components/settings/QuickActions";
 
 export default async function ConfiguracionPage() {
   const session = await getServerSession(authOptions);
@@ -14,13 +15,16 @@ export default async function ConfiguracionPage() {
     <PageShell>
       <div className="mb-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-          Empresa
+          Ajustes
         </p>
         <h2 className="font-[var(--font-cormorant)] text-2xl font-semibold">
-          Datos de la empresa
+          Ajustes generales
         </h2>
       </div>
-      <CompanySettingsForm />
+      <div className="grid gap-8">
+        <QuickActions />
+        <CompanySettingsForm />
+      </div>
     </PageShell>
   );
 }

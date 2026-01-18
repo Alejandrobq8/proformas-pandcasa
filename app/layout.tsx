@@ -15,8 +15,11 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Proformas P&C Casa",
+  title: "Pan d' Casa",
   description: "Gestor de proformas y clientes",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({

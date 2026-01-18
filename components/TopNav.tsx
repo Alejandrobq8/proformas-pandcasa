@@ -1,12 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
-import { ThemeToggle } from "./ThemeToggle";
 
 export function TopNav() {
-  const { data } = useSession();
-
   return (
     <header className="app-shell sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--paper)] shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
@@ -46,17 +42,8 @@ export function TopNav() {
             className="rounded-full px-3 py-2 transition-colors hover:bg-[var(--sand)] hover:text-[var(--accent)]"
             href="/configuracion"
           >
-            Empresa
+            Ajustes
           </Link>
-          <ThemeToggle />
-          {data?.user ? (
-            <button
-              className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:bg-[var(--sand)] hover:text-[var(--accent)]"
-              onClick={() => signOut({ callbackUrl: "/login" })}
-            >
-              Salir
-            </button>
-          ) : null}
         </nav>
       </div>
     </header>
