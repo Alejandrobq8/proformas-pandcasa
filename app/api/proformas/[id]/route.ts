@@ -64,6 +64,7 @@ export async function PUT(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const status = parsed.data.status ?? "DRAFT";
   const { subtotal, total } = calculateTotals(parsed.data);
 
   const proforma = await prisma.$transaction(async (tx) => {
@@ -78,6 +79,7 @@ export async function PUT(
         clientNombre: parsed.data.clientNombre,
         clientEmpresa: parsed.data.clientEmpresa,
         clientCedulaJuridica: parsed.data.clientCedulaJuridica,
+        status,
         discount: parsed.data.discount ?? null,
         notes: parsed.data.notes ?? null,
         subtotal,

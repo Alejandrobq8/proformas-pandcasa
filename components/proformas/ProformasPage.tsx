@@ -16,9 +16,22 @@ type Proforma = {
   number: string;
   clientNombre: string;
   clientEmpresa: string;
+  status: "DRAFT" | "SENT" | "PAID";
   subtotal: number | string;
   total: number | string;
   items: Item[];
+};
+
+const statusLabel: Record<Proforma["status"], string> = {
+  DRAFT: "Borrador",
+  SENT: "Enviada",
+  PAID: "Pagada",
+};
+
+const statusStyles: Record<Proforma["status"], string> = {
+  DRAFT: "bg-[var(--sand)] text-[var(--cocoa)]",
+  SENT: "bg-[var(--amber)] text-[var(--cocoa)]",
+  PAID: "bg-emerald-100 text-emerald-800",
 };
 
 function toNumber(value: unknown) {
@@ -121,9 +134,16 @@ export function ProformasPage() {
               className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                  {proforma.number}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                    {proforma.number}
+                  </p>
+                  <span
+                    className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${statusStyles[proforma.status]}`}
+                  >
+                    {statusLabel[proforma.status]}
+                  </span>
+                </div>
                 <p className="font-semibold">
                   {proforma.clientNombre} - {proforma.clientEmpresa}
                 </p>

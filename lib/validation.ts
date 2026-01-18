@@ -12,6 +12,8 @@ export const proformaItemSchema = z.object({
   unitPrice: z.number().nonnegative(),
 });
 
+export const proformaStatusSchema = z.enum(["DRAFT", "SENT", "PAID"]);
+
 export const proformaSchema = z.object({
   clientId: z.string().optional().nullable(),
   clientNombre: z.string().min(1),
@@ -19,6 +21,7 @@ export const proformaSchema = z.object({
   clientCedulaJuridica: z.string().min(1),
   discount: z.number().nonnegative().optional().nullable(),
   notes: z.string().optional().nullable(),
+  status: proformaStatusSchema.optional(),
   items: z.array(proformaItemSchema).min(1),
 });
 
@@ -34,4 +37,5 @@ export const companySettingsSchema = z.object({
 
 export type ClientInput = z.infer<typeof clientSchema>;
 export type ProformaInput = z.infer<typeof proformaSchema>;
+export type ProformaStatus = z.infer<typeof proformaStatusSchema>;
 export type CompanySettingsInput = z.infer<typeof companySettingsSchema>;

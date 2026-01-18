@@ -74,6 +74,7 @@ export async function POST(request: Request) {
     }
   }
 
+  const status = parsed.data.status ?? "DRAFT";
   const { subtotal, total } = calculateTotals(parsed.data);
   const year = new Date().getFullYear();
 
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
         clientNombre: parsed.data.clientNombre,
         clientEmpresa: parsed.data.clientEmpresa,
         clientCedulaJuridica: parsed.data.clientCedulaJuridica,
+        status,
         discount: parsed.data.discount ?? null,
         notes: parsed.data.notes ?? null,
         subtotal,
