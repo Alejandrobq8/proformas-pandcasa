@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f2e8;
+  --foreground: #2b1d14;
+  --amber: #e0a100;
+  --amber-strong: #c98100;
+  --cocoa: #5a3a22;
+  --sand: #f1e6d6;
+  --paper: #fffaf3;
+  --border: #e3d4c2;
+  --accent: #b76d1e;
+  --button-text: #5a3a22;
+}
+
+html.theme-dark {
+  --background: #1f1a14;
+  --foreground: #f2e7d8;
+  --amber: #f0b429;
+  --amber-strong: #d48b1f;
+  --cocoa: #d6b48f;
+  --sand: #2a221b;
+  --paper: #2c241c;
+  --border: #3a3026;
+  --accent: #f1a042;
+  --button-text: #5a3a22;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-amber: var(--amber);
+  --color-amber-strong: var(--amber-strong);
+  --color-cocoa: var(--cocoa);
+  --color-sand: var(--sand);
+  --color-paper: var(--paper);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-work-sans);
+  --font-display: var(--font-cormorant);
+}
+
+body {
+  background: radial-gradient(circle at top left, #fff1d6, #f5e6d1 40%, #f0dfc6);
+  color: var(--foreground);
+  font-family: var(--font-work-sans), sans-serif;
+  min-height: 100vh;
+}
+
+html.theme-dark body {
+  background: radial-gradient(circle at top left, #2b241c, #1f1a14 45%, #16120d);
+}
+
+.app-shell {
+  background-image: radial-gradient(
+      rgba(0, 0, 0, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent);
+  background-size: 18px 18px, 100% 100%;
+}
+
+html.theme-dark .app-shell {
+  background-image: radial-gradient(
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent);
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+}
