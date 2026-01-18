@@ -62,9 +62,8 @@ export async function GET(
 
   const browser = await puppeteer.launch({
     args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
     executablePath: executablePath || undefined,
-    headless: chromium.headless,
+    headless: true,
   });
 
   try {
@@ -78,7 +77,7 @@ export async function GET(
       preferCSSPageSize: true,
     });
 
-    return new NextResponse(pdf, {
+    return new NextResponse(Buffer.from(pdf), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="${proforma.number}.pdf"`,

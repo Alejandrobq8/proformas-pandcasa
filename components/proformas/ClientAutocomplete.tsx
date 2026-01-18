@@ -36,7 +36,13 @@ export function ClientAutocomplete({
 
   function handleSelect(cliente: Cliente) {
     onSelect(cliente);
-    setQuery(`${cliente.nombre} - ${cliente.empresa} - {cliente.cedulaJuridica}
+    setQuery(
+      cliente.nombre +
+        " - " +
+        cliente.empresa +
+        " - " +
+        cliente.cedulaJuridica
+    );
     setOpen(false);
   }
 
@@ -72,6 +78,3 @@ export function ClientAutocomplete({
     </div>
   );
 }
-
-
-

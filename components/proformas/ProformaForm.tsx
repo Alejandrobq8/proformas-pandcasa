@@ -20,7 +20,7 @@ type ProformaData = {
   clientCedulaJuridica: string;
   discount?: number | null;
   notes?: string | null;
-  items: Item[];
+  items: Array<Omit<Item, "id">>;
 };
 
 function makeItem(): Item {

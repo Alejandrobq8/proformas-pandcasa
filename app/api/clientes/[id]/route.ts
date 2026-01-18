@@ -6,15 +6,16 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const client = await prisma.client.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
   });
   if (!client) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -25,8 +26,9 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -43,14 +45,14 @@ export async function PUT(
 
   try {
     const updated = await prisma.client.updateMany({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
       data: parsed.data,
     });
     if (updated.count === 0) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
     const client = await prisma.client.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
     return NextResponse.json(client);
   } catch (error) {
@@ -63,8 +65,9 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -72,12 +75,12 @@ export async function DELETE(
 
   try {
     const client = await prisma.client.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
     });
     if (!client) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    await prisma.client.delete({ where: { id: params.id } });
+    await prisma.client.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
