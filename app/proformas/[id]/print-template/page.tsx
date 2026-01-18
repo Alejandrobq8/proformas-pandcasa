@@ -89,8 +89,9 @@ export default async function ProformaTemplatePage({
     `${proforma.userId}:${proforma.id}`,
     token
   );
+  const isOwner = session?.user?.id === proforma.userId;
 
-  if (!session?.user && !tokenValid) {
+  if (!isOwner && !tokenValid) {
     notFound();
   }
 
