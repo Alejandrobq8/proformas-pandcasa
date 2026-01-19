@@ -85,10 +85,7 @@ export default async function ProformaTemplatePage({
 
   const session = await getServerSession(authOptions);
   const token = rawToken ?? "";
-  const tokenValid = verifyPdfToken(
-    `${proforma.userId}:${proforma.id}`,
-    token
-  );
+  const tokenValid = verifyPdfToken(`${proforma.userId}:${proforma.id}`, token);
   const isOwner = session?.user?.id === proforma.userId;
 
   if (!isOwner && !tokenValid) {
@@ -452,17 +449,20 @@ export default async function ProformaTemplatePage({
           {proforma.items.map((item) => {
             const lineTotal = item.quantity * toNumber(item.unitPrice);
             const parsed = parseDescription(item.description);
+
             return (
               <tr key={item.id}>
                 <td>
-                  {parsed.bullets.length > 0 ? (
+                  {parsed.title ? (
                     <>
                       <p className="item-title">{parsed.title}</p>
-                      <ul className="item-list">
-                        {parsed.bullets.map((bullet, index) => (
-                          <li key={`${item.id}-bullet-${index}`}>{bullet}</li>
-                        ))}
-                      </ul>
+                      {parsed.bullets.length > 0 ? (
+                        <ul className="item-list">
+                          {parsed.bullets.map((bullet, index) => (
+                            <li key={`${item.id}-bullet-${index}`}>{bullet}</li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </>
                   ) : (
                     <span>{item.description}</span>
@@ -528,7 +528,6 @@ export default async function ProformaTemplatePage({
           <strong>Email.</strong>
           {company?.email ?? "-"}
         </div>
-        
       </div>
 
       <div className="bottom-band"></div>
