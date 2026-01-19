@@ -247,16 +247,13 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
 
         <div className="mt-4 space-y-3">
           <div className="hidden gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)] md:grid md:grid-cols-[2fr,1fr,1fr,auto]">
-            <span>Descripcion</span>
-            <span className="text-right">Cantidad</span>
-            <span className="text-right">Precio unitario</span>
-            <span className="text-right">Total</span>
           </div>
           {items.map((item, index) => (
             <div
               key={item.id}
               className="grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-3 md:grid-cols-[2fr,1fr,1fr,auto]"
             >
+              <span className="text-left">Descripción</span>
               <textarea
                 className="min-h-[72px] rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
                 placeholder="Descripcion (puedes usar varias lineas y vinetas)"
@@ -266,6 +263,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                 }
                 required
               />
+              <span className="text-left">Cantidad</span>
               <input
                 className="rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
                 type="number"
@@ -276,6 +274,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                 }
                 required
               />
+              <span className="text-left">Precio Unitario</span>
               <input
                 className="rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
                 type="number"
@@ -333,22 +332,6 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               <span>{unitsCount} unidades</span>
             </div>
             <div className="my-3 h-px bg-[var(--border)]" />
-            <div className="mb-4">
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                Estado
-              </label>
-              <select
-                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                value={status}
-                onChange={(event) =>
-                  setStatus(event.target.value as ProformaStatus)
-                }
-              >
-                <option value="DRAFT">Borrador</option>
-                <option value="SENT">Enviada</option>
-                <option value="PAID">Pagada</option>
-              </select>
-            </div>
             <div className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Subtotal</span>
