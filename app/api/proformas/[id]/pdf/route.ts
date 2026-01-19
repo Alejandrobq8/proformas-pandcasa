@@ -42,19 +42,25 @@ export async function GET(
   const baseUrl = getBaseUrl(request);
   const printUrl = `${baseUrl}/proformas/${id}/print-template?token=${token}`;
 
-  let executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  const packUrl = process.env.CHROMIUM_PACK_URL;
+  let executablePath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ??
+    process.env.CHROME_EXECUTABLE_PATH ??
+    null;
   if (!executablePath) {
     try {
-      executablePath = await chromium.executablePath();
+      executablePath = packUrl
+        ? await chromium.executablePath(packUrl)
+        : await chromium.executablePath();
     } catch {
-      executablePath = process.env.CHROME_EXECUTABLE_PATH;
+      executablePath = null;
     }
   }
   if (!executablePath) {
     return NextResponse.json(
       {
         error:
-          "No se encontro Chrome. Define PUPPETEER_EXECUTABLE_PATH o CHROME_EXECUTABLE_PATH.",
+          "No se encontro Chrome. Define PUPPETEER_EXECUTABLE_PATH o CHROME_EXECUTABLE_PATH. En Vercel con chromium-min, define CHROMIUM_PACK_URL.",
       },
       { status: 500 }
     );
