@@ -371,6 +371,15 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           >
             Guardar borrador
           </button>
+          {initial?.id ? (
+            <button
+              type="button"
+              className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              onClick={() => window.open(`/api/proformas/${initial.id}/pdf`, "_blank")}
+            >
+              Descargar PDF
+            </button>
+          ) : null}
           {previewUrl ? (
             <button
               type="button"
@@ -427,7 +436,6 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     </form>
   );
 }
-
 
 
 
