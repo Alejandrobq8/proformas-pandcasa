@@ -42,25 +42,31 @@ export async function GET(
   const baseUrl = getBaseUrl(request);
   const printUrl = `${baseUrl}/proformas/${id}/print-template?token=${token}`;
 
-  const packUrl = process.env.CHROMIUM_PACK_URL;
+  const packUrl =
+    process.env.CHROMIUM_PACK_URL ??
+    "https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.tar";
   let executablePath =
     process.env.PUPPETEER_EXECUTABLE_PATH ??
     process.env.CHROME_EXECUTABLE_PATH ??
     null;
   if (!executablePath) {
     try {
-      executablePath = packUrl
-        ? await chromium.executablePath(packUrl)
-        : await chromium.executablePath();
-    } catch {
-      executablePath = null;
+      executablePath = await chromium.executablePath();
+    } catch (error) {
+      console.error("Chromium executablePath failed", error);
+      try {
+        executablePath = await chromium.executablePath(packUrl);
+      } catch (packError) {
+        console.error("Chromium pack download failed", packError);
+        executablePath = null;
+      }
     }
   }
   if (!executablePath) {
     return NextResponse.json(
       {
         error:
-          "No se encontro Chrome. Define PUPPETEER_EXECUTABLE_PATH o CHROME_EXECUTABLE_PATH. En Vercel con chromium-min, define CHROMIUM_PACK_URL.",
+          "No se encontro Chrome. Define PUPPETEER_EXECUTABLE_PATH o CHROME_EXECUTABLE_PATH, o configura CHROMIUM_PACK_URL.",
       },
       { status: 500 }
     );
