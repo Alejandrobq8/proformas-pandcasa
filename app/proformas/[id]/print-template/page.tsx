@@ -129,18 +129,21 @@ export default async function ProformaTemplatePage({
           print-color-adjust: exact;
         }
 
-        html.theme-dark body {
-          background: #eae6e0;
-          color: var(--ink);
-        }
-
         .sheet {
+          --amber: #f4c430;
+          --coffee: #6b4b1a;
+          --ink: #2d2a26;
+          --muted: #6b6b6b;
+          --line: #d9cdbf;
+          --row: #f0f0f0;
+          --paper: #ffffff;
           width: 900px;
           margin: 32px auto;
           background: var(--paper);
           box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
           position: relative;
           padding: 48px 56px 64px;
+          color: var(--ink);
         }
 
         .top-band {
@@ -189,7 +192,7 @@ export default async function ProformaTemplatePage({
           grid-template-columns: 2fr 1fr;
           gap: 24px;
           padding-bottom: 16px;
-          border-bottom: 2px solid var(--line);
+          border-bottom: 2px solid var(--coffee);
         }
 
         .bill-to h3 {
@@ -277,7 +280,7 @@ export default async function ProformaTemplatePage({
         .terms {
           margin-top: 24px;
           padding-top: 16px;
-          border-top: 2px solid var(--line);
+          border-top: 2px solid var(--coffee);
         }
 
         .terms h4 {
