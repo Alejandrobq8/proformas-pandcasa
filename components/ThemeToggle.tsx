@@ -29,6 +29,7 @@ export function ThemeToggle() {
     const initial = prefersDark ? "dark" : "light";
     setTheme(initial);
     applyTheme(initial);
+    window.localStorage.setItem(STORAGE_KEY, initial);
   }, []);
 
   function toggleTheme() {

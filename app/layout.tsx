@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Work_Sans, Cormorant_Garamond } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -32,6 +33,14 @@ export default function RootLayout({
       <body
         className={`${workSans.variable} ${cormorant.variable} antialiased`}
       >
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html:
+              "(() => { try { const stored = localStorage.getItem('theme'); if (stored === 'dark') { document.documentElement.classList.add('theme-dark'); } else if (stored === 'light') { document.documentElement.classList.remove('theme-dark'); } } catch (e) {} })();",
+          }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
