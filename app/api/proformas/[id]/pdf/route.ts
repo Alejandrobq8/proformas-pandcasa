@@ -45,19 +45,26 @@ export async function GET(
   const packUrl =
     process.env.CHROMIUM_PACK_URL ??
     "https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.x64.tar";
+  const usePack = Boolean(process.env.VERCEL);
   let executablePath =
     process.env.PUPPETEER_EXECUTABLE_PATH ??
     process.env.CHROME_EXECUTABLE_PATH ??
     null;
   if (!executablePath) {
     try {
-      executablePath = await chromium.executablePath();
+      executablePath = usePack
+        ? await chromium.executablePath(packUrl)
+        : await chromium.executablePath();
     } catch (error) {
       console.error("Chromium executablePath failed", error);
-      try {
-        executablePath = await chromium.executablePath(packUrl);
-      } catch (packError) {
-        console.error("Chromium pack download failed", packError);
+      if (!usePack) {
+        try {
+          executablePath = await chromium.executablePath(packUrl);
+        } catch (packError) {
+          console.error("Chromium pack download failed", packError);
+          executablePath = null;
+        }
+      } else {
         executablePath = null;
       }
     }
