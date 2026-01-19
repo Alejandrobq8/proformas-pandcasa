@@ -12,6 +12,9 @@ function getBaseUrl(request: Request) {
   const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (envUrl) return envUrl.replace(/\/$/, "");
 
+  const vercelUrl = process.env.VERCEL_URL;
+  if (vercelUrl) return `https://${vercelUrl}`.replace(/\/$/, "");
+
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   const proto =
     request.headers.get("x-forwarded-proto") ??
