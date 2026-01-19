@@ -509,10 +509,14 @@ export default async function ProformaTemplatePage({
       <div className="terms">
         <h4>TÉRMINOS Y CONDICIONES</h4>
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam
-          nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat
-          volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation
-          ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
+          <strong>
+            No se procede con el pedido, sino se recibe la orden de compra
+            o visto bueno formal.
+          </strong>
+          En este documento se pactan los servicios brindados y sus respectivos
+          costos, por lo que nos liberamos de toda responsabilidad por la falta de
+          atención de servicios que no se encuentren en el presente documento, por
+          lo que se recomienda revisar con detenimiento los servicios contratados
         </p>
       </div>
 
