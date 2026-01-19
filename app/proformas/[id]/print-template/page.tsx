@@ -129,6 +129,11 @@ export default async function ProformaTemplatePage({
           print-color-adjust: exact;
         }
 
+        html.theme-dark body {
+          background: #eae6e0;
+          color: var(--ink);
+        }
+
         .sheet {
           width: 900px;
           margin: 32px auto;
