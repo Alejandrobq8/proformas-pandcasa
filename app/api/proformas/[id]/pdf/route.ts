@@ -66,13 +66,14 @@ export async function GET(
     );
   }
 
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: executablePath || undefined,
-    headless: true,
-  });
-
+  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   try {
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: executablePath || undefined,
+      headless: true,
+    });
+
     const page = await browser.newPage();
     await page.goto(printUrl, { waitUntil: "networkidle0" });
     await page.evaluate(() => document.fonts.ready);
@@ -89,7 +90,20 @@ export async function GET(
         "Content-Disposition": `inline; filename="${proforma.number}.pdf"`,
       },
     });
+  } catch (error) {
+    console.error("PDF generation failed", error);
+    const message =
+      error instanceof Error ? error.message : "Error generando PDF";
+    return NextResponse.json(
+      {
+        error: "No se pudo generar el PDF.",
+        details: message,
+      },
+      { status: 500 }
+    );
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
