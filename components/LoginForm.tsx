@@ -56,7 +56,11 @@ export function LoginForm() {
           required
         />
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
       <button
         className="rounded-full bg-[var(--amber)] px-6 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
         disabled={loading}

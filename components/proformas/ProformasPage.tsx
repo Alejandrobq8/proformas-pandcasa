@@ -118,7 +118,11 @@ export function ProformasPage() {
         </div>
       </div>
 
-      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
 
       <div className="mt-6 space-y-4">
         {loading ? (

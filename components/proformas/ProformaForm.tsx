@@ -355,7 +355,11 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
             </div>
           </div>
         </div>
-        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+        {error ? (
+          <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </p>
+        ) : null}
       </section>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -436,7 +440,6 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     </form>
   );
 }
-
 
 
 

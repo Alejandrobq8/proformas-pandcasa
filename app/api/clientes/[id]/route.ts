@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { clientSchema } from "@/lib/validation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export async function GET(
   _request: Request,
@@ -56,6 +57,18 @@ export async function PUT(
     });
     return NextResponse.json(client);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Ya existe un cliente con esta cedula juridica para este usuario.",
+        },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: "No se pudo actualizar el cliente." },
       { status: 400 }

@@ -30,7 +30,6 @@ model Client {
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   proformas      Proforma[]
 
-  @@unique([userId, cedulaJuridica])
   @@index([userId, nombre])
   @@index([userId, empresa])
   @@index([userId, cedulaJuridica])

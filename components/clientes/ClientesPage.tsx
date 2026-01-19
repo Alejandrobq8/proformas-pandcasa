@@ -70,7 +70,8 @@ export function ClientesPage() {
     );
 
     if (!res.ok) {
-      setError("No se pudo guardar el cliente.");
+      const payload = await res.json().catch(() => null);
+      setError(payload?.error ?? "No se pudo guardar el cliente.");
       return;
     }
 
@@ -82,7 +83,8 @@ export function ClientesPage() {
     if (!confirm("Eliminar cliente?")) return;
     const res = await fetch(`/api/clientes/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      setError("No se pudo eliminar el cliente.");
+      const payload = await res.json().catch(() => null);
+      setError(payload?.error ?? "No se pudo eliminar el cliente.");
       return;
     }
     await loadClientes(query);
@@ -191,7 +193,11 @@ export function ClientesPage() {
             }
             required
           />
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? (
+            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          ) : null}
           <button className="rounded-full bg-[var(--amber)] px-5 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md">
             {editingId ? "Guardar cambios" : "Crear cliente"}
           </button>
