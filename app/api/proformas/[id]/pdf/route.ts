@@ -44,7 +44,7 @@ export async function GET(
 
   const packUrl =
     process.env.CHROMIUM_PACK_URL ??
-    "https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.tar";
+    "https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.x64.tar";
   let executablePath =
     process.env.PUPPETEER_EXECUTABLE_PATH ??
     process.env.CHROME_EXECUTABLE_PATH ??
