@@ -245,50 +245,20 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
         </div>
 
         <div className="mt-4 space-y-3">
-          <div className="hidden gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)] md:grid md:grid-cols-[2fr,1fr,1fr,auto]">
-          </div>
           {items.map((item, index) => (
             <div
               key={item.id}
-              className="grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-3 md:grid-cols-[2fr,1fr,1fr,auto]"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4 shadow-sm"
             >
-              <span className="text-left">Descripción</span>
-              <textarea
-                className="min-h-[72px] rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                placeholder="Descripcion (puedes usar varias lineas y vinetas)"
-                value={item.description}
-                onChange={(event) =>
-                  updateItem(index, { description: event.target.value })
-                }
-                required
-              />
-              <span className="text-left">Cantidad</span>
-              <input
-                className="rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                type="number"
-                min={1}
-                value={item.quantity}
-                onChange={(event) =>
-                  updateItem(index, { quantity: Number(event.target.value) })
-                }
-                required
-              />
-              <span className="text-left">Precio Unitario</span>
-              <input
-                className="rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                type="number"
-                min={0}
-                step="0.01"
-                value={item.unitPrice}
-                onChange={(event) =>
-                  updateItem(index, { unitPrice: Number(event.target.value) })
-                }
-                required
-              />
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-[var(--cocoa)]">
-                  {formatCRC(item.quantity * item.unitPrice)}
-                </span>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                  <span className="rounded-full border border-[var(--border)] px-3 py-1">
+                    Item {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-sm font-semibold normal-case text-[var(--cocoa)]">
+                    Total: {formatCRC(item.quantity * item.unitPrice)}
+                  </span>
+                </div>
                 {items.length > 1 ? (
                   <button
                     type="button"
@@ -298,6 +268,56 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                     Quitar
                   </button>
                 ) : null}
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr]">
+                <div>
+                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                    Descripcion
+                  </label>
+                  <textarea
+                    className="mt-2 min-h-[96px] w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+                    placeholder="Descripcion (usa lineas nuevas para vinetas)"
+                    value={item.description}
+                    onChange={(event) =>
+                      updateItem(index, { description: event.target.value })
+                    }
+                    required
+                  />
+                  <p className="mt-2 text-xs text-[var(--cocoa)]">
+                    Primera linea como titulo, el resto como lista.
+                  </p>
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                    Cantidad
+                  </label>
+                  <input
+                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+                    type="number"
+                    min={1}
+                    value={item.quantity}
+                    onChange={(event) =>
+                      updateItem(index, { quantity: Number(event.target.value) })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                    Precio unitario
+                  </label>
+                  <input
+                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={item.unitPrice}
+                    onChange={(event) =>
+                      updateItem(index, { unitPrice: Number(event.target.value) })
+                    }
+                    required
+                  />
+                </div>
               </div>
             </div>
           ))}

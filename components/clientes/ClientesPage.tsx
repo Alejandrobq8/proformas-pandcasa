@@ -19,6 +19,7 @@ export function ClientesPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"list" | "form">("list");
 
   const debounceQuery = useMemo(() => query, [query]);
 
@@ -44,6 +45,7 @@ export function ClientesPage() {
     setEditingId(null);
     setForm(emptyForm);
     setError(null);
+    setActiveTab("form");
   }
 
   function startEdit(cliente: Cliente) {
@@ -54,6 +56,7 @@ export function ClientesPage() {
       cedulaJuridica: cliente.cedulaJuridica,
     });
     setError(null);
+    setActiveTab("form");
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -91,8 +94,34 @@ export function ClientesPage() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
-      <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+    <div className="grid gap-6">
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+            activeTab === "list"
+              ? "border-[var(--amber-strong)] text-[var(--accent)]"
+              : "border-[var(--border)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+          }`}
+          onClick={() => setActiveTab("list")}
+        >
+          Listado
+        </button>
+        <button
+          type="button"
+          className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+            activeTab === "form"
+              ? "border-[var(--amber-strong)] text-[var(--accent)]"
+              : "border-[var(--border)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+          }`}
+          onClick={() => setActiveTab("form")}
+        >
+          {editingId ? "Editar" : "Nuevo"}
+        </button>
+      </div>
+
+      {activeTab === "list" ? (
+        <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -102,12 +131,21 @@ export function ClientesPage() {
               {total} registros
             </h2>
           </div>
-          <input
-            className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
-            placeholder="Buscar por nombre, empresa o cedula"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <div className="flex w-full flex-wrap gap-3 sm:w-auto">
+            <input
+              className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
+              placeholder="Buscar por nombre, empresa o cedula"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <button
+              type="button"
+              className="rounded-full bg-[var(--amber)] px-5 py-2 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md"
+              onClick={startCreate}
+            >
+              Nuevo cliente
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 space-y-4">
@@ -150,61 +188,65 @@ export function ClientesPage() {
             ))
           )}
         </div>
-      </section>
-
-      <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-              {editingId ? "Editar" : "Nuevo"} cliente
-            </p>
-            <h3 className="font-[var(--font-cormorant)] text-xl font-semibold">
-              Datos base
-            </h3>
-          </div>
-          {editingId ? (
+        </section>
+      ) : (
+        <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+                {editingId ? "Editar" : "Nuevo"} cliente
+              </p>
+              <h3 className="font-[var(--font-cormorant)] text-xl font-semibold">
+                Datos base
+              </h3>
+            </div>
             <button
               className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] transition hover:text-[var(--amber-strong)]"
-              onClick={startCreate}
+              onClick={() => setActiveTab("list")}
+              type="button"
             >
-              Limpiar
+              Ver listado
             </button>
-          ) : null}
-        </div>
+          </div>
 
-        <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Nombre"
-            value={form.nombre}
-            onChange={(event) => setForm({ ...form, nombre: event.target.value })}
-            required
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Empresa"
-            value={form.empresa}
-            onChange={(event) => setForm({ ...form, empresa: event.target.value })}
-            required
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Cedula juridica (opcional)"
-            value={form.cedulaJuridica}
-            onChange={(event) =>
-              setForm({ ...form, cedulaJuridica: event.target.value })
-            }
-          />
-          {error ? (
-            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </p>
-          ) : null}
-          <button className="rounded-full bg-[var(--amber)] px-5 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md">
-            {editingId ? "Guardar cambios" : "Crear cliente"}
-          </button>
-        </form>
-      </section>
+          <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
+            <input
+              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              placeholder="Nombre"
+              value={form.nombre}
+              onChange={(event) =>
+                setForm({ ...form, nombre: event.target.value })
+              }
+              required
+            />
+            <input
+              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              placeholder="Empresa"
+              value={form.empresa}
+              onChange={(event) =>
+                setForm({ ...form, empresa: event.target.value })
+              }
+              required
+            />
+            <input
+              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              placeholder="Cedula juridica (opcional)"
+              value={form.cedulaJuridica}
+              onChange={(event) =>
+                setForm({ ...form, cedulaJuridica: event.target.value })
+              }
+            />
+            {error ? (
+              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </p>
+            ) : null}
+            <button className="rounded-full bg-[var(--amber)] px-5 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md">
+              {editingId ? "Guardar cambios" : "Crear cliente"}
+            </button>
+          </form>
+        </section>
+      )}
     </div>
   );
 }
