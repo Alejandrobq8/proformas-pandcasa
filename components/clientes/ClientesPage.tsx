@@ -96,30 +96,6 @@ export function ClientesPage() {
 
   return (
     <div className="grid gap-6">
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          className={`inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition ${
-            activeTab === "list"
-              ? "border-[var(--amber-strong)] text-[var(--accent)]"
-              : "border-[var(--border)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
-          }`}
-          onClick={() => setActiveTab("list")}
-        >
-          Listado
-        </button>
-        <button
-          type="button"
-          className={`inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition ${
-            activeTab === "form"
-              ? "border-[var(--amber-strong)] text-[var(--accent)]"
-              : "border-[var(--border)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
-          }`}
-          onClick={() => setActiveTab("form")}
-        >
-          {editingId ? "Editar" : "Nuevo"}
-        </button>
-      </div>
 
       {activeTab === "list" ? (
         <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
@@ -238,12 +214,13 @@ export function ClientesPage() {
               </h3>
             </div>
             <button
-              className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] transition hover:text-[var(--amber-strong)]"
-              onClick={() => setActiveTab("list")}
               type="button"
+              className="rounded-full bg-[var(--amber)] px-5 py-2 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md"
+              onClick={() => setActiveTab("list")}
             >
               Ver listado
             </button>
+
           </div>
 
           <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
