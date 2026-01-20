@@ -492,11 +492,18 @@ export default async function ProformaTemplatePage({
         <div className="payment">
           <strong>DATOS DE PAGO:</strong>
           <br />
-          NUMERO DE CUENTA: -
+          Número de cuenta BAC: 931315097
+          <br />
+          Número de cuenta IBAN: CR95010200009313150978
+          <br />
+          SINPE: 8337-6864
           <br />
           NOMBRE: {company?.contactName ?? company?.name ?? "Pan d' Casa"}
           <br />
-          MÉTODO DE PAGO: TRANSFERENCIA BANCARIA
+          MÉTODOS DE PAGO: TRANSFERENCIA BANCARIA O SINPE
+          <br />
+          <strong>Importante: </strong>Enviar comprobante de pago al numero de
+          WhatsApp {company?.phone ?? "-"} o al correo {company?.email ?? "-"}
         </div>
         <div className="totals">
           <div>
