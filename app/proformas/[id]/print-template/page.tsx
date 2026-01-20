@@ -280,7 +280,7 @@ export default async function ProformaTemplatePage({
         .terms {
           margin-top: 24px;
           padding-top: 16px;
-          border-top: 2px solid var(--coffee);
+          border-top: 2px solid var(--amber);
         }
 
         .terms h4 {
