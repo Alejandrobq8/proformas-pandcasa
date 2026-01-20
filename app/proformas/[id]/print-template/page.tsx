@@ -502,7 +502,7 @@ export default async function ProformaTemplatePage({
           <br />
           MÉTODOS DE PAGO: TRANSFERENCIA BANCARIA O SINPE
           <br />
-          <strong>Importante: </strong>Enviar comprobante de pago al numero de
+          <strong>Importante: </strong>Enviar comprobante de pago al número de
           WhatsApp {company?.phone ?? "-"} o al correo {company?.email ?? "-"}
         </div>
         <div className="totals">
