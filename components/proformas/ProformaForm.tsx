@@ -311,9 +311,14 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                     type="number"
                     min={0}
                     step="0.01"
-                    value={item.unitPrice}
+                    value={item.unitPrice === 0 ? "" : item.unitPrice}
                     onChange={(event) =>
-                      updateItem(index, { unitPrice: Number(event.target.value) })
+                      updateItem(index, {
+                        unitPrice:
+                          event.target.value === ""
+                            ? 0
+                            : Number(event.target.value),
+                      })
                     }
                     required
                   />
