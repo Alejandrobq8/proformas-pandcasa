@@ -237,7 +237,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           </div>
           <button
             type="button"
-            className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
             onClick={addItem}
           >
             Agregar item
@@ -272,7 +272,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr]">
                 <div>
                   <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                    Descripcion
+                    Descripción
                   </label>
                   <textarea
                     className="mt-2 min-h-[96px] w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
@@ -293,12 +293,15 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                   </label>
                   <input
                     className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                    type="number"
-                    min={1}
+                    type="text"
+                    inputMode="numeric"
                     value={item.quantity}
-                    onChange={(event) =>
-                      updateItem(index, { quantity: Number(event.target.value) })
-                    }
+                    onChange={(event) => {
+                      const cleaned = event.target.value.replace(/[^\d]/g, "");
+                      updateItem(index, {
+                        quantity: cleaned ? Number(cleaned) : 0,
+                      });
+                    }}
                     required
                   />
                 </div>
@@ -308,18 +311,17 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                   </label>
                   <input
                     className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                    type="number"
-                    min={0}
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={item.unitPrice === 0 ? "" : item.unitPrice}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const normalized = event.target.value
+                        .replace(",", ".")
+                        .replace(/[^\d.]/g, "");
                       updateItem(index, {
-                        unitPrice:
-                          event.target.value === ""
-                            ? 0
-                            : Number(event.target.value),
-                      })
-                    }
+                        unitPrice: normalized ? Number(normalized) : 0,
+                      });
+                    }}
                     required
                   />
                 </div>
@@ -393,7 +395,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
             disabled={saving}
             onClick={() => saveProforma("DRAFT")}
           >
@@ -402,7 +404,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           {initial?.id ? (
             <button
               type="button"
-              className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
               onClick={() => window.open(`/api/proformas/${initial.id}/pdf`, "_blank")}
             >
               Descargar PDF
@@ -411,7 +413,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           {previewUrl ? (
             <button
               type="button"
-              className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
               onClick={() => window.open(previewUrl, "_blank")}
             >
               Abrir vista previa
@@ -439,7 +441,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           </div>
           <button
             type="button"
-            className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
             onClick={() => saveProforma()}
             disabled={saving}
           >

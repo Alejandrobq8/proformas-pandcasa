@@ -157,19 +157,19 @@ export function ProformasPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Link
-                  className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                  className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
                   href={`/proformas/${proforma.id}/edit`}
                 >
                   Editar
                 </Link>
                 <button
-                  className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                  className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
                   onClick={() => handleDuplicate(proforma.id)}
                 >
                   Duplicar
                 </button>
                 <a
-                  className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                  className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
                   href={`/api/proformas/${proforma.id}/pdf`}
                   target="_blank"
                   rel="noreferrer"
@@ -177,10 +177,46 @@ export function ProformasPage() {
                   PDF
                 </a>
                 <button
-                  className="rounded-full border border-red-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-red-600 transition hover:border-red-400 hover:text-red-700"
+                  className="bin-button"
                   onClick={() => handleDelete(proforma.id)}
+                  type="button"
+                  aria-label="Eliminar"
                 >
-                  Eliminar
+                  <svg
+                    className="bin-top"
+                    viewBox="0 0 39 7"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <line y1="5" x2="39" y2="5" stroke="white" strokeWidth="4" />
+                    <line
+                      x1="12"
+                      y1="1.5"
+                      x2="26.0357"
+                      y2="1.5"
+                      stroke="white"
+                      strokeWidth="3"
+                    />
+                  </svg>
+                  <svg
+                    className="bin-bottom"
+                    viewBox="0 0 33 39"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <mask id={`bin-mask-${proforma.id}`} fill="white">
+                      <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z" />
+                    </mask>
+                    <path
+                      d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z"
+                      fill="white"
+                      mask={`url(#bin-mask-${proforma.id})`}
+                    />
+                    <path d="M12 6L12 29" stroke="white" strokeWidth="4" />
+                    <path d="M21 6V29" stroke="white" strokeWidth="4" />
+                  </svg>
                 </button>
               </div>
             </div>

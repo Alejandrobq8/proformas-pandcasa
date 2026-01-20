@@ -19,7 +19,7 @@ export function QuickActions() {
           <ThemeToggle />
           <button
             type="button"
-            className="rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] hover:bg-[var(--sand)] hover:text-[var(--accent)]"
+            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:bg-[var(--sand)] hover:text-[var(--accent)]"
             onClick={() => signOut({ callbackUrl: "/login" })}
           >
             Salir

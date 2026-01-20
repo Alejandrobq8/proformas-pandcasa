@@ -31,7 +31,7 @@ export default async function HomePage() {
               Ver proformas
             </Link>
             <Link
-              className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--cocoa)] transition hover:-translate-y-0.5 hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--cocoa)] text-center transition hover:-translate-y-0.5 hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
               href="/clientes"
             >
               Gestionar clientes
