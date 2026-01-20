@@ -3,7 +3,7 @@ import { z } from "zod";
 export const clientSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
   empresa: z.string().min(1, "Empresa requerida"),
-  cedulaJuridica: z.string().min(1, "Cedula juridica requerida"),
+  cedulaJuridica: z.string().optional(),
 });
 
 export const proformaItemSchema = z.object({
@@ -18,7 +18,7 @@ export const proformaSchema = z.object({
   clientId: z.string().optional().nullable(),
   clientNombre: z.string().min(1),
   clientEmpresa: z.string().min(1),
-  clientCedulaJuridica: z.string().min(1),
+  clientCedulaJuridica: z.string().optional(),
   discount: z.number().nonnegative().optional().nullable(),
   notes: z.string().optional().nullable(),
   status: proformaStatusSchema.optional(),

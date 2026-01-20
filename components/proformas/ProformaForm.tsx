@@ -210,10 +210,9 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           </div>
           <input
             className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Cedula juridica"
+            placeholder="Cedula juridica (opcional)"
             value={clientCedulaJuridica}
             onChange={(event) => setClientCedulaJuridica(event.target.value)}
-            required
           />
         </div>
       </section>
@@ -440,7 +439,6 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     </form>
   );
 }
-
 
 
 

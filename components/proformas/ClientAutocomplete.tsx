@@ -36,13 +36,10 @@ export function ClientAutocomplete({
 
   function handleSelect(cliente: Cliente) {
     onSelect(cliente);
-    setQuery(
-      cliente.nombre +
-        " - " +
-        cliente.empresa +
-        " - " +
-        cliente.cedulaJuridica
-    );
+    const label = [cliente.nombre, cliente.empresa, cliente.cedulaJuridica]
+      .filter(Boolean)
+      .join(" - ");
+    setQuery(label);
     setOpen(false);
   }
 
@@ -69,7 +66,10 @@ export function ClientAutocomplete({
             >
               <p className="font-semibold">{cliente.nombre}</p>
               <p className="text-xs text-[var(--cocoa)]">
-                {cliente.empresa} - {cliente.cedulaJuridica}
+                {cliente.empresa}
+                {cliente.cedulaJuridica
+                  ? ` - ${cliente.cedulaJuridica}`
+                  : ""}
               </p>
             </button>
           ))}

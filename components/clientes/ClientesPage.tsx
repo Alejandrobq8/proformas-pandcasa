@@ -126,7 +126,10 @@ export function ClientesPage() {
                 <div>
                   <p className="font-semibold">{cliente.nombre}</p>
                   <p className="text-xs text-[var(--cocoa)]">
-                    {cliente.empresa} - {cliente.cedulaJuridica}
+                    {cliente.empresa}
+                    {cliente.cedulaJuridica
+                      ? ` - ${cliente.cedulaJuridica}`
+                      : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -186,12 +189,11 @@ export function ClientesPage() {
           />
           <input
             className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Cedula juridica"
+            placeholder="Cedula juridica (opcional)"
             value={form.cedulaJuridica}
             onChange={(event) =>
               setForm({ ...form, cedulaJuridica: event.target.value })
             }
-            required
           />
           {error ? (
             <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

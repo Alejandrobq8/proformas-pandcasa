@@ -429,7 +429,8 @@ export default async function ProformaTemplatePage({
         <div>
           <h3>{proforma.clientNombre}</h3>
           <p>
-            <strong>Céd. Jurídica:</strong> {proforma.clientCedulaJuridica}
+            <strong>Céd. Jurídica:</strong>{" "}
+            {proforma.clientCedulaJuridica || "-"}
           </p>
           <p>
             <strong>Empresa:</strong> {proforma.clientEmpresa}

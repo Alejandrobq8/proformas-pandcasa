@@ -47,7 +47,10 @@ export async function PUT(
   try {
     const updated = await prisma.client.updateMany({
       where: { id, userId: session.user.id },
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        cedulaJuridica: parsed.data.cedulaJuridica ?? "",
+      },
     });
     if (updated.count === 0) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
