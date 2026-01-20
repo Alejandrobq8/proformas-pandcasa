@@ -102,10 +102,25 @@ export async function GET(
       preferCSSPageSize: true,
     });
 
+    const safePart = (value?: string | null) =>
+      (value ?? "")
+        .trim()
+        .replace(/[\\/:*?"<>|]/g, "")
+        .replace(/\s+/g, " ")
+        .slice(0, 60);
+
+    const filename = [
+      safePart(proforma.number) || "proforma",
+      safePart(proforma.clientEmpresa),
+      safePart(proforma.clientNombre),
+    ]
+      .filter(Boolean)
+      .join(" - ");
+
     return new NextResponse(Buffer.from(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${proforma.number}.pdf"`,
+        "Content-Disposition": `inline; filename="${filename}.pdf"`,
       },
     });
   } catch (error) {

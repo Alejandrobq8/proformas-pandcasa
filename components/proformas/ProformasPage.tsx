@@ -142,11 +142,6 @@ export function ProformasPage() {
                   <p className="text-sm uppercase tracking-[0.2em] text-[var(--cocoa)]">
                     {proforma.number}
                   </p>
-                  <span
-                    className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${statusStyles[proforma.status]}`}
-                  >
-                    {statusLabel[proforma.status]}
-                  </span>
                 </div>
                 <p className="font-semibold">
                   {proforma.clientNombre} - {proforma.clientEmpresa}
