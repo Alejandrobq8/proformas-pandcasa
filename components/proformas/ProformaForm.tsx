@@ -339,14 +339,14 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                 Paso 3
               </span>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Notas
+                Entrega
               </p>
             </div>
             <textarea
               className="mt-2 min-h-[120px] w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              placeholder="Condiciones, plazos o detalles adicionales."
+              placeholder="Detalles de la entrega."
             />
           </div>
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4">
