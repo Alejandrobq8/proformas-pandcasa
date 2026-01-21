@@ -420,7 +420,7 @@ export default async function ProformaTemplatePage({
 
       <div className="header">
         <div className="brand">{company?.name ?? "Pan d' Casa"}</div>
-        <div className="title" style={{ fontWeight: "bold" }}>PROFORMA</div>
+        <div className="title" style={{ fontWeight: 700 }}>PROFORMA</div>
       </div>
 
       <div className="divider"></div>
