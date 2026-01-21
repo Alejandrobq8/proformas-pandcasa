@@ -61,6 +61,12 @@ export function MenuPage() {
     return () => clearTimeout(timeout);
   }, [debounceQuery, activeCategory]);
 
+  useEffect(() => {
+    if (!success) return;
+    const timeout = setTimeout(() => setSuccess(null), 1000);
+    return () => clearTimeout(timeout);
+  }, [success]);
+
   async function loadItems(search: string, category: MenuItem["category"]) {
     setLoading(true);
     const res = await fetch(
