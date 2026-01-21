@@ -11,14 +11,19 @@ type MenuItem = {
   price: number | string;
 };
 
-const categories = [
+const categories: Array<{ value: MenuItem["category"]; label: string }> = [
   { value: "BOCADILLOS", label: "Bocadillos" },
   { value: "POSTRES", label: "Postres" },
   { value: "QUEQUES", label: "Queques" },
 ];
 
-const emptyForm = {
-  category: "BOCADILLOS" as const,
+const emptyForm: {
+  category: MenuItem["category"];
+  name: string;
+  description: string;
+  price: string;
+} = {
+  category: "BOCADILLOS",
   name: "",
   description: "",
   price: "",

@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { menuCategorySchema, menuItemSchema } from "@/lib/validation";
+import {
+  menuCategorySchema,
+  menuItemSchema,
+  type MenuCategory,
+} from "@/lib/validation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -14,11 +19,13 @@ export async function GET(request: Request) {
   const q = searchParams.get("q")?.trim() ?? "";
   const categoryParam = searchParams.get("category")?.trim() ?? "";
   const parsedCategory = menuCategorySchema.safeParse(categoryParam);
-  const category = parsedCategory.success ? parsedCategory.data : null;
+  const category: MenuCategory | undefined = parsedCategory.success
+    ? parsedCategory.data
+    : undefined;
   const take = Number(searchParams.get("take") ?? 30);
   const skip = Number(searchParams.get("skip") ?? 0);
 
-  const where = {
+  const where: Prisma.MenuItemWhereInput = {
     userId: session.user.id,
     ...(category ? { category } : {}),
     ...(q
