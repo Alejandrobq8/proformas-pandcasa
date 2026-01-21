@@ -50,6 +50,7 @@ export function MenuPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [successVisible, setSuccessVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<"list" | "form">("list");
 
   const debounceQuery = useMemo(() => query, [query]);
@@ -62,9 +63,17 @@ export function MenuPage() {
   }, [debounceQuery, activeCategory]);
 
   useEffect(() => {
-    if (!success) return;
-    const timeout = setTimeout(() => setSuccess(null), 1000);
-    return () => clearTimeout(timeout);
+    if (!success) {
+      setSuccessVisible(false);
+      return;
+    }
+    setSuccessVisible(true);
+    const fadeTimeout = setTimeout(() => setSuccessVisible(false), 700);
+    const clearSuccessTimeout = setTimeout(() => setSuccess(null), 1000);
+    return () => {
+      clearTimeout(fadeTimeout);
+      clearTimeout(clearSuccessTimeout);
+    };
   }, [success]);
 
   async function loadItems(search: string, category: MenuItem["category"]) {
@@ -138,6 +147,7 @@ export function MenuPage() {
 
     resetForm();
     setSuccess(editingId ? "Producto actualizado." : "Producto agregado.");
+    setSuccessVisible(true);
     setActiveTab("list");
     await loadItems(query, activeCategory);
   }
@@ -224,7 +234,11 @@ export function MenuPage() {
             </p>
           ) : null}
           {success ? (
-            <p className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <p
+              className={`mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 transition-opacity duration-300 ${
+                successVisible ? "opacity-100" : "opacity-0"
+              }`}
+            >
               {success}
             </p>
           ) : null}
@@ -392,7 +406,11 @@ export function MenuPage() {
               </p>
             ) : null}
             {success ? (
-              <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <p
+                className={`rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 transition-opacity duration-300 ${
+                  successVisible ? "opacity-100" : "opacity-0"
+                }`}
+              >
                 {success}
               </p>
             ) : null}
