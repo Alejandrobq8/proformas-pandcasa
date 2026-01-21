@@ -14,6 +14,19 @@ export const proformaItemSchema = z.object({
 
 export const proformaStatusSchema = z.enum(["DRAFT", "SENT", "PAID"]);
 
+export const menuCategorySchema = z.enum([
+  "BOCADILLOS",
+  "POSTRES",
+  "QUEQUES",
+]);
+
+export const menuItemSchema = z.object({
+  category: menuCategorySchema,
+  name: z.string().min(1, "Nombre requerido"),
+  description: z.string().optional().nullable(),
+  price: z.number().nonnegative(),
+});
+
 export const proformaSchema = z.object({
   clientId: z.string().optional().nullable(),
   clientNombre: z.string().min(1),
@@ -38,4 +51,6 @@ export const companySettingsSchema = z.object({
 export type ClientInput = z.infer<typeof clientSchema>;
 export type ProformaInput = z.infer<typeof proformaSchema>;
 export type ProformaStatus = z.infer<typeof proformaStatusSchema>;
+export type MenuItemInput = z.infer<typeof menuItemSchema>;
+export type MenuCategory = z.infer<typeof menuCategorySchema>;
 export type CompanySettingsInput = z.infer<typeof companySettingsSchema>;

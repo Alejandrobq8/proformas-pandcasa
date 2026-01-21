@@ -37,6 +37,12 @@ export function TopNav() {
           </Link>
           <Link
             className="rounded-full px-3 py-2 transition-colors hover:bg-[var(--sand)] hover:text-[var(--accent)]"
+            href="/menu"
+          >
+            Menu
+          </Link>
+          <Link
+            className="rounded-full px-3 py-2 transition-colors hover:bg-[var(--sand)] hover:text-[var(--accent)]"
             href="/configuracion"
           >
             Ajustes
