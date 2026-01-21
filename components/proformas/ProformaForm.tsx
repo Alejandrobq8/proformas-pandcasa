@@ -295,7 +295,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                     className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
                     type="text"
                     inputMode="numeric"
-                    value={item.quantity}
+                    value={item.quantity === 0 ? "" : item.quantity}
                     onChange={(event) => {
                       const cleaned = event.target.value.replace(/[^\d]/g, "");
                       updateItem(index, {
