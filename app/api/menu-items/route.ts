@@ -13,9 +13,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
   const categoryParam = searchParams.get("category")?.trim() ?? "";
-  const category = menuCategorySchema.safeParse(categoryParam).success
-    ? categoryParam
-    : "";
+  const parsedCategory = menuCategorySchema.safeParse(categoryParam);
+  const category = parsedCategory.success ? parsedCategory.data : null;
   const take = Number(searchParams.get("take") ?? 30);
   const skip = Number(searchParams.get("skip") ?? 0);
 
