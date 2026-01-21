@@ -176,7 +176,7 @@ export default async function ProformaTemplatePage({
         .title {
           text-align: right;
           font-size: 44px;
-          font-weight: 800;
+          font-weight: bold;
           font-style: italic;
           color: var(--coffee);
           letter-spacing: 1px;
@@ -420,7 +420,7 @@ export default async function ProformaTemplatePage({
 
       <div className="header">
         <div className="brand">{company?.name ?? "Pan d' Casa"}</div>
-        <div className="title" style={{ fontWeight: 700 }}>PROFORMA</div>
+        <div className="title">PROFORMA</div>
       </div>
 
       <div className="divider"></div>
