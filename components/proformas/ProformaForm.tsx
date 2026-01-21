@@ -30,7 +30,7 @@ function makeItem(): Item {
   return {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     description: "",
-    quantity: 1,
+    quantity: 0,
     unitPrice: 0,
   };
 }
