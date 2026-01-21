@@ -101,6 +101,8 @@ export default async function ProformaTemplatePage({
   return (
     <div className="sheet">
       <style>{`
+        @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&display=swap");
+
         :root {
           --amber: #f4c430;
           --coffee: #6b4b1a;
@@ -176,8 +178,9 @@ export default async function ProformaTemplatePage({
         .title {
           text-align: right;
           font-size: 44px;
-          font-weight: bold;
-          font-style: italic;
+          font-family: "Playfair Display", "Times New Roman", serif;
+          font-weight: 800;
+          font-style: normal;
           color: var(--coffee);
           letter-spacing: 1px;
         }
