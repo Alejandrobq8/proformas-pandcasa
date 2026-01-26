@@ -97,6 +97,12 @@ export default async function ProformaTemplatePage({
   const discount = toNumber(proforma.discount ?? 0);
   const total = toNumber(proforma.total);
   const deliveryText = proforma.notes?.trim() || "Por definir";
+  const issuedAt = new Date();
+  const issuedDate = new Intl.DateTimeFormat("es-CR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(issuedAt);
 
   return (
     <div className="sheet">
@@ -445,6 +451,7 @@ export default async function ProformaTemplatePage({
         <div className="invoice-meta">
           PROFORMA#
           <strong>{proforma.number}</strong>
+          <div>Fecha: {issuedDate}</div>
         </div>
       </section>
 
