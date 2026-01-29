@@ -1,29 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f2e8;
-  --foreground: #2b1d14;
-  --amber: #e0a100;
-  --amber-strong: #c98100;
-  --cocoa: #5a3a22;
-  --sand: #f1e6d6;
-  --paper: #fffaf3;
-  --border: #e3d4c2;
-  --accent: #b76d1e;
-  --button-text: #5a3a22;
+  --background: #f4eee6;
+  --foreground: #2b251f;
+  --amber: #7a7f4b;
+  --amber-strong: #2f5c63;
+  --cocoa: #6b5d52;
+  --sand: #e8d8c2;
+  --paper: #fffdf8;
+  --border: #e3d2bd;
+  --accent: #c07346;
+  --button-text: #fff6ee;
+  --shadow-soft: 0 10px 24px rgba(12, 18, 14, 0.08);
 }
 
 html.theme-dark {
-  --background: #1f1a14;
-  --foreground: #f2e7d8;
-  --amber: #f0b429;
-  --amber-strong: #d48b1f;
-  --cocoa: #d6b48f;
-  --sand: #2a221b;
-  --paper: #2c241c;
-  --border: #3a3026;
-  --accent: #f1a042;
-  --button-text: #5a3a22;
+  --background: #3a1f16;
+  --foreground: #f5ede3;
+  --amber: #7a7f4b;
+  --amber-strong: #2f5c63;
+  --cocoa: #e3d1bc;
+  --sand: #4a271c;
+  --paper: #3f2218;
+  --border: #5a3124;
+  --accent: #d4a24c;
+  --button-text: #3a1f16;
+  --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
@@ -41,31 +43,27 @@ html.theme-dark {
 }
 
 body {
-  background: radial-gradient(circle at top left, #fff1d6, #f5e6d1 40%, #f0dfc6);
+  background: linear-gradient(180deg, #f6efe7 0%, #efe2d2 100%);
   color: var(--foreground);
   font-family: var(--font-work-sans), sans-serif;
   min-height: 100vh;
 }
 
 html.theme-dark body {
-  background: radial-gradient(circle at top left, #2b241c, #1f1a14 45%, #16120d);
+  background: linear-gradient(180deg, #4b2a1d 0%, #2e1a12 100%);
 }
 
 .app-shell {
-  background-image: radial-gradient(
-      rgba(0, 0, 0, 0.04) 1px,
-      transparent 1px
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent);
-  background-size: 18px 18px, 100% 100%;
+  background-image: none;
 }
 
 html.theme-dark .app-shell {
-  background-image: radial-gradient(
-      rgba(255, 255, 255, 0.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent);
+  background-image: none;
+}
+
+::selection {
+  background: rgba(192, 115, 70, 0.35);
+  color: var(--foreground);
 }
 
 .bin-button {
@@ -105,6 +103,59 @@ html.theme-dark .app-shell {
 
 .bin-button:active {
   transform: scale(0.9);
+}
+
+html.theme-dark .bin-button {
+  border-color: rgb(255, 160, 160);
+  box-shadow: 0 6px 16px rgba(255, 95, 95, 0.35);
+}
+
+.btn-primary {
+  background: var(--amber);
+  color: var(--button-text);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover {
+  background: var(--amber-strong);
+}
+
+.btn-secondary {
+  border-color: var(--border);
+  color: var(--cocoa);
+  background: transparent;
+}
+
+.btn-secondary:hover {
+  border-color: var(--amber-strong);
+  color: var(--accent);
+  background: var(--sand);
+}
+
+html.theme-dark .btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--amber));
+  color: var(--button-text);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(212, 162, 76, 0.35);
+}
+
+html.theme-dark .btn-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+html.theme-dark .btn-secondary {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+html.theme-dark .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: var(--foreground);
 }
 
 @media print {

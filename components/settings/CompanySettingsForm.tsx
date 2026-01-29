@@ -179,7 +179,7 @@ export function CompanySettingsForm() {
         </p>
       ) : null}
       <button
-        className="mt-6 rounded-full bg-[var(--amber)] px-6 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-primary mt-6 w-full rounded-full px-6 py-3 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         disabled={saving}
         type="submit"
       >

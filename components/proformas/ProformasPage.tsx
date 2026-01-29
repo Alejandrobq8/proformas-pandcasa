@@ -93,7 +93,7 @@ export function ProformasPage() {
 
   return (
     <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
             Proformas
@@ -102,7 +102,7 @@ export function ProformasPage() {
             {total} documentos
           </h2>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
           <input
             className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
             placeholder="Buscar por numero o cliente"
@@ -110,7 +110,7 @@ export function ProformasPage() {
             onChange={(event) => setQuery(event.target.value)}
           />
           <Link
-            className="rounded-full bg-[var(--amber)] px-5 py-2 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md"
+            className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
             href="/proformas/new"
           >
             Nueva proforma
@@ -135,7 +135,7 @@ export function ProformasPage() {
           proformas.map((proforma) => (
             <div
               key={proforma.id}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -150,21 +150,21 @@ export function ProformasPage() {
                   Total {formatCRC(toNumber(proforma.total))}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
                 <Link
-                  className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                  className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
                   href={`/proformas/${proforma.id}/edit`}
                 >
                   Editar
                 </Link>
                 <button
-                  className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                  className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
                   onClick={() => handleDuplicate(proforma.id)}
                 >
                   Duplicar
                 </button>
                 <a
-                  className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                  className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
                   href={`/api/proformas/${proforma.id}/pdf`}
                   target="_blank"
                   rel="noreferrer"
@@ -221,8 +221,6 @@ export function ProformasPage() {
     </section>
   );
 }
-
-
 
 
 

@@ -423,6 +423,67 @@ export default async function ProformaTemplatePage({
             page-break-inside: avoid;
           }
         }
+
+        @media (max-width: 768px) {
+          body {
+            background: #f5f1eb;
+          }
+
+          .sheet {
+            width: 100%;
+            margin: 0;
+            box-shadow: none;
+            padding: 28px 20px 40px;
+          }
+
+          .header {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            text-align: left;
+          }
+
+          .title {
+            text-align: left;
+            font-size: 36px;
+            letter-spacing: 0.5px;
+          }
+
+          .divider {
+            margin: 14px 0 18px;
+          }
+
+          .bill-to {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .invoice-meta {
+            text-align: left;
+          }
+
+          table {
+            font-size: 12px;
+          }
+
+          thead th,
+          tbody td {
+            padding: 8px;
+          }
+
+          .footer-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .contact-row {
+            gap: 12px;
+            font-size: 12px;
+          }
+
+          .contact-row > div {
+            width: 100%;
+          }
+        }
       `}</style>
 
       <div className="top-band"></div>

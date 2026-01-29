@@ -23,15 +23,15 @@ export default async function HomePage() {
           <p className="mt-4 text-sm text-[var(--cocoa)]">
             Crea, edita y exporta proformas con estilo editorial y PDF exacto.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="rounded-full bg-[var(--amber)] px-5 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md"
+              className="btn-primary w-full rounded-full px-5 py-3 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
               href="/proformas"
             >
               Ver proformas
             </Link>
             <Link
-              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--cocoa)] text-center transition hover:-translate-y-0.5 hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold text-center transition hover:-translate-y-0.5 sm:w-auto"
               href="/clientes"
             >
               Gestionar clientes

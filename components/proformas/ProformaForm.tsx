@@ -158,7 +158,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
   return (
     <form className="grid gap-8" onSubmit={handleSubmit}>
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -218,7 +218,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       </section>
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -237,7 +237,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           </div>
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+            className="inline-flex w-full items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)] sm:w-auto"
             onClick={addItem}
           >
             Agregar item
@@ -250,7 +250,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               key={item.id}
               className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4 shadow-sm"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
                   <span className="rounded-full border border-[var(--border)] px-3 py-1">
                     Item {String(index + 1).padStart(2, "0")}
@@ -388,14 +388,14 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
         ) : null}
       </section>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
           {lastSavedAt ? `Guardado ${lastSavedAt}` : "Sin guardar"}
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             disabled={saving}
             onClick={() => saveProforma("DRAFT")}
           >
@@ -404,7 +404,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           {initial?.id ? (
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
               onClick={() => window.open(`/api/proformas/${initial.id}/pdf`, "_blank")}
             >
               Descargar PDF
@@ -413,14 +413,14 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           {previewUrl ? (
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
               onClick={() => window.open(previewUrl, "_blank")}
             >
               Abrir vista previa
             </button>
           ) : null}
           <button
-            className="rounded-full bg-[var(--amber)] px-6 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-primary w-full rounded-full px-6 py-3 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             disabled={saving}
             type="submit"
           >
@@ -430,7 +430,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       </div>
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
               Vista previa
@@ -441,7 +441,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
           </div>
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+            className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
             onClick={() => saveProforma()}
             disabled={saving}
           >

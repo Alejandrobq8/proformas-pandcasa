@@ -99,7 +99,7 @@ export function ClientesPage() {
 
       {activeTab === "list" ? (
         <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
               Clientes
@@ -108,7 +108,7 @@ export function ClientesPage() {
               {total} registros
             </h2>
           </div>
-          <div className="flex w-full flex-wrap gap-3 sm:w-auto">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <input
               className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
               placeholder="Buscar por nombre, empresa o cedula"
@@ -117,7 +117,7 @@ export function ClientesPage() {
             />
             <button
               type="button"
-              className="rounded-full bg-[var(--amber)] px-5 py-2 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md"
+              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
               onClick={startCreate}
             >
               Nuevo cliente
@@ -136,7 +136,7 @@ export function ClientesPage() {
             clientes.map((cliente) => (
               <div
                 key={cliente.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
                   <p className="font-semibold">{cliente.nombre}</p>
@@ -147,9 +147,9 @@ export function ClientesPage() {
                       : ""}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
                   <button
-                    className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                    className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
                     onClick={() => startEdit(cliente)}
                   >
                     Editar
@@ -204,7 +204,7 @@ export function ClientesPage() {
         </section>
       ) : (
         <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
                 {editingId ? "Editar" : "Nuevo"} cliente
@@ -215,7 +215,7 @@ export function ClientesPage() {
             </div>
             <button
               type="button"
-              className="rounded-full bg-[var(--amber)] px-5 py-2 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md"
+              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
               onClick={() => setActiveTab("list")}
             >
               Ver listado
@@ -255,7 +255,7 @@ export function ClientesPage() {
                 {error}
               </p>
             ) : null}
-          <button className="rounded-full bg-[var(--amber)] px-5 py-3 text-sm font-semibold text-[var(--button-text)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--amber-strong)] hover:shadow-md">
+          <button className="btn-primary rounded-full px-5 py-3 text-sm font-semibold shadow transition hover:-translate-y-0.5">
             {editingId ? "Guardar cambios" : "Crear cliente"}
           </button>
         </form>
@@ -264,8 +264,5 @@ export function ClientesPage() {
     </div>
   );
 }
-
-
-
 
 
