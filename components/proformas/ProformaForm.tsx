@@ -20,6 +20,7 @@ type ProformaData = {
   clientNombre: string;
   clientEmpresa?: string | null;
   clientCedulaJuridica?: string | null;
+  showUnitPrice?: boolean;
   discount?: number | null;
   notes?: string | null;
   status?: ProformaStatus;
@@ -46,6 +47,9 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
   );
   const [clientCedulaJuridica, setClientCedulaJuridica] = useState(
     initial?.clientCedulaJuridica ?? ""
+  );
+  const [showUnitPrice, setShowUnitPrice] = useState(
+    initial?.showUnitPrice ?? true
   );
   const [status, setStatus] = useState<ProformaStatus>(
     initial?.status ?? "DRAFT"
@@ -105,6 +109,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       clientNombre,
       clientEmpresa,
       clientCedulaJuridica,
+      showUnitPrice,
       discount: discount || 0,
       notes,
       items,
@@ -234,13 +239,24 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               Usa varias lineas para describir cada item con vinetas.
             </p>
           </div>
-          <button
-            type="button"
-            className="inline-flex w-full items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] hover:text-[var(--accent)] sm:w-auto"
-            onClick={addItem}
-          >
-            Agregar item
-          </button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              <input
+                type="checkbox"
+                checked={showUnitPrice}
+                onChange={(event) => setShowUnitPrice(event.target.checked)}
+                className="h-4 w-4 accent-[var(--accent)]"
+              />
+              Mostrar precio unitario en PDF
+            </label>
+            <button
+              type="button"
+              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
+              onClick={addItem}
+            >
+              Agregar item
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 space-y-3">
@@ -268,7 +284,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                   </button>
                 ) : null}
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr]">
+              <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr,1fr]">
                 <div>
                   <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
                     Descripción
@@ -322,6 +338,32 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                       });
                     }}
                     required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                    Total
+                  </label>
+                  <input
+                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+                    type="text"
+                    inputMode="decimal"
+                    value={
+                      item.quantity > 0 && item.unitPrice > 0
+                        ? item.quantity * item.unitPrice
+                        : ""
+                    }
+                    onChange={(event) => {
+                      const normalized = event.target.value
+                        .replace(",", ".")
+                        .replace(/[^\d.]/g, "");
+                      const totalValue = normalized ? Number(normalized) : 0;
+                      const nextUnit =
+                        item.quantity > 0 ? totalValue / item.quantity : 0;
+                      updateItem(index, {
+                        unitPrice: Number.isFinite(nextUnit) ? nextUnit : 0,
+                      });
+                    }}
                   />
                 </div>
               </div>

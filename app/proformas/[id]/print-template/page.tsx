@@ -97,6 +97,7 @@ export default async function ProformaTemplatePage({
   const discount = toNumber(proforma.discount ?? 0);
   const total = toNumber(proforma.total);
   const deliveryText = proforma.notes?.trim() || "";
+  const showUnitPrice = proforma.showUnitPrice ?? true;
   const issuedAt = new Date();
   const issuedDate = new Intl.DateTimeFormat("es-CR", {
     year: "numeric",
@@ -526,14 +527,15 @@ export default async function ProformaTemplatePage({
         <thead>
           <tr>
             <th>PRODUCTO</th>
-            <th className="col-price">PRECIO</th>
+            {showUnitPrice ? <th className="col-price">PRECIO</th> : null}
             <th className="col-qty">CANT.</th>
             <th className="col-total">TOTAL</th>
           </tr>
         </thead>
         <tbody>
           {proforma.items.map((item) => {
-            const lineTotal = item.quantity * toNumber(item.unitPrice);
+            const unitPrice = toNumber(item.unitPrice);
+            const lineTotal = item.quantity * unitPrice;
             const parsed = parseDescription(item.description);
 
             return (
@@ -554,9 +556,9 @@ export default async function ProformaTemplatePage({
                     <span>{item.description}</span>
                   )}
                 </td>
-                <td className="col-price">
-                  {formatCRC(toNumber(item.unitPrice))}
-                </td>
+                {showUnitPrice ? (
+                  <td className="col-price">{formatCRC(unitPrice)}</td>
+                ) : null}
                 <td className="col-qty">{item.quantity}</td>
                 <td className="col-total">{formatCRC(lineTotal)}</td>
               </tr>

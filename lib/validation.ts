@@ -32,6 +32,7 @@ export const proformaSchema = z.object({
   clientNombre: z.string().min(1),
   clientEmpresa: z.string().optional(),
   clientCedulaJuridica: z.string().optional(),
+  showUnitPrice: z.boolean().optional(),
   discount: z.number().nonnegative().optional().nullable(),
   notes: z.string().optional().nullable(),
   status: proformaStatusSchema.optional(),

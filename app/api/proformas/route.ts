@@ -94,6 +94,7 @@ export async function POST(request: Request) {
         clientNombre: parsed.data.clientNombre,
         clientEmpresa: parsed.data.clientEmpresa ?? "",
         clientCedulaJuridica: parsed.data.clientCedulaJuridica ?? "",
+        showUnitPrice: parsed.data.showUnitPrice ?? true,
         status,
         discount: parsed.data.discount ?? null,
         notes: parsed.data.notes ?? null,

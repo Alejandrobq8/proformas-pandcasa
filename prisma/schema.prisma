@@ -47,6 +47,7 @@ model Proforma {
   clientNombre          String
   clientEmpresa         String?
   clientCedulaJuridica  String?
+  showUnitPrice         Boolean        @default(true)
   discount              Decimal?       @db.Decimal(12, 2)
   subtotal              Decimal         @db.Decimal(12, 2)
   total                 Decimal         @db.Decimal(12, 2)

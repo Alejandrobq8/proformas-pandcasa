@@ -43,6 +43,7 @@ export async function POST(
         clientNombre: source.clientNombre,
         clientEmpresa: source.clientEmpresa ?? "",
         clientCedulaJuridica: source.clientCedulaJuridica ?? "",
+        showUnitPrice: source.showUnitPrice,
         status: "DRAFT",
         discount: source.discount,
         notes: source.notes,

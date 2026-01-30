@@ -40,6 +40,7 @@ export default async function ProformaEditPage({
     clientNombre: proforma.clientNombre,
     clientEmpresa: proforma.clientEmpresa,
     clientCedulaJuridica: proforma.clientCedulaJuridica,
+    showUnitPrice: proforma.showUnitPrice,
     discount: toNumber(proforma.discount ?? 0),
     notes: proforma.notes ?? "",
     status: proforma.status,
