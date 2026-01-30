@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const clientSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
-  empresa: z.string().min(1, "Empresa requerida"),
+  empresa: z.string().optional(),
   cedulaJuridica: z.string().optional(),
 });
 
@@ -30,7 +30,7 @@ export const menuItemSchema = z.object({
 export const proformaSchema = z.object({
   clientId: z.string().optional().nullable(),
   clientNombre: z.string().min(1),
-  clientEmpresa: z.string().min(1),
+  clientEmpresa: z.string().optional(),
   clientCedulaJuridica: z.string().optional(),
   discount: z.number().nonnegative().optional().nullable(),
   notes: z.string().optional().nullable(),

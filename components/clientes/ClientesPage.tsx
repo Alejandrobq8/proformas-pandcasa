@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 type Cliente = {
   id: string;
   nombre: string;
-  empresa: string;
-  cedulaJuridica: string;
+  empresa?: string | null;
+  cedulaJuridica?: string | null;
 };
 
 const emptyForm = { nombre: "", empresa: "", cedulaJuridica: "" };
@@ -52,8 +52,8 @@ export function ClientesPage() {
     setEditingId(cliente.id);
     setForm({
       nombre: cliente.nombre,
-      empresa: cliente.empresa,
-      cedulaJuridica: cliente.cedulaJuridica,
+      empresa: cliente.empresa ?? "",
+      cedulaJuridica: cliente.cedulaJuridica ?? "",
     });
     setError(null);
     setActiveTab("form");
@@ -140,12 +140,14 @@ export function ClientesPage() {
               >
                 <div>
                   <p className="font-semibold">{cliente.nombre}</p>
-                  <p className="text-xs text-[var(--cocoa)]">
-                    {cliente.empresa}
-                    {cliente.cedulaJuridica
-                      ? ` - ${cliente.cedulaJuridica}`
-                      : ""}
-                  </p>
+                  {cliente.empresa || cliente.cedulaJuridica ? (
+                    <p className="text-xs text-[var(--cocoa)]">
+                      {cliente.empresa ?? ""}
+                      {cliente.cedulaJuridica
+                        ? ` - ${cliente.cedulaJuridica}`
+                        : ""}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
                   <button
@@ -240,7 +242,6 @@ export function ClientesPage() {
               onChange={(event) =>
                 setForm({ ...form, empresa: event.target.value })
               }
-              required
             />
             <input
               className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
@@ -264,5 +265,4 @@ export function ClientesPage() {
     </div>
   );
 }
-
 

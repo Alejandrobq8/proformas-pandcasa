@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 type Cliente = {
   id: string;
   nombre: string;
-  empresa: string;
-  cedulaJuridica: string;
+  empresa?: string | null;
+  cedulaJuridica?: string | null;
 };
 
 export function ClientAutocomplete({
@@ -36,7 +36,7 @@ export function ClientAutocomplete({
 
   function handleSelect(cliente: Cliente) {
     onSelect(cliente);
-    const label = [cliente.nombre, cliente.empresa, cliente.cedulaJuridica]
+    const label = [cliente.nombre, cliente.empresa ?? "", cliente.cedulaJuridica ?? ""]
       .filter(Boolean)
       .join(" - ");
     setQuery(label);
@@ -65,12 +65,14 @@ export function ClientAutocomplete({
               type="button"
             >
               <p className="font-semibold">{cliente.nombre}</p>
-              <p className="text-xs text-[var(--cocoa)]">
-                {cliente.empresa}
-                {cliente.cedulaJuridica
-                  ? ` - ${cliente.cedulaJuridica}`
-                  : ""}
-              </p>
+              {cliente.empresa || cliente.cedulaJuridica ? (
+                <p className="text-xs text-[var(--cocoa)]">
+                  {cliente.empresa ?? ""}
+                  {cliente.cedulaJuridica
+                    ? ` - ${cliente.cedulaJuridica}`
+                    : ""}
+                </p>
+              ) : null}
             </button>
           ))}
         </div>

@@ -18,8 +18,8 @@ type ProformaData = {
   id?: string;
   clientId?: string | null;
   clientNombre: string;
-  clientEmpresa: string;
-  clientCedulaJuridica: string;
+  clientEmpresa?: string | null;
+  clientCedulaJuridica?: string | null;
   discount?: number | null;
   notes?: string | null;
   status?: ProformaStatus;
@@ -188,8 +188,8 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
             onSelect={(cliente) => {
               setClientId(cliente.id);
               setClientNombre(cliente.nombre);
-              setClientEmpresa(cliente.empresa);
-              setClientCedulaJuridica(cliente.cedulaJuridica);
+              setClientEmpresa(cliente.empresa ?? "");
+              setClientCedulaJuridica(cliente.cedulaJuridica ?? "");
             }}
           />
           <div className="grid gap-3 md:grid-cols-2">
@@ -205,7 +205,6 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               placeholder="Empresa"
               value={clientEmpresa}
               onChange={(event) => setClientEmpresa(event.target.value)}
-              required
             />
           </div>
           <input

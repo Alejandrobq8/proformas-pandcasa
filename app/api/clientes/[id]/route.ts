@@ -49,6 +49,7 @@ export async function PUT(
       where: { id, userId: session.user.id },
       data: {
         ...parsed.data,
+        empresa: parsed.data.empresa ?? "",
         cedulaJuridica: parsed.data.cedulaJuridica ?? "",
       },
     });

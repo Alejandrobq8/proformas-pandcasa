@@ -77,7 +77,7 @@ export async function PUT(
       data: {
         clientId: parsed.data.clientId ?? null,
         clientNombre: parsed.data.clientNombre,
-        clientEmpresa: parsed.data.clientEmpresa,
+        clientEmpresa: parsed.data.clientEmpresa ?? "",
         clientCedulaJuridica: parsed.data.clientCedulaJuridica ?? "",
         status,
         discount: parsed.data.discount ?? null,

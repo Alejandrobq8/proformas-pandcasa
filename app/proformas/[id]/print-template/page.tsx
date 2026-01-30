@@ -96,7 +96,7 @@ export default async function ProformaTemplatePage({
   const subtotal = toNumber(proforma.subtotal);
   const discount = toNumber(proforma.discount ?? 0);
   const total = toNumber(proforma.total);
-  const deliveryText = proforma.notes?.trim() || "Por definir";
+  const deliveryText = proforma.notes?.trim() || "";
   const issuedAt = new Date();
   const issuedDate = new Intl.DateTimeFormat("es-CR", {
     year: "numeric",
@@ -498,16 +498,22 @@ export default async function ProformaTemplatePage({
       <section className="bill-to">
         <div>
           <h3>{proforma.clientNombre}</h3>
-          <p>
-            <strong>Céd. Jurídica:</strong>{" "}
-            {proforma.clientCedulaJuridica || "-"}
-          </p>
-          <p>
-            <strong>Empresa:</strong> {proforma.clientEmpresa}
-          </p>
-          <p>
-            <strong>Entrega:</strong> {deliveryText}
-          </p>
+          {proforma.clientCedulaJuridica ? (
+            <p>
+              <strong>Céd. Jurídica:</strong>{" "}
+              {proforma.clientCedulaJuridica}
+            </p>
+          ) : null}
+          {proforma.clientEmpresa ? (
+            <p>
+              <strong>Empresa:</strong> {proforma.clientEmpresa}
+            </p>
+          ) : null}
+          {deliveryText ? (
+            <p>
+              <strong>Entrega:</strong> {deliveryText}
+            </p>
+          ) : null}
         </div>
         <div className="invoice-meta">
           PROFORMA#

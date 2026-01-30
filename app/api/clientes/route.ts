@@ -61,6 +61,7 @@ export async function POST(request: Request) {
     const client = await prisma.client.create({
       data: {
         ...parsed.data,
+        empresa: parsed.data.empresa ?? "",
         cedulaJuridica: parsed.data.cedulaJuridica ?? "",
         userId: session.user.id,
       },
