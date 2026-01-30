@@ -222,7 +222,7 @@ export default async function ProformaTemplatePage({
           color: var(--muted);
         }
 
-        .invoice-meta strong {
+        .invoice-meta .meta-number {
           display: block;
           font-size: 22px;
           color: var(--ink);
@@ -518,8 +518,10 @@ export default async function ProformaTemplatePage({
         </div>
         <div className="invoice-meta">
           PROFORMA#
-          <strong>{proforma.number}</strong>
-          <div><strong>Entrega:</strong> {issuedDate}</div>
+          <strong className="meta-number">{proforma.number}</strong>
+          <p>
+            <strong>Fecha:</strong> {issuedDate}
+          </p>
         </div>
       </section>
 
