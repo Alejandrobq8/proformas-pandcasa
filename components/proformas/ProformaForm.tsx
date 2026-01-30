@@ -61,6 +61,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       ? initial.items.map((item) => ({ ...item, id: makeItem().id }))
       : [makeItem()]
   );
+  const [totalDrafts, setTotalDrafts] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
@@ -97,7 +98,17 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
   }
 
   function removeItem(index: number) {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+    setItems((prev) => {
+      const removed = prev[index];
+      if (removed) {
+        setTotalDrafts((current) => {
+          const next = { ...current };
+          delete next[removed.id];
+          return next;
+        });
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   async function saveProforma(nextStatus?: ProformaStatus) {
@@ -313,9 +324,20 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                     value={item.quantity === 0 ? "" : item.quantity}
                     onChange={(event) => {
                       const cleaned = event.target.value.replace(/[^\d]/g, "");
-                      updateItem(index, {
-                        quantity: cleaned ? Number(cleaned) : 0,
-                      });
+                      const nextQuantity = cleaned ? Number(cleaned) : 0;
+                      const draft = totalDrafts[item.id];
+                      if (draft && nextQuantity > 0) {
+                        const totalValue = Number(draft);
+                        const nextUnit = totalValue / nextQuantity;
+                        updateItem(index, {
+                          quantity: nextQuantity,
+                          unitPrice: Number.isFinite(nextUnit) ? nextUnit : 0,
+                        });
+                      } else {
+                        updateItem(index, {
+                          quantity: nextQuantity,
+                        });
+                      }
                     }}
                     required
                   />
@@ -336,6 +358,12 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                       updateItem(index, {
                         unitPrice: normalized ? Number(normalized) : 0,
                       });
+                      setTotalDrafts((current) => {
+                        if (!current[item.id]) return current;
+                        const next = { ...current };
+                        delete next[item.id];
+                        return next;
+                      });
                     }}
                     required
                   />
@@ -349,20 +377,26 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                     type="text"
                     inputMode="decimal"
                     value={
-                      item.quantity > 0 && item.unitPrice > 0
-                        ? item.quantity * item.unitPrice
-                        : ""
+                      totalDrafts[item.id] ??
+                      (item.quantity > 0 && item.unitPrice > 0
+                        ? String(item.quantity * item.unitPrice)
+                        : "")
                     }
                     onChange={(event) => {
                       const normalized = event.target.value
                         .replace(",", ".")
                         .replace(/[^\d.]/g, "");
                       const totalValue = normalized ? Number(normalized) : 0;
-                      const nextUnit =
-                        item.quantity > 0 ? totalValue / item.quantity : 0;
-                      updateItem(index, {
-                        unitPrice: Number.isFinite(nextUnit) ? nextUnit : 0,
-                      });
+                      setTotalDrafts((current) => ({
+                        ...current,
+                        [item.id]: normalized,
+                      }));
+                      if (item.quantity > 0) {
+                        const nextUnit = totalValue / item.quantity;
+                        updateItem(index, {
+                          unitPrice: Number.isFinite(nextUnit) ? nextUnit : 0,
+                        });
+                      }
                     }}
                   />
                 </div>
