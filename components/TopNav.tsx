@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 export function TopNav() {
@@ -12,8 +13,15 @@ export function TopNav() {
           className="group flex items-center gap-3 rounded-full px-2 py-1 transition hover:bg-[var(--sand)]"
           href="/"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--amber)] to-[var(--accent)] text-base font-semibold text-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md sm:h-11 sm:w-11 sm:text-lg">
-            PC
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-[var(--border)] bg-transparent p-1 shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md sm:h-14 sm:w-14">
+            <Image
+              src="/logo.png"
+              alt="Pan d' Casa"
+              width={56}
+              height={56}
+              className="h-full w-full rounded-full object-cover"
+              priority
+            />
           </div>
           <div className="min-w-0">
             <p className="truncate font-[var(--font-cormorant)] text-lg font-semibold tracking-wide sm:text-xl">
