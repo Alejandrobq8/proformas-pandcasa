@@ -98,7 +98,7 @@ export function ClientesPage() {
     <div className="grid gap-6">
 
       {activeTab === "list" ? (
-        <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+        <section className="tab-pane rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -205,7 +205,7 @@ export function ClientesPage() {
         </div>
         </section>
       ) : (
-        <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+        <section className="tab-pane rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -265,4 +265,3 @@ export function ClientesPage() {
     </div>
   );
 }
-
