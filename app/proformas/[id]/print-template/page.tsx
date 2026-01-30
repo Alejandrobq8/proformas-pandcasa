@@ -519,7 +519,7 @@ export default async function ProformaTemplatePage({
         <div className="invoice-meta">
           PROFORMA#
           <strong>{proforma.number}</strong>
-          <div>Fecha: {issuedDate}</div>
+          <div><strong>Entrega:</strong> {issuedDate}</div>
         </div>
       </section>
 
