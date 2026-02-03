@@ -9,6 +9,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/proformas/") && pathname.endsWith("/print-template")) {
+    const token = request.nextUrl.searchParams.get("token");
+    if (token) {
+      return NextResponse.next();
+    }
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
