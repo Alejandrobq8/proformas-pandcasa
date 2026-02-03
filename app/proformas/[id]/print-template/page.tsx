@@ -108,7 +108,7 @@ export default async function ProformaTemplatePage({
   return (
     <div className="sheet">
       <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@600;700;800;900&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800;900&display=swap");
 
         :root {
           --amber: #f4c430;
@@ -185,9 +185,9 @@ export default async function ProformaTemplatePage({
         .title {
           text-align: right;
           font-size: 44px;
-          font-family: "Source Sans 3", "Arial", sans-serif;
+          font-family: "Cormorant Garamond", "Times New Roman", serif;
           font-weight: 800;
-          font-style: italic;
+          font-style: normal;
           color: var(--coffee);
           letter-spacing: 1px;
         }
