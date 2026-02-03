@@ -98,7 +98,7 @@ export default async function ProformaTemplatePage({
   const total = toNumber(proforma.total);
   const deliveryText = proforma.notes?.trim() || "";
   const showUnitPrice = proforma.showUnitPrice ?? true;
-  const issuedAt = new Date();
+  const issuedAt = proforma.createdAt ?? new Date();
   const issuedDate = new Intl.DateTimeFormat("es-CR", {
     year: "numeric",
     month: "long",
