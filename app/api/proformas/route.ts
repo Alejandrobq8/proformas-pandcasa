@@ -20,6 +20,8 @@ export async function GET(request: Request) {
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
+  const dateRange = parseDateQuery(q);
+
   const where = {
     userId: session.user.id,
     ...(q
@@ -28,6 +30,16 @@ export async function GET(request: Request) {
             { number: { contains: q, mode: "insensitive" as const } },
             { clientNombre: { contains: q, mode: "insensitive" as const } },
             { clientEmpresa: { contains: q, mode: "insensitive" as const } },
+            ...(dateRange
+              ? [
+                  {
+                    createdAt: {
+                      gte: dateRange.start,
+                      lt: dateRange.end,
+                    },
+                  },
+                ]
+              : []),
           ],
         }
       : {}),
@@ -45,6 +57,37 @@ export async function GET(request: Request) {
   ]);
 
   return NextResponse.json({ data, total });
+}
+
+function parseDateQuery(value: string) {
+  if (!value) return null;
+  const normalized = value.replace(/\s+/g, "");
+
+  const isoMatch = normalized.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+  if (isoMatch) {
+    const [_, year, month, day] = isoMatch;
+    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    if (!Number.isNaN(date.getTime())) {
+      const start = new Date(date);
+      const end = new Date(date);
+      end.setUTCDate(end.getUTCDate() + 1);
+      return { start, end };
+    }
+  }
+
+  const latamMatch = normalized.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+  if (latamMatch) {
+    const [_, day, month, year] = latamMatch;
+    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    if (!Number.isNaN(date.getTime())) {
+      const start = new Date(date);
+      const end = new Date(date);
+      end.setUTCDate(end.getUTCDate() + 1);
+      return { start, end };
+    }
+  }
+
+  return null;
 }
 
 export async function POST(request: Request) {
