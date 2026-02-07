@@ -94,7 +94,7 @@ export function ProformasPage() {
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
           <input
             className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
-            placeholder="Buscar por número, cliente o fecha (YYYY-MM-DD)"
+            placeholder="Buscar por número, cliente o fecha (YYYY-MM-DD / YYYY-MM)"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />

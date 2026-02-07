@@ -75,6 +75,16 @@ function parseDateQuery(value: string) {
     }
   }
 
+  const isoMonthMatch = normalized.match(/^(\d{4})[-/](\d{2})$/);
+  if (isoMonthMatch) {
+    const [_, year, month] = isoMonthMatch;
+    const start = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
+    if (!Number.isNaN(start.getTime())) {
+      const end = new Date(Date.UTC(Number(year), Number(month), 1));
+      return { start, end };
+    }
+  }
+
   const latamMatch = normalized.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
   if (latamMatch) {
     const [_, day, month, year] = latamMatch;
@@ -83,6 +93,16 @@ function parseDateQuery(value: string) {
       const start = new Date(date);
       const end = new Date(date);
       end.setUTCDate(end.getUTCDate() + 1);
+      return { start, end };
+    }
+  }
+
+  const latamMonthMatch = normalized.match(/^(\d{2})[/-](\d{4})$/);
+  if (latamMonthMatch) {
+    const [_, month, year] = latamMonthMatch;
+    const start = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
+    if (!Number.isNaN(start.getTime())) {
+      const end = new Date(Date.UTC(Number(year), Number(month), 1));
       return { start, end };
     }
   }
