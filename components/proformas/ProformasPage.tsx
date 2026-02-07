@@ -49,20 +49,21 @@ export function ProformasPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [take, setTake] = useState(20);
 
   const debounceQuery = useMemo(() => query, [query]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      void loadProformas(debounceQuery);
+      void loadProformas(debounceQuery, take);
     }, 300);
     return () => clearTimeout(timeout);
-  }, [debounceQuery]);
+  }, [debounceQuery, take]);
 
-  async function loadProformas(search: string) {
+  async function loadProformas(search: string, limit: number) {
     setLoading(true);
     const res = await fetch(
-      `/api/proformas?q=${encodeURIComponent(search)}&take=20`
+      `/api/proformas?q=${encodeURIComponent(search)}&take=${limit}`
     );
     const payload = await res.json();
     setProformas(payload.data ?? []);
@@ -77,7 +78,7 @@ export function ProformasPage() {
       setError("No se pudo eliminar la proforma.");
       return;
     }
-    await loadProformas(query);
+    await loadProformas(query, take);
   }
 
   return (
@@ -96,7 +97,10 @@ export function ProformasPage() {
             className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
             placeholder="Buscar por número, cliente o fecha (YYYY-MM-DD / YYYY-MM)"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setTake(20);
+            }}
           />
           <Link
             className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
@@ -205,6 +209,18 @@ export function ProformasPage() {
           ))
         )}
       </div>
+      {proformas.length < total ? (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            className="btn-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
+            onClick={() => setTake((prev) => prev + 20)}
+            disabled={loading}
+          >
+            Cargar más
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }
