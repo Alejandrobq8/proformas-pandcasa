@@ -17,32 +17,84 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
+  const numberParam = searchParams.get("number")?.trim() ?? "";
+  const clientParam = searchParams.get("client")?.trim() ?? "";
+  const dateParam = searchParams.get("date")?.trim() ?? "";
+  const amountMinParam = searchParams.get("amountMin")?.trim() ?? "";
+  const amountMaxParam = searchParams.get("amountMax")?.trim() ?? "";
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
-  const dateRange = parseDateQuery(q);
+  const filtersActive =
+    numberParam || clientParam || dateParam || amountMinParam || amountMaxParam;
+  const dateRange = parseDateQuery(filtersActive ? dateParam : q);
+  const amountRange = filtersActive
+    ? parseAmountRange(amountMinParam, amountMaxParam)
+    : parseAmountQuery(q);
 
   const where = {
     userId: session.user.id,
-    ...(q
+    ...(filtersActive
       ? {
-          OR: [
-            { number: { contains: q, mode: "insensitive" as const } },
-            { clientNombre: { contains: q, mode: "insensitive" as const } },
-            { clientEmpresa: { contains: q, mode: "insensitive" as const } },
-            ...(dateRange
-              ? [
-                  {
-                    createdAt: {
-                      gte: dateRange.start,
-                      lt: dateRange.end,
-                    },
+          AND: [
+            numberParam
+              ? { number: { contains: numberParam, mode: "insensitive" as const } }
+              : null,
+            clientParam
+              ? {
+                  OR: [
+                    { clientNombre: { contains: clientParam, mode: "insensitive" as const } },
+                    { clientEmpresa: { contains: clientParam, mode: "insensitive" as const } },
+                  ],
+                }
+              : null,
+            dateRange
+              ? {
+                  createdAt: {
+                    gte: dateRange.start,
+                    lt: dateRange.end,
                   },
-                ]
-              : []),
-          ],
+                }
+              : null,
+            amountRange
+              ? {
+                  total: {
+                    ...(amountRange.min !== null ? { gte: amountRange.min } : {}),
+                    ...(amountRange.max !== null ? { lte: amountRange.max } : {}),
+                  },
+                }
+              : null,
+          ].filter(Boolean),
         }
-      : {}),
+      : q
+        ? {
+            OR: [
+              { number: { contains: q, mode: "insensitive" as const } },
+              { clientNombre: { contains: q, mode: "insensitive" as const } },
+              { clientEmpresa: { contains: q, mode: "insensitive" as const } },
+              ...(dateRange
+                ? [
+                    {
+                      createdAt: {
+                        gte: dateRange.start,
+                        lt: dateRange.end,
+                      },
+                    },
+                  ]
+                : []),
+              ...(amountRange
+                ? [
+                    {
+                      total: {
+                        gte: amountRange.min,
+                        lt: amountRange.max,
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          }
+        : {}),
   };
 
   const [data, total] = await Promise.all([
@@ -108,6 +160,39 @@ function parseDateQuery(value: string) {
   }
 
   return null;
+}
+
+function parseAmountQuery(value: string) {
+  if (!value) return null;
+  const normalized = value
+    .toLowerCase()
+    .replace(/[₡$,]/g, "")
+    .replace(/\s+/g, "")
+    .replace(",", ".");
+  const amount = Number(normalized);
+  if (!Number.isFinite(amount)) return null;
+  const min = amount - 0.005;
+  const max = amount + 0.005;
+  return { min, max };
+}
+
+function parseAmountValue(value: string) {
+  if (!value) return null;
+  const normalized = value
+    .toLowerCase()
+    .replace(/[₡$,]/g, "")
+    .replace(/\s+/g, "")
+    .replace(",", ".");
+  const amount = Number(normalized);
+  if (!Number.isFinite(amount)) return null;
+  return amount;
+}
+
+function parseAmountRange(minValue: string, maxValue: string) {
+  const min = parseAmountValue(minValue);
+  const max = parseAmountValue(maxValue);
+  if (min === null && max === null) return null;
+  return { min, max };
 }
 
 export async function POST(request: Request) {

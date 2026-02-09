@@ -22,6 +22,14 @@ type Proforma = {
   items: Item[];
 };
 
+type Filters = {
+  number: string;
+  client: string;
+  date: string;
+  amountMin: string;
+  amountMax: string;
+};
+
 const statusLabel: Record<Proforma["status"], string> = {
   DRAFT: "Borrador",
   SENT: "Enviada",
@@ -44,27 +52,55 @@ function toNumber(value: unknown) {
 }
 
 export function ProformasPage() {
-  const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Filters>({
+    number: "",
+    client: "",
+    date: "",
+    amountMin: "",
+    amountMax: "",
+  });
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [take, setTake] = useState(20);
 
-  const debounceQuery = useMemo(() => query, [query]);
+  const debounceKey = useMemo(() => JSON.stringify(filters), [filters]);
+  const activeFilterCount = useMemo(
+    () =>
+      Object.values(filters).filter((value) => value.trim().length > 0).length,
+    [filters]
+  );
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      void loadProformas(debounceQuery, take);
+      void loadProformas(filters, take);
     }, 300);
     return () => clearTimeout(timeout);
-  }, [debounceQuery, take]);
+  }, [debounceKey, take]);
 
-  async function loadProformas(search: string, limit: number) {
+  async function loadProformas(searchFilters: Filters, limit: number) {
     setLoading(true);
-    const res = await fetch(
-      `/api/proformas?q=${encodeURIComponent(search)}&take=${limit}`
-    );
+    const params = new URLSearchParams();
+    if (searchFilters.number.trim()) {
+      params.set("number", searchFilters.number.trim());
+    }
+    if (searchFilters.client.trim()) {
+      params.set("client", searchFilters.client.trim());
+    }
+    if (searchFilters.date.trim()) {
+      params.set("date", searchFilters.date.trim());
+    }
+    if (searchFilters.amountMin.trim()) {
+      params.set("amountMin", searchFilters.amountMin.trim());
+    }
+    if (searchFilters.amountMax.trim()) {
+      params.set("amountMax", searchFilters.amountMax.trim());
+    }
+    params.set("take", String(limit));
+
+    const res = await fetch(`/api/proformas?${params.toString()}`);
     const payload = await res.json();
     setProformas(payload.data ?? []);
     setTotal(payload.total ?? 0);
@@ -78,7 +114,7 @@ export function ProformasPage() {
       setError("No se pudo eliminar la proforma.");
       return;
     }
-    await loadProformas(query, take);
+    await loadProformas(filters, take);
   }
 
   return (
@@ -92,16 +128,14 @@ export function ProformasPage() {
             {total} documentos
           </h2>
         </div>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <input
-            className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
-            placeholder="Buscar por número, cliente o fecha (YYYY-MM-DD / YYYY-MM)"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setTake(20);
-            }}
-          />
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <button
+            type="button"
+            className="btn-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
+            onClick={() => setFiltersOpen((prev) => !prev)}
+          >
+            Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+          </button>
           <Link
             className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
             href="/proformas/new"
@@ -110,6 +144,109 @@ export function ProformasPage() {
           </Link>
         </div>
       </div>
+
+      {filtersOpen ? (
+        <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4 shadow-sm">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              Numero
+              <input
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                placeholder="PF-2026-0001"
+                value={filters.number}
+                onChange={(event) => {
+                  setFilters((prev) => ({ ...prev, number: event.target.value }));
+                  setTake(20);
+                }}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              Cliente
+              <input
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                placeholder="Nombre o empresa"
+                value={filters.client}
+                onChange={(event) => {
+                  setFilters((prev) => ({ ...prev, client: event.target.value }));
+                  setTake(20);
+                }}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              Fecha
+              <input
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                placeholder="YYYY-MM o YYYY-MM-DD"
+                value={filters.date}
+                onChange={(event) => {
+                  setFilters((prev) => ({ ...prev, date: event.target.value }));
+                  setTake(20);
+                }}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              Monto desde
+              <input
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                placeholder="₡ 15000"
+                value={filters.amountMin}
+                onChange={(event) => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    amountMin: event.target.value,
+                  }));
+                  setTake(20);
+                }}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              Monto hasta
+              <input
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                placeholder="₡ 45000"
+                value={filters.amountMax}
+                onChange={(event) => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    amountMax: event.target.value,
+                  }));
+                  setTake(20);
+                }}
+              />
+            </label>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              className="btn-secondary inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
+              onClick={() => {
+                setFilters({
+                  number: "",
+                  client: "",
+                  date: "",
+                  amountMin: "",
+                  amountMax: "",
+                });
+                setTake(20);
+              }}
+            >
+              Limpiar filtros
+            </button>
+            <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+              Mostrar
+              <select
+                className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                value={take}
+                onChange={(event) => setTake(Number(event.target.value))}
+              >
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      ) : null}
 
       {error ? (
         <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
