@@ -32,39 +32,41 @@ export async function GET(request: Request) {
     ? parseAmountRange(amountMinParam, amountMaxParam)
     : parseAmountQuery(q);
 
+  const andFilters = [
+    numberParam
+      ? { number: { contains: numberParam, mode: "insensitive" as const } }
+      : null,
+    clientParam
+      ? {
+          OR: [
+            { clientNombre: { contains: clientParam, mode: "insensitive" as const } },
+            { clientEmpresa: { contains: clientParam, mode: "insensitive" as const } },
+          ],
+        }
+      : null,
+    dateRange
+      ? {
+          createdAt: {
+            gte: dateRange.start,
+            lt: dateRange.end,
+          },
+        }
+      : null,
+    amountRange
+      ? {
+          total: {
+            ...(amountRange.min !== null ? { gte: amountRange.min } : {}),
+            ...(amountRange.max !== null ? { lte: amountRange.max } : {}),
+          },
+        }
+      : null,
+  ].filter((value): value is NonNullable<typeof value> => value !== null);
+
   const where = {
     userId: session.user.id,
     ...(filtersActive
       ? {
-          AND: [
-            numberParam
-              ? { number: { contains: numberParam, mode: "insensitive" as const } }
-              : null,
-            clientParam
-              ? {
-                  OR: [
-                    { clientNombre: { contains: clientParam, mode: "insensitive" as const } },
-                    { clientEmpresa: { contains: clientParam, mode: "insensitive" as const } },
-                  ],
-                }
-              : null,
-            dateRange
-              ? {
-                  createdAt: {
-                    gte: dateRange.start,
-                    lt: dateRange.end,
-                  },
-                }
-              : null,
-            amountRange
-              ? {
-                  total: {
-                    ...(amountRange.min !== null ? { gte: amountRange.min } : {}),
-                    ...(amountRange.max !== null ? { lte: amountRange.max } : {}),
-                  },
-                }
-              : null,
-          ].filter(Boolean),
+          AND: andFilters,
         }
       : q
         ? {
