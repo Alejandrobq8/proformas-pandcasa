@@ -28,9 +28,10 @@ export async function GET(request: Request) {
   const filtersActive =
     numberParam || clientParam || dateParam || amountMinParam || amountMaxParam;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
-  const amountRange = filtersActive
+  const amountRangeFilters = filtersActive
     ? parseAmountRange(amountMinParam, amountMaxParam)
-    : parseAmountQuery(q);
+    : null;
+  const amountRangeQuery = !filtersActive ? parseAmountQuery(q) : null;
 
   const andFilters = [
     numberParam
@@ -52,11 +53,15 @@ export async function GET(request: Request) {
           },
         }
       : null,
-    amountRange
+    amountRangeFilters
       ? {
           total: {
-            ...(amountRange.min !== null ? { gte: amountRange.min } : {}),
-            ...(amountRange.max !== null ? { lte: amountRange.max } : {}),
+            ...(amountRangeFilters.min !== null
+              ? { gte: amountRangeFilters.min }
+              : {}),
+            ...(amountRangeFilters.max !== null
+              ? { lte: amountRangeFilters.max }
+              : {}),
           },
         }
       : null,
@@ -84,12 +89,12 @@ export async function GET(request: Request) {
                     },
                   ]
                 : []),
-              ...(amountRange
+              ...(amountRangeQuery
                 ? [
                     {
                       total: {
-                        gte: amountRange.min,
-                        lt: amountRange.max,
+                        gte: amountRangeQuery.min,
+                        lt: amountRangeQuery.max,
                       },
                     },
                   ]
