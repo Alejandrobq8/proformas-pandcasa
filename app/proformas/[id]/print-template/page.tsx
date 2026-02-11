@@ -103,6 +103,7 @@ export default async function ProformaTemplatePage({
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "America/Costa_Rica",
   }).format(issuedAt);
 
   return (
