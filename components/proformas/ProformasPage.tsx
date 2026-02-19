@@ -82,6 +82,7 @@ export function ProformasPage() {
 
   async function loadProformas(searchFilters: Filters, limit: number) {
     setLoading(true);
+    setError(null);
     const params = new URLSearchParams();
     if (searchFilters.number.trim()) {
       params.set("number", searchFilters.number.trim());
@@ -100,11 +101,43 @@ export function ProformasPage() {
     }
     params.set("take", String(limit));
 
-    const res = await fetch(`/api/proformas?${params.toString()}`);
-    const payload = await res.json();
-    setProformas(payload.data ?? []);
-    setTotal(payload.total ?? 0);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/proformas?${params.toString()}`);
+      if (!res.ok) {
+        let detail = "";
+        try {
+          const data = await res.json();
+          detail =
+            typeof data?.error === "string"
+              ? data.error
+              : typeof data?.message === "string"
+                ? data.message
+                : "";
+        } catch {
+          try {
+            detail = await res.text();
+          } catch {
+            detail = "";
+          }
+        }
+        const message = detail
+          ? `No se pudieron cargar las proformas: ${detail}`
+          : "No se pudieron cargar las proformas.";
+        setError(message);
+        setProformas([]);
+        setTotal(0);
+        return;
+      }
+      const payload = await res.json();
+      setProformas(payload.data ?? []);
+      setTotal(payload.total ?? 0);
+    } catch {
+      setError("No se pudieron cargar las proformas.");
+      setProformas([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleDelete(id: string) {

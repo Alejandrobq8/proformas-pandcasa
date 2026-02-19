@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClientAutocomplete } from "./ClientAutocomplete";
 import { formatCRC } from "@/lib/money";
+import { sileo } from "sileo";
 
 type Item = {
   id: string;
@@ -109,6 +110,11 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       }
       return prev.filter((_, i) => i !== index);
     });
+    sileo.success({
+      title: "Producto eliminado",
+      description: "El item fue removido de la proforma.",
+      duration: 2200,
+    });
   }
 
   async function saveProforma(nextStatus?: ProformaStatus) {
@@ -151,6 +157,14 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
 
     const createdId = data?.id;
     if (!initial?.id && createdId) {
+      sileo.success({
+        title: nextStatus === "DRAFT" ? "Borrador guardado" : "Proforma guardada",
+        description:
+          nextStatus === "DRAFT"
+            ? "El borrador se guardo correctamente."
+            : "Se guardo correctamente.",
+        duration: 2200,
+      });
       router.push(`/proformas/${createdId}/edit`);
       return;
     }
@@ -164,6 +178,11 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     );
     setPreviewKey(Date.now());
     setSaving(false);
+    sileo.success({
+      title: nextStatus === "DRAFT" ? "Borrador guardado" : "Cambios guardados",
+      description: "Los cambios se guardaron correctamente.",
+      duration: 2200,
+    });
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
