@@ -34,11 +34,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <SessionProvider>
-      <Toaster
-        position={isMobile ? "bottom-center" : "top-right"}
-        offset={16}
-        options={toastOptions}
-      />
+      <Toaster position="top-center" offset={16} options={toastOptions} />
       {children}
     </SessionProvider>
   );
