@@ -24,8 +24,8 @@ export function Providers({ children }: { children: ReactNode }) {
       fill: "var(--toast-bg)",
       styles: {
         title:
-          "text-[var(--foreground)] font-semibold tracking-wide text-[13px]",
-        description: "text-[var(--cocoa)] text-sm",
+          "text-[var(--toast-foreground)] font-semibold tracking-wide text-[13px]",
+        description: "text-[var(--toast-muted)] text-sm",
         button: "text-[var(--accent)]",
       },
     }),

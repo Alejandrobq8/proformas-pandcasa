@@ -13,7 +13,9 @@
   --accent: #c07346;
   --button-text: #fff6ee;
   --shadow-soft: 0 10px 24px rgba(12, 18, 14, 0.08);
-  --toast-bg: #fffdf8;
+  --toast-bg: #2b251f;
+  --toast-foreground: #fffdf8;
+  --toast-muted: #e8d8c2;
 }
 
 html.theme-dark {
@@ -28,7 +30,9 @@ html.theme-dark {
   --accent: #d4a24c;
   --button-text: #3a1f16;
   --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.45);
-  --toast-bg: #4a2a1f;
+  --toast-bg: #fffdf8;
+  --toast-foreground: #2b251f;
+  --toast-muted: #6b5d52;
 }
 
 @theme inline {
