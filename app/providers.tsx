@@ -9,16 +9,13 @@ export function Providers({ children }: { children: ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !window.matchMedia) return;
     const media = window.matchMedia("(max-width: 768px)");
-    const handleChange = () => setIsMobile(media.matches);
-    handleChange();
-    if ("addEventListener" in media) {
-      media.addEventListener("change", handleChange);
-      return () => media.removeEventListener("change", handleChange);
-    }
-    media.addListener(handleChange);
-    return () => media.removeListener(handleChange);
+    const handleChange = (event: MediaQueryListEvent) =>
+      setIsMobile(event.matches);
+    setIsMobile(media.matches);
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
   }, []);
 
   const toastOptions = useMemo(
