@@ -605,12 +605,16 @@ export default async function ProformaTemplatePage({
           <strong>
             No se procede con el pedido, sino se recibe la orden de compra
             o visto bueno formal.
+            <br />
+            Los pedidos no podrán cancelarse con menos de 20 horas de anticipación a 
+            la entrega, debido al proceso de preparación y planificación del mismo
           </strong>
           <br />
           En este documento se pactan los servicios brindados y sus respectivos
           costos, por lo que nos liberamos de toda responsabilidad por la falta de
           atención de servicios que no se encuentren en el presente documento, por
-          lo que se recomienda revisar con detenimiento los servicios contratados
+          lo que se recomienda revisar con detenimiento los servicios contratados.
+           
         </p>
       </div>
 
