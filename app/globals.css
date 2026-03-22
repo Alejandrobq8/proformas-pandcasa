@@ -56,7 +56,6 @@ html.theme-dark {
 }
 
 html {
-  font-size: 17px;
   scroll-behavior: smooth;
 }
 
@@ -564,12 +563,6 @@ html.theme-dark .bin-button {
     transform: none !important;
     filter: none !important;
     opacity: 1 !important;
-  }
-}
-
-@media (max-width: 640px) {
-  html {
-    font-size: 16px;
   }
 }
 
