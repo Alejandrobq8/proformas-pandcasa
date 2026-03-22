@@ -110,7 +110,11 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       take,
       skip,
-      include: { items: true },
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
     }),
     prisma.proforma.count({ where }),
   ]);
@@ -259,14 +263,19 @@ export async function POST(request: Request) {
         sequence,
         number,
         items: {
-          create: parsed.data.items.map((item) => ({
+          create: parsed.data.items.map((item, index) => ({
+            sortOrder: index,
             description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
           })),
         },
       },
-      include: { items: true },
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
     });
   });
 

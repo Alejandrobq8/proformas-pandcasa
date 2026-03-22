@@ -19,7 +19,11 @@ export async function POST(
 
   const source = await prisma.proforma.findFirst({
     where: { id, userId: session.user.id },
-    include: { items: true },
+    include: {
+      items: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
   if (!source) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -53,14 +57,19 @@ export async function POST(
         sequence,
         number,
         items: {
-          create: source.items.map((item) => ({
+          create: source.items.map((item, index) => ({
+            sortOrder: item.sortOrder ?? index,
             description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
           })),
         },
       },
-      include: { items: true },
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
     });
   });
 

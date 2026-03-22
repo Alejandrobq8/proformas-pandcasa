@@ -29,7 +29,7 @@ export function LoginForm() {
 
   return (
     <form
-      className="mt-6 grid gap-4 rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-8 shadow-sm"
+      className="mt-6 grid gap-4"
       onSubmit={handleSubmit}
     >
       <div>
@@ -37,7 +37,7 @@ export function LoginForm() {
           Email
         </label>
         <input
-          className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+          className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
@@ -49,7 +49,7 @@ export function LoginForm() {
           Password
         </label>
         <input
-          className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+          className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
@@ -57,12 +57,12 @@ export function LoginForm() {
         />
       </div>
       {error ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="rounded-[1.2rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </p>
       ) : null}
       <button
-        className="btn-primary rounded-full px-6 py-3 text-sm font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-primary rounded-full px-6 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
         disabled={loading}
         type="submit"
       >

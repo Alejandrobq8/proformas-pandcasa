@@ -17,7 +17,11 @@ export async function GET(
 
   const proforma = await prisma.proforma.findFirst({
     where: { id, userId: session.user.id },
-    include: { items: true },
+    include: {
+      items: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
   if (!proforma) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -86,14 +90,19 @@ export async function PUT(
         subtotal,
         total,
         items: {
-          create: parsed.data.items.map((item) => ({
+          create: parsed.data.items.map((item, index) => ({
+            sortOrder: index,
             description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
           })),
         },
       },
-      include: { items: true },
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
     });
   });
 

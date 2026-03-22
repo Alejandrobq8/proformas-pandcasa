@@ -23,13 +23,6 @@ export function ClientesPage() {
 
   const debounceQuery = useMemo(() => query, [query]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadClientes(debounceQuery);
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [debounceQuery]);
-
   async function loadClientes(search: string) {
     setLoading(true);
     const res = await fetch(
@@ -40,6 +33,13 @@ export function ClientesPage() {
     setTotal(payload.total ?? 0);
     setLoading(false);
   }
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      void loadClientes(debounceQuery);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [debounceQuery]);
 
   function startCreate() {
     setEditingId(null);
@@ -96,9 +96,51 @@ export function ClientesPage() {
 
   return (
     <div className="grid gap-6">
+      <section className="hero-panel rounded-[2rem] px-6 py-7 sm:px-8 sm:py-8">
+        <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/72">
+              Clientes
+            </p>
+            <h2 className="mt-3 font-[var(--font-cormorant)] text-3xl font-semibold sm:text-4xl">
+              Base de clientes con acciones rapidas y mejor lectura.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
+              Busca, edita y registra contactos desde una vista mas ordenada,
+              con entradas suaves y tarjetas mas vivas.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+                Registros
+              </p>
+              <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
+                {total}
+              </p>
+            </div>
+            <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+                Busqueda
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white/88">
+                Nombre, empresa o cedula
+              </p>
+            </div>
+            <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+                Flujo
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white/88">
+                Alta y edicion en una sola vista
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {activeTab === "list" ? (
-        <section className="tab-pane rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+        <section className="tab-pane surface-panel rounded-[2rem] p-6 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -110,14 +152,14 @@ export function ClientesPage() {
           </div>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <input
-              className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
+              className="w-full rounded-full border border-[var(--border)] bg-white/45 px-4 py-2 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] sm:w-72"
               placeholder="Buscar por nombre, empresa o cedula"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
             <button
               type="button"
-              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
+              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold sm:w-auto"
               onClick={startCreate}
             >
               Nuevo cliente
@@ -125,7 +167,7 @@ export function ClientesPage() {
           </div>
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="stagger-children mt-6 space-y-4">
           {loading ? (
             <p className="text-sm text-[var(--cocoa)]">Cargando...</p>
           ) : clientes.length === 0 ? (
@@ -136,7 +178,7 @@ export function ClientesPage() {
             clientes.map((cliente) => (
               <div
                 key={cliente.id}
-                className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+                className="interactive-card flex flex-col gap-3 rounded-[1.6rem] border border-[var(--border)] bg-white/35 px-4 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
                   <p className="font-semibold">{cliente.nombre}</p>
@@ -210,7 +252,7 @@ export function ClientesPage() {
         </div>
         </section>
       ) : (
-        <section className="tab-pane rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+        <section className="tab-pane surface-panel rounded-[2rem] p-6 sm:p-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -222,7 +264,7 @@ export function ClientesPage() {
             </div>
             <button
               type="button"
-              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
+              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold sm:w-auto"
               onClick={() => setActiveTab("list")}
             >
               Ver listado
@@ -232,7 +274,7 @@ export function ClientesPage() {
 
           <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
             <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
               placeholder="Nombre"
               value={form.nombre}
               onChange={(event) =>
@@ -241,7 +283,7 @@ export function ClientesPage() {
               required
             />
             <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
               placeholder="Empresa"
               value={form.empresa}
               onChange={(event) =>
@@ -249,7 +291,7 @@ export function ClientesPage() {
               }
             />
             <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
               placeholder="Cedula juridica (opcional)"
               value={form.cedulaJuridica}
               onChange={(event) =>
@@ -261,7 +303,7 @@ export function ClientesPage() {
                 {error}
               </p>
             ) : null}
-          <button className="btn-primary rounded-full px-5 py-3 text-sm font-semibold shadow transition hover:-translate-y-0.5">
+          <button className="btn-primary rounded-full px-5 py-3 text-sm font-semibold">
             {editingId ? "Guardar cambios" : "Crear cliente"}
           </button>
         </form>

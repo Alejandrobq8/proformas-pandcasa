@@ -27,7 +27,11 @@ export default async function ProformaEditPage({
 
   const proforma = await prisma.proforma.findFirst({
     where: { id, userId: session.user.id },
-    include: { items: true },
+    include: {
+      items: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
 
   if (!proforma) {

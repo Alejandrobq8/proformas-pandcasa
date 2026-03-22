@@ -50,30 +50,14 @@ export function MenuPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [successVisible, setSuccessVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<"list" | "form">("list");
 
   const debounceQuery = useMemo(() => query, [query]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadItems(debounceQuery, activeCategory);
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [debounceQuery, activeCategory]);
-
-  useEffect(() => {
-    if (!success) {
-      setSuccessVisible(false);
-      return;
-    }
-    setSuccessVisible(true);
-    const fadeTimeout = setTimeout(() => setSuccessVisible(false), 700);
-    const clearSuccessTimeout = setTimeout(() => setSuccess(null), 1000);
-    return () => {
-      clearTimeout(fadeTimeout);
-      clearTimeout(clearSuccessTimeout);
-    };
+    if (!success) return;
+    const clearSuccessTimeout = setTimeout(() => setSuccess(null), 1400);
+    return () => clearTimeout(clearSuccessTimeout);
   }, [success]);
 
   async function loadItems(search: string, category: MenuItem["category"]) {
@@ -86,6 +70,13 @@ export function MenuPage() {
     setTotal(payload.total ?? 0);
     setLoading(false);
   }
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      void loadItems(debounceQuery, activeCategory);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [debounceQuery, activeCategory]);
 
   function resetForm() {
     setEditingId(null);
@@ -147,7 +138,6 @@ export function MenuPage() {
 
     resetForm();
     setSuccess(editingId ? "Producto actualizado." : "Producto agregado.");
-    setSuccessVisible(true);
     setActiveTab("list");
     await loadItems(query, activeCategory);
   }
@@ -165,16 +155,42 @@ export function MenuPage() {
 
   return (
     <section className="grid gap-6">
-      <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-8 shadow-sm">
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+      <div className="hero-panel rounded-[2rem] px-7 py-8 sm:px-8 sm:py-9">
+        <p className="text-xs uppercase tracking-[0.3em] text-white/72">
           Menu
         </p>
-        <h1 className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
+        <h1 className="mt-3 font-[var(--font-cormorant)] text-3xl font-semibold sm:text-4xl">
           Menu de productos
         </h1>
-        <p className="mt-3 text-sm text-[var(--cocoa)]">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
           Administra bocadillos, postres y queques con sus precios.
         </p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+              Items
+            </p>
+            <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
+              {total}
+            </p>
+          </div>
+          <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+              Categoria
+            </p>
+            <p className="mt-2 text-sm font-semibold text-white/88">
+              {categories.find((item) => item.value === activeCategory)?.label}
+            </p>
+          </div>
+          <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+              Vista
+            </p>
+            <p className="mt-2 text-sm font-semibold text-white/88">
+              Catalogo editable
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -184,8 +200,8 @@ export function MenuPage() {
             type="button"
             className={`inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition ${
               activeCategory === category.value
-                ? "border-[var(--amber-strong)] text-[var(--accent)]"
-                : "border-[var(--border)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                ? "border-white/20 bg-[var(--foreground)] text-[var(--paper)] shadow-lg shadow-black/8"
+                : "border-[var(--border)] bg-white/35 text-[var(--cocoa)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
             }`}
             onClick={() => {
               setActiveCategory(category.value);
@@ -201,7 +217,7 @@ export function MenuPage() {
 
       <div className="grid gap-8">
         {activeTab === "list" ? (
-        <section className="tab-pane rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+        <section className="tab-pane surface-panel rounded-[2rem] p-6 sm:p-7">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -213,14 +229,14 @@ export function MenuPage() {
             </div>
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <input
-                className="w-full rounded-full border border-[var(--border)] bg-[var(--paper)] px-4 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition sm:w-64"
+                className="w-full rounded-full border border-[var(--border)] bg-white/45 px-4 py-2 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] sm:w-64"
                 placeholder="Buscar por nombre"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
               <button
                 type="button"
-                className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
+                className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold sm:w-auto"
                 onClick={startCreate}
               >
                 Nuevo producto
@@ -234,16 +250,12 @@ export function MenuPage() {
             </p>
           ) : null}
           {success ? (
-            <p
-              className={`mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 transition-opacity duration-300 ${
-                successVisible ? "opacity-100" : "opacity-0"
-              }`}
-            >
+            <p className="mt-4 rounded-[1.3rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
               {success}
             </p>
           ) : null}
 
-          <div className="mt-6 space-y-4">
+          <div className="stagger-children mt-6 space-y-4">
             {loading ? (
               <p className="text-sm text-[var(--cocoa)]">Cargando...</p>
             ) : items.length === 0 ? (
@@ -254,7 +266,7 @@ export function MenuPage() {
               items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+                  className="interactive-card flex flex-col gap-3 rounded-[1.6rem] border border-[var(--border)] bg-white/35 px-4 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
                     <p className="font-semibold">{item.name}</p>
@@ -328,7 +340,7 @@ export function MenuPage() {
           </div>
         </section>
         ) : (
-        <section className="tab-pane rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+        <section className="tab-pane surface-panel rounded-[2rem] p-6 sm:p-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
@@ -362,7 +374,7 @@ export function MenuPage() {
             <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Categoria
               <select
-                className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+                className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 value={form.category}
                 onChange={(event) =>
                   setForm((prev) => ({
@@ -379,7 +391,7 @@ export function MenuPage() {
               </select>
             </label>
             <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
               placeholder="Nombre"
               value={form.name}
               onChange={(event) =>
@@ -388,7 +400,7 @@ export function MenuPage() {
               required
             />
             <textarea
-              className="min-h-[90px] rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              className="min-h-[90px] rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
               placeholder="Descripcion (opcional)"
               value={form.description}
               onChange={(event) =>
@@ -396,7 +408,7 @@ export function MenuPage() {
               }
             />
             <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
               placeholder="Precio (CRC)"
               value={form.price}
               onChange={(event) =>
@@ -413,15 +425,11 @@ export function MenuPage() {
               </p>
             ) : null}
             {success ? (
-              <p
-                className={`rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 transition-opacity duration-300 ${
-                  successVisible ? "opacity-100" : "opacity-0"
-                }`}
-              >
+              <p className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                 {success}
               </p>
             ) : null}
-            <button className="btn-primary rounded-full px-5 py-3 text-sm font-semibold shadow transition hover:-translate-y-0.5">
+            <button className="btn-primary rounded-full px-5 py-3 text-sm font-semibold">
               {editingId ? "Guardar cambios" : "Guardar producto"}
             </button>
           </form>

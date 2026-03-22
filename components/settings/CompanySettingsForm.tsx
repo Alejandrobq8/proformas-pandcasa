@@ -76,7 +76,7 @@ export function CompanySettingsForm() {
 
   if (loading) {
     return (
-      <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+      <div className="surface-panel rounded-[2rem] p-6 sm:p-7">
         <p className="text-sm text-[var(--cocoa)]">Cargando...</p>
       </div>
     );
@@ -84,7 +84,7 @@ export function CompanySettingsForm() {
 
   return (
     <form
-      className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm"
+      className="surface-panel rounded-[2rem] p-6 sm:p-7"
       onSubmit={handleSubmit}
     >
       <div className="grid gap-4 md:grid-cols-2">
@@ -93,7 +93,7 @@ export function CompanySettingsForm() {
             Nombre de la empresa
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.name}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
             required
@@ -104,7 +104,7 @@ export function CompanySettingsForm() {
             Nombre
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.contactName}
             onChange={(event) =>
               setForm({ ...form, contactName: event.target.value })
@@ -116,7 +116,7 @@ export function CompanySettingsForm() {
             Cedula
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.cedula}
             onChange={(event) => setForm({ ...form, cedula: event.target.value })}
           />
@@ -126,7 +126,7 @@ export function CompanySettingsForm() {
             Direccion
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.address}
             onChange={(event) =>
               setForm({ ...form, address: event.target.value })
@@ -138,7 +138,7 @@ export function CompanySettingsForm() {
             Telefono
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.phone}
             onChange={(event) => setForm({ ...form, phone: event.target.value })}
           />
@@ -148,7 +148,7 @@ export function CompanySettingsForm() {
             Email
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.email}
             onChange={(event) => setForm({ ...form, email: event.target.value })}
             type="email"
@@ -159,7 +159,7 @@ export function CompanySettingsForm() {
             Logo URL (opcional)
           </label>
           <input
-            className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
             value={form.logoUrl}
             onChange={(event) =>
               setForm({ ...form, logoUrl: event.target.value })
@@ -169,17 +169,17 @@ export function CompanySettingsForm() {
         </div>
       </div>
       {error ? (
-        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="mt-4 rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </p>
       ) : null}
       {success ? (
-        <p className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <p className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {success}
         </p>
       ) : null}
       <button
-        className="btn-primary mt-6 w-full rounded-full px-6 py-3 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        className="btn-primary mt-6 w-full rounded-full px-6 py-3 text-center text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         disabled={saving}
         type="submit"
       >

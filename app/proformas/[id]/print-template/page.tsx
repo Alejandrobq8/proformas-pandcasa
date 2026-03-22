@@ -74,7 +74,9 @@ export default async function ProformaTemplatePage({
   const proforma = await prisma.proforma.findUnique({
     where: { id },
     include: {
-      items: true,
+      items: {
+        orderBy: { sortOrder: "asc" },
+      },
       user: { include: { companySetting: true } },
     },
   });

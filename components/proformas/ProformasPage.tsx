@@ -75,7 +75,8 @@ export function ProformasPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      void loadProformas(filters, take);
+      const nextFilters = JSON.parse(debounceKey) as Filters;
+      void loadProformas(nextFilters, take);
     }, 300);
     return () => clearTimeout(timeout);
   }, [debounceKey, take]);
@@ -151,40 +152,84 @@ export function ProformasPage() {
   }
 
   return (
-    <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-            Proformas
-          </p>
-          <h2 className="font-[var(--font-cormorant)] text-2xl font-semibold">
-            {total} documentos
-          </h2>
+    <div className="grid gap-6">
+      <section className="hero-panel rounded-[2rem] px-6 py-7 sm:px-8 sm:py-8">
+        <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/72">
+              Proformas
+            </p>
+            <h2 className="mt-3 font-[var(--font-cormorant)] text-3xl font-semibold sm:text-4xl">
+              Centro de documentos con filtros rapidos y acciones directas.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
+              Consulta, edita y exporta cada proforma desde una vista mas clara,
+              con mejor jerarquia visual y movimiento sutil al entrar.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+                Total
+              </p>
+              <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
+                {total}
+              </p>
+            </div>
+            <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+                Filtros
+              </p>
+              <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
+                {activeFilterCount}
+              </p>
+            </div>
+            <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/68">
+                Vista
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white/88">
+                Edicion y PDF en un paso
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <button
-            type="button"
-            className="btn-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
-            onClick={() => setFiltersOpen((prev) => !prev)}
-          >
-            Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-          </button>
-          <Link
-            className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 sm:w-auto"
-            href="/proformas/new"
-          >
-            Nueva proforma
-          </Link>
-        </div>
-      </div>
+      </section>
 
-      {filtersOpen ? (
-        <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4 shadow-sm">
+      <section className="surface-panel rounded-[2rem] p-6 sm:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+              Proformas
+            </p>
+            <h3 className="font-[var(--font-cormorant)] text-2xl font-semibold">
+              {total} documentos
+            </h3>
+          </div>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+            <button
+              type="button"
+              className="btn-secondary inline-flex items-center justify-center rounded-full px-5 py-2 text-xs uppercase tracking-[0.2em] text-center"
+              onClick={() => setFiltersOpen((prev) => !prev)}
+            >
+              Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+            </button>
+            <Link
+              className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold sm:w-auto"
+              href="/proformas/new"
+            >
+              Nueva proforma
+            </Link>
+          </div>
+        </div>
+
+        {filtersOpen ? (
+        <div className="mt-5 rounded-[1.6rem] border border-[var(--border)] bg-white/35 p-4 shadow-sm backdrop-blur">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Numero
               <input
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                className="rounded-[1.2rem] border border-[var(--border)] bg-white/55 px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 placeholder="PF-2026-0001"
                 value={filters.number}
                 onChange={(event) => {
@@ -196,7 +241,7 @@ export function ProformasPage() {
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Cliente
               <input
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                className="rounded-[1.2rem] border border-[var(--border)] bg-white/55 px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 placeholder="Nombre o empresa"
                 value={filters.client}
                 onChange={(event) => {
@@ -208,7 +253,7 @@ export function ProformasPage() {
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Fecha
               <input
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                className="rounded-[1.2rem] border border-[var(--border)] bg-white/55 px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 placeholder="YYYY-MM o YYYY-MM-DD"
                 value={filters.date}
                 onChange={(event) => {
@@ -220,7 +265,7 @@ export function ProformasPage() {
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Monto desde
               <input
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                className="rounded-[1.2rem] border border-[var(--border)] bg-white/55 px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 placeholder="₡ 15000"
                 value={filters.amountMin}
                 onChange={(event) => {
@@ -235,7 +280,7 @@ export function ProformasPage() {
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Monto hasta
               <input
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                className="rounded-[1.2rem] border border-[var(--border)] bg-white/55 px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 placeholder="₡ 45000"
                 value={filters.amountMax}
                 onChange={(event) => {
@@ -251,7 +296,7 @@ export function ProformasPage() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
-              className="btn-secondary inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
+              className="btn-secondary inline-flex items-center justify-center rounded-full px-4 py-2 text-xs uppercase tracking-[0.2em] text-center"
               onClick={() => {
                 setFilters({
                   number: "",
@@ -268,7 +313,7 @@ export function ProformasPage() {
             <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Mostrar
               <select
-                className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--ink)] focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+                className="rounded-full border border-[var(--border)] bg-white/55 px-3 py-2 text-xs focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
                 value={take}
                 onChange={(event) => setTake(Number(event.target.value))}
               >
@@ -281,13 +326,13 @@ export function ProformasPage() {
         </div>
       ) : null}
 
-      {error ? (
-        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {error ? (
+        <p className="mt-4 rounded-[1.4rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </p>
       ) : null}
 
-      <div className="mt-6 space-y-4">
+        <div className="stagger-children mt-6 space-y-4">
         {loading ? (
           <p className="text-sm text-[var(--cocoa)]">Cargando...</p>
         ) : proformas.length === 0 ? (
@@ -298,13 +343,18 @@ export function ProformasPage() {
           proformas.map((proforma) => (
             <div
               key={proforma.id}
-              className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+              className="interactive-card flex flex-col gap-4 rounded-[1.6rem] border border-[var(--border)] bg-white/35 px-4 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm uppercase tracking-[0.2em] text-[var(--cocoa)]">
                     {proforma.number}
                   </p>
+                  <span
+                    className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${statusStyles[proforma.status]}`}
+                  >
+                    {statusLabel[proforma.status]}
+                  </span>
                 </div>
                 <p className="font-semibold">
                   {proforma.clientNombre} - {proforma.clientEmpresa}
@@ -315,7 +365,7 @@ export function ProformasPage() {
               </div>
               <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:justify-end">
                 <a
-                  className="btn-secondary inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
+                  className="btn-secondary inline-flex items-center justify-center rounded-full px-4 py-2 text-xs uppercase tracking-[0.2em] text-center"
                   href={`/api/proformas/${proforma.id}/pdf`}
                   target="_blank"
                   rel="noreferrer"
@@ -378,19 +428,20 @@ export function ProformasPage() {
             </div>
           ))
         )}
-      </div>
-      {proformas.length < total ? (
+        </div>
+        {proformas.length < total ? (
         <div className="mt-6 flex justify-center">
           <button
             type="button"
-            className="btn-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)]"
+            className="btn-secondary inline-flex items-center justify-center rounded-full px-5 py-2 text-xs uppercase tracking-[0.2em] text-center"
             onClick={() => setTake((prev) => prev + 20)}
             disabled={loading}
           >
             Cargar más
           </button>
         </div>
-      ) : null}
-    </section>
+        ) : null}
+      </section>
+    </div>
   );
 }

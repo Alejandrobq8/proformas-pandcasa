@@ -98,6 +98,19 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     setItems((prev) => [...prev, makeItem()]);
   }
 
+  function moveItem(index: number, direction: "up" | "down") {
+    setItems((prev) => {
+      const nextIndex = direction === "up" ? index - 1 : index + 1;
+      if (nextIndex < 0 || nextIndex >= prev.length) {
+        return prev;
+      }
+
+      const next = [...prev];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+  }
+
   function removeItem(index: number) {
     setItems((prev) => {
       const removed = prev[index];
@@ -296,7 +309,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4 shadow-sm"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
                   <span className="rounded-full border border-[var(--border)] px-3 py-1">
                     Item {String(index + 1).padStart(2, "0")}
                   </span>
@@ -304,15 +317,65 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
                     Total: {formatCRC(item.quantity * item.unitPrice)}
                   </span>
                 </div>
-                {items.length > 1 ? (
-                  <button
-                    type="button"
-                    className="text-xs uppercase tracking-[0.2em] text-red-600 transition hover:text-red-700"
-                    onClick={() => removeItem(index)}
-                  >
-                    Quitar
-                  </button>
-                ) : null}
+                <div className="flex flex-wrap items-center gap-2">
+                  {items.length > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn-secondary inline-flex h-10 w-10 items-center justify-center rounded-full p-0 disabled:cursor-not-allowed disabled:opacity-45"
+                        onClick={() => moveItem(index, "up")}
+                        disabled={index === 0}
+                        aria-label={`Subir item ${index + 1}`}
+                        title="Subir"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M12 19V5" />
+                          <path d="m5 12 7-7 7 7" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-secondary inline-flex h-10 w-10 items-center justify-center rounded-full p-0 disabled:cursor-not-allowed disabled:opacity-45"
+                        onClick={() => moveItem(index, "down")}
+                        disabled={index === items.length - 1}
+                        aria-label={`Bajar item ${index + 1}`}
+                        title="Bajar"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M12 5v14" />
+                          <path d="m19 12-7 7-7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs uppercase tracking-[0.2em] text-red-600 transition hover:text-red-700"
+                        onClick={() => removeItem(index)}
+                      >
+                        Quitar
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr,1fr]">
                 <div>
