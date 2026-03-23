@@ -82,7 +82,7 @@ export function TopNav() {
             return (
               <Link
                 key={item.href}
-                className={`rounded-[1.1rem] px-4 py-2.5 text-sm font-semibold tracking-[0.04em] transition duration-300 ${
+                className={`topnav-link rounded-[1.1rem] px-4 py-2.5 text-sm font-semibold tracking-[0.04em] transition duration-300 ${
                   active
                     ? "bg-[var(--foreground)] text-[var(--paper)] shadow-lg shadow-black/10"
                     : "text-[var(--cocoa)] hover:-translate-y-0.5 hover:bg-white/55 hover:text-[var(--accent)]"
