@@ -11,7 +11,7 @@ export function PageShell({ children }: { children: ReactNode }) {
         <div className="ambient-grid" />
       </div>
       <TopNav />
-      <main className="relative mx-auto max-w-7xl px-5 pb-20 pt-8 sm:px-8 lg:px-10">
+      <main className="relative mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         <PageTransition>{children}</PageTransition>
       </main>
     </div>

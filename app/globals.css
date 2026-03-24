@@ -57,6 +57,13 @@ html.theme-dark {
 
 html {
   scroll-behavior: smooth;
+  font-size: 87.5%;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 93.75%;
+  }
 }
 
 body {
@@ -181,6 +188,29 @@ html.theme-dark body::before {
     );
   border-color: color-mix(in srgb, var(--border) 80%, white 20%);
   box-shadow: 0 10px 35px rgba(38, 24, 14, 0.08);
+}
+
+.hero-panel,
+.surface-panel {
+  border-radius: 1.75rem;
+}
+
+.hero-panel {
+  padding: 1.5rem;
+}
+
+.surface-panel {
+  padding: 1.35rem;
+}
+
+@media (min-width: 640px) {
+  .hero-panel {
+    padding: 1.75rem;
+  }
+
+  .surface-panel {
+    padding: 1.6rem;
+  }
 }
 
 html.theme-dark .app-shell {
