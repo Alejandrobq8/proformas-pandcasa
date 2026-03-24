@@ -224,7 +224,7 @@ export function ProformasPage() {
         </div>
 
         {filtersOpen ? (
-        <div className="mt-5 rounded-[1.6rem] border border-[var(--border)] bg-white/35 p-4 shadow-sm backdrop-blur">
+        <div className="proforma-filters mt-5 rounded-[1.6rem] border border-[var(--border)] bg-white/35 p-4 shadow-sm backdrop-blur">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
               Numero

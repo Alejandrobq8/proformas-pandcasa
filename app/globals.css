@@ -70,6 +70,48 @@ body {
   min-height: 100vh;
 }
 
+input,
+select,
+textarea {
+  color: var(--foreground);
+  caret-color: var(--accent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--cocoa) 78%, transparent);
+  opacity: 1;
+}
+
+html.theme-dark input,
+html.theme-dark select,
+html.theme-dark textarea {
+  background-color: color-mix(in srgb, var(--paper) 88%, black 12%);
+  border-color: color-mix(in srgb, var(--border) 82%, white 18%);
+}
+
+html.theme-dark select option {
+  background-color: var(--paper);
+  color: var(--foreground);
+}
+
+html.theme-dark .proforma-filters input,
+html.theme-dark .proforma-filters select {
+  background-color: rgba(255, 255, 255, 0.82);
+  border-color: rgba(17, 24, 39, 0.12);
+  color: #111827;
+  caret-color: #111827;
+}
+
+html.theme-dark .proforma-filters input::placeholder {
+  color: rgba(17, 24, 39, 0.58);
+}
+
+html.theme-dark .proforma-filters select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+
 body::before {
   content: "";
   position: fixed;
