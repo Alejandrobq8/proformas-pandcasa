@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/server/auth";
 
 function formatNumber(year: number, sequence: number) {
   return `PF-${year}-${String(sequence).padStart(4, "0")}`;
@@ -75,3 +75,4 @@ export async function POST(
 
   return NextResponse.json(proforma, { status: 201 });
 }
+

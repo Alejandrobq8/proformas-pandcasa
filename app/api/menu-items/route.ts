@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 import {
   menuCategorySchema,
   menuItemSchema,
   type MenuCategory,
-} from "@/lib/validation";
+} from "@/features/menu/schema";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/server/auth";
 import { Prisma } from "@prisma/client";
 
 export async function GET(request: Request) {
@@ -75,3 +75,5 @@ export async function POST(request: Request) {
 
   return NextResponse.json(item, { status: 201 });
 }
+
+

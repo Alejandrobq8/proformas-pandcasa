@@ -8,8 +8,15 @@ Next.js App Router, Prisma y Puppeteer en Vercel.
 - Backend: Route Handlers en runtime Node.js (API REST).
 - Auth: NextAuth Credentials con Prisma (session JWT).
 - DB: PostgreSQL local para desarrollo, portable a remoto via `DATABASE_URL`.
-- PDF: `puppeteer-core` + `@sparticuz/chromium-min` desde `/api/proformas/[id]/pdf`.
+- PDF: `puppeteer-core` + `@sparticuz/chromium` desde `/api/proformas/[id]/pdf`.
 - Print: `/proformas/[id]/print` sirve el HTML exacto para la generacion PDF.
+
+## Estructura del proyecto
+- `app/`: rutas de Next.js. Los modulos autenticados viven en `app/(dashboard)` y el acceso publico en `app/(public)`.
+- `app/api/`: route handlers de Next.js.
+- `features/`: codigo por dominio (`auth`, `clientes`, `menu`, `proformas`, `settings`).
+- `shared/`: piezas reutilizables entre dominios (`components` y `lib`).
+- `prisma/`: schema, migraciones y seed.
 
 ## Variables de entorno
 Ver `.env.example`.

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { proformaSchema } from "@/lib/validation";
-import { calculateTotals } from "@/lib/proforma";
+import { prisma } from "@/shared/lib/prisma";
+import { proformaSchema } from "@/features/proformas/schema";
+import { calculateTotals } from "@/features/proformas/utils/calculateTotals";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/server/auth";
 
 function formatNumber(year: number, sequence: number) {
   return `PF-${year}-${String(sequence).padStart(4, "0")}`;
@@ -128,7 +128,7 @@ function parseDateQuery(value: string) {
 
   const isoMatch = normalized.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
   if (isoMatch) {
-    const [_, year, month, day] = isoMatch;
+    const [, year, month, day] = isoMatch;
     const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
     if (!Number.isNaN(date.getTime())) {
       const start = new Date(date);
@@ -140,7 +140,7 @@ function parseDateQuery(value: string) {
 
   const isoMonthMatch = normalized.match(/^(\d{4})[-/](\d{2})$/);
   if (isoMonthMatch) {
-    const [_, year, month] = isoMonthMatch;
+    const [, year, month] = isoMonthMatch;
     const start = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
     if (!Number.isNaN(start.getTime())) {
       const end = new Date(Date.UTC(Number(year), Number(month), 1));
@@ -150,7 +150,7 @@ function parseDateQuery(value: string) {
 
   const latamMatch = normalized.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
   if (latamMatch) {
-    const [_, day, month, year] = latamMatch;
+    const [, day, month, year] = latamMatch;
     const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
     if (!Number.isNaN(date.getTime())) {
       const start = new Date(date);
@@ -162,7 +162,7 @@ function parseDateQuery(value: string) {
 
   const latamMonthMatch = normalized.match(/^(\d{2})[/-](\d{4})$/);
   if (latamMonthMatch) {
-    const [_, month, year] = latamMonthMatch;
+    const [, month, year] = latamMonthMatch;
     const start = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
     if (!Number.isNaN(start.getTime())) {
       const end = new Date(Date.UTC(Number(year), Number(month), 1));
@@ -281,3 +281,5 @@ export async function POST(request: Request) {
 
   return NextResponse.json(proforma, { status: 201 });
 }
+
+

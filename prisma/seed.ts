@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from "../shared/lib/prisma";
 import bcrypt from "bcryptjs";
 
 async function main() {
@@ -40,3 +40,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+

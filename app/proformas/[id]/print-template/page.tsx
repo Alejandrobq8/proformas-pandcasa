@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
-import { formatCRC } from "@/lib/money";
-import { verifyPdfToken } from "@/lib/pdfToken";
+import { verifyPdfToken } from "@/features/proformas/server/pdfToken";
+import { authOptions } from "@/features/auth/server/auth";
+import { formatCRC } from "@/shared/lib/money";
+import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { notFound } from "next/navigation";
 
 function toNumber(value: unknown) {
@@ -96,7 +96,6 @@ export default async function ProformaTemplatePage({
 
   const company = proforma.user.companySetting;
   const subtotal = toNumber(proforma.subtotal);
-  const discount = toNumber(proforma.discount ?? 0);
   const total = toNumber(proforma.total);
   const deliveryText = proforma.notes?.trim() || "";
   const showUnitPrice = proforma.showUnitPrice ?? true;

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { clientSchema } from "@/lib/validation";
+import { prisma } from "@/shared/lib/prisma";
+import { clientSchema } from "@/features/clientes/schema";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/server/auth";
 import { Prisma } from "@prisma/client";
 
 export async function GET(
@@ -99,10 +99,12 @@ export async function DELETE(
     }
     await prisma.client.delete({ where: { id } });
     return NextResponse.json({ ok: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "No se pudo eliminar el cliente." },
       { status: 400 }
     );
   }
 }
+
+

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { signPdfToken } from "@/lib/pdfToken";
+import { authOptions } from "@/features/auth/server/auth";
+import { prisma } from "@/shared/lib/prisma";
+import { signPdfToken } from "@/features/proformas/server/pdfToken";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 
@@ -140,3 +140,4 @@ export async function GET(
     }
   }
 }
+

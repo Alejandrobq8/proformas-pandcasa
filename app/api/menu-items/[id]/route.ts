@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { menuItemSchema } from "@/lib/validation";
+import { prisma } from "@/shared/lib/prisma";
+import { menuItemSchema } from "@/features/menu/schema";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/server/auth";
 
 export async function GET(
   _request: Request,
@@ -81,3 +81,5 @@ export async function DELETE(
   await prisma.menuItem.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
+
+
