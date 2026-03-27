@@ -33,6 +33,7 @@ Ver `.env.example`.
 Con la configuracion final en Supabase:
 - `DATABASE_URL`: usa la URL pooled de Supavisor para runtime.
 - `DIRECT_URL`: usa el session pooler en puerto `5432` para migraciones y seed desde entornos con IPv4.
+- En Vercel, `prisma generate` puede correr solo con `DATABASE_URL`; `DIRECT_URL` no debe ser obligatoria para build.
 
 Variables opcionales de migracion:
 - `SOURCE_DATABASE_URL`: fuerza la base origen al migrar datos desde otro Postgres.
