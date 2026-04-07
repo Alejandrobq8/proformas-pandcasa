@@ -31,7 +31,7 @@ type Filters = {
 };
 
 const statusLabel: Record<Proforma["status"], string> = {
-  DRAFT: "Borrador",
+  DRAFT: "Guardada",
   SENT: "Enviada",
   PAID: "Pagada",
 };
