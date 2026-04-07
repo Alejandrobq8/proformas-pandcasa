@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -A 10 \"item-title\\\\|item-list\" /c/Users/aleja/Documents/VS_Code_Projects/proformas-pandcasa/app/proformas/[id]/print-template/page.tsx)"
+    ]
+  }
+}

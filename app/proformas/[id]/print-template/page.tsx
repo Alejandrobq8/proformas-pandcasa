@@ -14,13 +14,6 @@ function toNumber(value: unknown) {
   return 0;
 }
 
-function splitList(value: string) {
-  return value
-    .split(/[;,]/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
 function stripBullet(line: string) {
   return line.replace(/^[-*•]\s*/, "");
 }
@@ -31,33 +24,12 @@ function parseDescription(description: string) {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  if (lines.length === 0) {
+  if (lines.length <= 1) {
     return { title: "", bullets: [] as string[] };
   }
 
   const first = lines[0];
   const rest = lines.slice(1).map(stripBullet);
-
-  if (/^[-*•]\s*/.test(first)) {
-    return { title: "", bullets: [stripBullet(first), ...rest] };
-  }
-
-  if (lines.length === 1) {
-    const colonIndex = first.indexOf(":");
-    if (colonIndex >= 0) {
-      const title = first.slice(0, colonIndex + 1).trim();
-      const tail = first.slice(colonIndex + 1).trim();
-      const bullets = tail ? splitList(tail) : [];
-      return { title, bullets };
-    }
-
-    const bullets = splitList(first);
-    if (bullets.length > 1) {
-      return { title: "", bullets };
-    }
-
-    return { title: "", bullets: [stripBullet(first)] };
-  }
 
   return { title: first, bullets: rest };
 }
