@@ -79,6 +79,7 @@ type Proforma = {
   numeroFactura: string | null;
   fechaPago: string | null;
   verificacionPago: boolean;
+  sinpeTransf: boolean;
 };
 
 type EditState = { id: string; field: string } | null;
@@ -304,24 +305,24 @@ export function CobrosPage() {
     }
   }
 
-  async function toggleVerificacion(id: string, current: boolean) {
+  async function toggleBoolean(id: string, field: "verificacionPago" | "sinpeTransf", current: boolean) {
     setProformas((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, verificacionPago: !current } : p))
+      prev.map((p) => (p.id === id ? { ...p, [field]: !current } : p))
     );
     try {
       const res = await fetch(`/api/proformas/${id}/cobro`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verificacionPago: !current }),
+        body: JSON.stringify({ [field]: !current }),
       });
       if (!res.ok) throw new Error("error");
     } catch {
       setProformas((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, verificacionPago: current } : p))
+        prev.map((p) => (p.id === id ? { ...p, [field]: current } : p))
       );
       sileo.error({
         title: "Error al guardar",
-        description: "No se pudo actualizar la verificación.",
+        description: "No se pudo actualizar el campo.",
         duration: 2500,
       });
     }
@@ -349,6 +350,7 @@ export function CobrosPage() {
     "N° Factura",
     "Fecha de Pago",
     "Verificado",
+    "SINPE/TRANSF.",
   ];
 
   return (
@@ -440,7 +442,7 @@ export function CobrosPage() {
       ) : (
         grouped.map((group) => {
           const isCollapsed = collapsedMonths.has(group.key);
-          const paid = group.items.filter((p) => p.verificacionPago).length;
+          const paid = group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length;
           const pending = group.items.length - paid;
 
           return (
@@ -666,14 +668,23 @@ export function CobrosPage() {
                                 type="checkbox"
                                 checked={isVerified}
                                 onChange={() =>
-                                  toggleVerificacion(p.id, isVerified)
+                                  toggleBoolean(p.id, "verificacionPago", isVerified)
                                 }
                                 className="h-4 w-4 cursor-pointer accent-emerald-600"
-                                title={
-                                  isVerified
-                                    ? "Pago verificado"
-                                    : "Marcar como verificado"
+                                title={isVerified ? "Pago verificado" : "Marcar como verificado"}
+                              />
+                            </td>
+
+                            {/* SINPE/TRANSF. */}
+                            <td className="px-3 py-2 text-center">
+                              <input
+                                type="checkbox"
+                                checked={p.sinpeTransf}
+                                onChange={() =>
+                                  toggleBoolean(p.id, "sinpeTransf", p.sinpeTransf)
                                 }
+                                className="h-4 w-4 cursor-pointer accent-blue-600"
+                                title={p.sinpeTransf ? "SINPE/Transferencia confirmada" : "Marcar como SINPE/Transferencia"}
                               />
                             </td>
                           </tr>
@@ -688,12 +699,12 @@ export function CobrosPage() {
                         <td className="px-3 py-2.5 font-semibold text-emerald-700">
                           {formatCRC(
                             group.items
-                              .filter((p) => p.verificacionPago)
+                              .filter((p) => p.verificacionPago || p.sinpeTransf)
                               .reduce((sum, p) => sum + Number(p.total), 0)
                           )}
                         </td>
-                        <td colSpan={7} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
-                          {group.items.filter((p) => p.verificacionPago).length} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} verificada{group.items.filter((p) => p.verificacionPago).length !== 1 ? "s" : ""}
+                        <td colSpan={8} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
+                          {group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length !== 1 ? "s" : ""}
                         </td>
                       </tr>
                     </tfoot>

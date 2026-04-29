@@ -11,6 +11,7 @@ const cobroSchema = z.object({
   numeroFactura: z.string().nullable().optional(),
   fechaPago: z.string().nullable().optional(),
   verificacionPago: z.boolean().optional(),
+  sinpeTransf: z.boolean().optional(),
 });
 
 export async function PATCH(
@@ -48,6 +49,9 @@ export async function PATCH(
     }),
     ...("verificacionPago" in parsed.data && {
       verificacionPago: parsed.data.verificacionPago,
+    }),
+    ...("sinpeTransf" in parsed.data && {
+      sinpeTransf: parsed.data.sinpeTransf,
     }),
   };
 
