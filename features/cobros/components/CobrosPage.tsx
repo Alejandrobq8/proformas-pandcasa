@@ -504,7 +504,7 @@ export function CobrosPage() {
                                     <p className="mb-3 text-xs uppercase tracking-[0.25em] text-[var(--cocoa)]">
                                       Datos de cobro — {p.number}
                                     </p>
-                                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                    <div className="grid grid-cols-2 gap-4">
                                       <div>
                                         <label className={labelClass}>Orden de Compra</label>
                                         <input
