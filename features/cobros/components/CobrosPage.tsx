@@ -1,70 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { formatCRC } from "@/shared/lib/money";
 import { sileo } from "sileo";
-
-function TableScroller({ children }: { children: React.ReactNode }) {
-  const tableWrapRef = useRef<HTMLDivElement>(null);
-  const topBarRef = useRef<HTMLDivElement>(null);
-  const phantomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const tableWrap = tableWrapRef.current;
-    const topBar = topBarRef.current;
-    const phantom = phantomRef.current;
-    if (!tableWrap || !topBar || !phantom) return;
-
-    const syncPhantomWidth = () => {
-      phantom.style.width = `${tableWrap.scrollWidth}px`;
-    };
-    syncPhantomWidth();
-
-    let fromTop = false;
-    let fromTable = false;
-
-    const onTopScroll = () => {
-      if (fromTable) return;
-      fromTop = true;
-      tableWrap.scrollLeft = topBar.scrollLeft;
-      fromTop = false;
-    };
-
-    const onTableScroll = () => {
-      if (fromTop) return;
-      fromTable = true;
-      topBar.scrollLeft = tableWrap.scrollLeft;
-      fromTable = false;
-    };
-
-    topBar.addEventListener("scroll", onTopScroll);
-    tableWrap.addEventListener("scroll", onTableScroll);
-
-    const ro = new ResizeObserver(syncPhantomWidth);
-    ro.observe(tableWrap);
-
-    return () => {
-      topBar.removeEventListener("scroll", onTopScroll);
-      tableWrap.removeEventListener("scroll", onTableScroll);
-      ro.disconnect();
-    };
-  }, []);
-
-  return (
-    <>
-      <div
-        ref={topBarRef}
-        className="overflow-x-scroll overflow-y-hidden border-b border-[var(--border)]"
-        style={{ height: 12 }}
-      >
-        <div ref={phantomRef} style={{ height: 1 }} />
-      </div>
-      <div ref={tableWrapRef} className="overflow-x-auto">
-        {children}
-      </div>
-    </>
-  );
-}
 
 type Proforma = {
   id: string;
@@ -82,7 +20,12 @@ type Proforma = {
   sinpeTransf: boolean;
 };
 
-type EditState = { id: string; field: string } | null;
+type RowDraft = {
+  ordenCompra: string;
+  migo: string;
+  numeroFactura: string;
+  fechaPago: string;
+};
 
 function getMonthKey(dateStr: string) {
   const d = new Date(dateStr);
@@ -115,63 +58,10 @@ function toInputDate(dateStr: string | null) {
   return new Date(dateStr).toISOString().split("T")[0];
 }
 
-function EditableCell({
-  isActive,
-  isSaving,
-  displayValue,
-  inputValue,
-  inputType = "text",
-  placeholder = "—",
-  onActivate,
-  onCommit,
-  onCancel,
-  onChange,
-}: {
-  isActive: boolean;
-  isSaving: boolean;
-  displayValue: string;
-  inputValue: string;
-  inputType?: "text" | "number" | "date";
-  placeholder?: string;
-  onActivate: () => void;
-  onCommit: () => void;
-  onCancel: () => void;
-  onChange: (v: string) => void;
-}) {
-  if (isActive) {
-    return (
-      <input
-        autoFocus
-        type={inputType}
-        value={inputValue}
-        className="w-full min-w-[90px] rounded-lg border border-[var(--amber-strong)] bg-[var(--paper)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onCommit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onCommit();
-          if (e.key === "Escape") onCancel();
-        }}
-      />
-    );
-  }
+const inputClass =
+  "w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition";
 
-  return (
-    <button
-      type="button"
-      onClick={onActivate}
-      title="Click para editar"
-      className={`min-w-[90px] w-full rounded-lg px-2 py-1 text-left text-sm transition hover:bg-[var(--sand)] ${
-        isSaving ? "opacity-50 cursor-wait" : "cursor-text"
-      }`}
-    >
-      {displayValue ? (
-        displayValue
-      ) : (
-        <span className="text-[var(--cocoa)] opacity-50 select-none">{placeholder}</span>
-      )}
-    </button>
-  );
-}
+const labelClass = "block text-xs uppercase tracking-[0.2em] text-[var(--cocoa)] mb-1";
 
 export function CobrosPage() {
   const [filterNumber, setFilterNumber] = useState("");
@@ -189,9 +79,14 @@ export function CobrosPage() {
   const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(new Set());
   const [monthsInitialized, setMonthsInitialized] = useState(false);
 
-  const [editing, setEditing] = useState<EditState>(null);
-  const [editValue, setEditValue] = useState("");
-  const [saving, setSaving] = useState<Set<string>>(new Set());
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [rowDraft, setRowDraft] = useState<RowDraft>({
+    ordenCompra: "",
+    migo: "",
+    numeroFactura: "",
+    fechaPago: "",
+  });
+  const [rowSaving, setRowSaving] = useState(false);
 
   const fetchProformas = useCallback(async () => {
     setLoading(true);
@@ -252,56 +147,45 @@ export function CobrosPage() {
     });
   }
 
-  function startEdit(id: string, field: string, value: string) {
-    setEditing({ id, field });
-    setEditValue(value);
+  function openRow(p: Proforma) {
+    if (expandedRow === p.id) {
+      setExpandedRow(null);
+      return;
+    }
+    setExpandedRow(p.id);
+    setRowDraft({
+      ordenCompra: p.ordenCompra ?? "",
+      migo: p.migo !== null ? String(p.migo) : "",
+      numeroFactura: p.numeroFactura ?? "",
+      fechaPago: toInputDate(p.fechaPago),
+    });
   }
 
-  async function commitEdit(id: string, field: string) {
-    if (editing?.id !== id || editing?.field !== field) return;
-    setEditing(null);
-
-    const proforma = proformas.find((p) => p.id === id);
-    if (!proforma) return;
-
-    let nextValue: string | number | null = editValue.trim() || null;
-    if (field === "migo") {
-      nextValue = editValue.trim() ? parseInt(editValue.trim(), 10) : null;
-      if (nextValue !== null && isNaN(nextValue as number)) return;
-    }
-
-    const original = proforma[field as keyof Proforma];
-    const originalStr =
-      original === null || original === undefined ? "" : String(original);
-    const newStr = nextValue === null ? "" : String(nextValue);
-    if (newStr === originalStr) return;
-
-    const key = `${id}:${field}`;
-    setSaving((prev) => new Set(prev).add(key));
-
+  async function saveRow(id: string) {
+    setRowSaving(true);
+    const body = {
+      ordenCompra: rowDraft.ordenCompra.trim() || null,
+      migo: rowDraft.migo.trim() ? parseInt(rowDraft.migo, 10) : null,
+      numeroFactura: rowDraft.numeroFactura.trim() || null,
+      fechaPago: rowDraft.fechaPago || null,
+    };
     try {
       const res = await fetch(`/api/proformas/${id}/cobro`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: nextValue }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("error");
       const updated = await res.json();
       setProformas((prev) =>
         prev.map((p) => (p.id === id ? { ...p, ...updated } : p))
       );
+      setExpandedRow(null);
+      sileo.success({ title: "Guardado", description: "Cambios guardados correctamente.", duration: 2000 });
     } catch {
-      sileo.error({
-        title: "Error al guardar",
-        description: "No se pudo guardar el cambio.",
-        duration: 2500,
-      });
+      sileo.error({ title: "Error al guardar", description: "No se pudo guardar los cambios.", duration: 2500 });
     } finally {
-      setSaving((prev) => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
+      setRowSaving(false);
     }
   }
 
@@ -320,11 +204,7 @@ export function CobrosPage() {
       setProformas((prev) =>
         prev.map((p) => (p.id === id ? { ...p, [field]: current } : p))
       );
-      sileo.error({
-        title: "Error al guardar",
-        description: "No se pudo actualizar el campo.",
-        duration: 2500,
-      });
+      sileo.error({ title: "Error al guardar", description: "No se pudo actualizar el campo.", duration: 2500 });
     }
   }
 
@@ -340,15 +220,12 @@ export function CobrosPage() {
     filterNumber || filterClient || filterAmountMin || filterAmountMax || filterMigo;
 
   const columns = [
+    "",
     "N° Proforma",
     "Fecha",
     "Monto Total",
     "Descripción Entrega",
     "Solicitante",
-    "Orden de Compra",
-    "MIGO",
-    "N° Factura",
-    "Fecha de Pago",
     "Verificado",
     "SINPE/TRANSF.",
   ];
@@ -358,9 +235,7 @@ export function CobrosPage() {
       {/* Filters */}
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-            Filtros
-          </p>
+          <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">Filtros</p>
           {filtersActive ? (
             <button
               type="button"
@@ -494,14 +369,13 @@ export function CobrosPage() {
 
               {/* Table */}
               {!isCollapsed && (
-                <div className="border-t border-[var(--border)]">
-                <TableScroller>
-                  <table className="w-full min-w-[900px] text-sm">
+                <div className="overflow-x-auto border-t border-[var(--border)]">
+                  <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-[var(--border)] bg-[var(--sand)]">
-                        {columns.map((col) => (
+                        {columns.map((col, i) => (
                           <th
-                            key={col}
+                            key={i}
                             className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--cocoa)] whitespace-nowrap"
                           >
                             {col}
@@ -512,188 +386,208 @@ export function CobrosPage() {
                     <tbody>
                       {group.items.map((p, index) => {
                         const isVerified = p.verificacionPago;
+                        const isExpanded = expandedRow === p.id;
+                        const hasDetails = !!(p.ordenCompra || p.migo || p.numeroFactura || p.fechaPago);
+
                         return (
-                          <tr
-                            key={p.id}
-                            className={`border-b border-[var(--border)] last:border-0 transition-colors ${
-                              isVerified
-                                ? "bg-emerald-50/60 dark:bg-emerald-950/20"
-                                : index % 2 === 1
-                                ? "bg-[var(--sand)]/40"
-                                : ""
-                            }`}
-                          >
-                            {/* N° Proforma */}
-                            <td className="px-3 py-2 whitespace-nowrap">
-                              <a
-                                href={`/proformas/${p.id}/edit`}
-                                className="font-semibold text-[var(--accent)] transition hover:text-[var(--amber-strong)] hover:underline"
-                              >
-                                {p.number}
-                              </a>
-                            </td>
-
-                            {/* Fecha */}
-                            <td className="px-3 py-2 whitespace-nowrap text-[var(--cocoa)]">
-                              {formatDateShort(p.createdAt)}
-                            </td>
-
-                            {/* Monto total */}
-                            <td className="px-3 py-2 whitespace-nowrap font-semibold">
-                              {formatCRC(Number(p.total))}
-                            </td>
-
-                            {/* Descripción entrega */}
-                            <td className="px-3 py-2 max-w-[200px]">
-                              {p.notes ? (
-                                <span
-                                  className="block truncate text-[var(--cocoa)]"
-                                  title={p.notes}
+                          <>
+                            <tr
+                              key={p.id}
+                              className={`border-b border-[var(--border)] transition-colors cursor-pointer select-none ${
+                                isExpanded
+                                  ? "bg-[var(--sand)]"
+                                  : isVerified || p.sinpeTransf
+                                  ? "bg-emerald-50/60 hover:bg-emerald-50 dark:bg-emerald-950/20"
+                                  : index % 2 === 1
+                                  ? "bg-[var(--sand)]/40 hover:bg-[var(--sand)]"
+                                  : "hover:bg-[var(--sand)]/60"
+                              }`}
+                              onClick={() => openRow(p)}
+                            >
+                              {/* Chevron */}
+                              <td className="w-8 pl-4 pr-1 py-2.5">
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className={`text-[var(--cocoa)] transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                                  aria-hidden="true"
                                 >
-                                  {p.notes}
-                                </span>
-                              ) : (
-                                <span className="text-[var(--cocoa)] opacity-40">—</span>
-                              )}
-                            </td>
+                                  <path d="m9 18 6-6-6-6" />
+                                </svg>
+                              </td>
 
-                            {/* Solicitante */}
-                            <td className="px-3 py-2 whitespace-nowrap">
-                              <span className="font-medium">{p.clientNombre}</span>
-                              {p.clientEmpresa && (
-                                <span className="block text-xs text-[var(--cocoa)]">
-                                  {p.clientEmpresa}
-                                </span>
-                              )}
-                            </td>
+                              {/* N° Proforma */}
+                              <td className="px-3 py-2.5 whitespace-nowrap">
+                                <a
+                                  href={`/proformas/${p.id}/edit`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="font-semibold text-[var(--accent)] transition hover:text-[var(--amber-strong)] hover:underline"
+                                >
+                                  {p.number}
+                                </a>
+                                {hasDetails && (
+                                  <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)] opacity-60 align-middle" title="Tiene datos de cobro" />
+                                )}
+                              </td>
 
-                            {/* Orden de Compra */}
-                            <td className="px-3 py-2">
-                              <EditableCell
-                                isActive={
-                                  editing?.id === p.id &&
-                                  editing?.field === "ordenCompra"
-                                }
-                                isSaving={saving.has(`${p.id}:ordenCompra`)}
-                                displayValue={p.ordenCompra ?? ""}
-                                inputValue={editValue}
-                                placeholder="—"
-                                onActivate={() =>
-                                  startEdit(p.id, "ordenCompra", p.ordenCompra ?? "")
-                                }
-                                onCommit={() => commitEdit(p.id, "ordenCompra")}
-                                onCancel={() => setEditing(null)}
-                                onChange={setEditValue}
-                              />
-                            </td>
+                              {/* Fecha */}
+                              <td className="px-3 py-2.5 whitespace-nowrap text-[var(--cocoa)]">
+                                {formatDateShort(p.createdAt)}
+                              </td>
 
-                            {/* MIGO */}
-                            <td className="px-3 py-2">
-                              <EditableCell
-                                isActive={
-                                  editing?.id === p.id && editing?.field === "migo"
-                                }
-                                isSaving={saving.has(`${p.id}:migo`)}
-                                displayValue={
-                                  p.migo !== null ? String(p.migo) : ""
-                                }
-                                inputValue={editValue}
-                                inputType="number"
-                                placeholder="—"
-                                onActivate={() =>
-                                  startEdit(
-                                    p.id,
-                                    "migo",
-                                    p.migo !== null ? String(p.migo) : ""
-                                  )
-                                }
-                                onCommit={() => commitEdit(p.id, "migo")}
-                                onCancel={() => setEditing(null)}
-                                onChange={setEditValue}
-                              />
-                            </td>
+                              {/* Monto */}
+                              <td className="px-3 py-2.5 whitespace-nowrap font-semibold">
+                                {formatCRC(Number(p.total))}
+                              </td>
 
-                            {/* N° Factura */}
-                            <td className="px-3 py-2">
-                              <EditableCell
-                                isActive={
-                                  editing?.id === p.id &&
-                                  editing?.field === "numeroFactura"
-                                }
-                                isSaving={saving.has(`${p.id}:numeroFactura`)}
-                                displayValue={p.numeroFactura ?? ""}
-                                inputValue={editValue}
-                                placeholder="—"
-                                onActivate={() =>
-                                  startEdit(
-                                    p.id,
-                                    "numeroFactura",
-                                    p.numeroFactura ?? ""
-                                  )
-                                }
-                                onCommit={() => commitEdit(p.id, "numeroFactura")}
-                                onCancel={() => setEditing(null)}
-                                onChange={setEditValue}
-                              />
-                            </td>
+                              {/* Descripción entrega */}
+                              <td className="px-3 py-2.5 max-w-[220px]">
+                                {p.notes ? (
+                                  <span className="block truncate text-[var(--cocoa)]" title={p.notes}>
+                                    {p.notes}
+                                  </span>
+                                ) : (
+                                  <span className="text-[var(--cocoa)] opacity-40">—</span>
+                                )}
+                              </td>
 
-                            {/* Fecha de pago */}
-                            <td className="px-3 py-2">
-                              <EditableCell
-                                isActive={
-                                  editing?.id === p.id &&
-                                  editing?.field === "fechaPago"
-                                }
-                                isSaving={saving.has(`${p.id}:fechaPago`)}
-                                displayValue={formatDateShort(p.fechaPago)}
-                                inputValue={editValue}
-                                inputType="date"
-                                placeholder="—"
-                                onActivate={() =>
-                                  startEdit(
-                                    p.id,
-                                    "fechaPago",
-                                    toInputDate(p.fechaPago)
-                                  )
-                                }
-                                onCommit={() => commitEdit(p.id, "fechaPago")}
-                                onCancel={() => setEditing(null)}
-                                onChange={setEditValue}
-                              />
-                            </td>
+                              {/* Solicitante */}
+                              <td className="px-3 py-2.5 whitespace-nowrap">
+                                <span className="font-medium">{p.clientNombre}</span>
+                                {p.clientEmpresa && (
+                                  <span className="block text-xs text-[var(--cocoa)]">
+                                    {p.clientEmpresa}
+                                  </span>
+                                )}
+                              </td>
 
-                            {/* Verificación */}
-                            <td className="px-3 py-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={isVerified}
-                                onChange={() =>
-                                  toggleBoolean(p.id, "verificacionPago", isVerified)
-                                }
-                                className="h-4 w-4 cursor-pointer accent-emerald-600"
-                                title={isVerified ? "Pago verificado" : "Marcar como verificado"}
-                              />
-                            </td>
+                              {/* Verificado */}
+                              <td
+                                className="px-3 py-2.5 text-center"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isVerified}
+                                  onChange={() => toggleBoolean(p.id, "verificacionPago", isVerified)}
+                                  className="h-4 w-4 cursor-pointer accent-emerald-600"
+                                  title={isVerified ? "Pago verificado" : "Marcar como verificado"}
+                                />
+                              </td>
 
-                            {/* SINPE/TRANSF. */}
-                            <td className="px-3 py-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={p.sinpeTransf}
-                                onChange={() =>
-                                  toggleBoolean(p.id, "sinpeTransf", p.sinpeTransf)
-                                }
-                                className="h-4 w-4 cursor-pointer accent-blue-600"
-                                title={p.sinpeTransf ? "SINPE/Transferencia confirmada" : "Marcar como SINPE/Transferencia"}
-                              />
-                            </td>
-                          </tr>
+                              {/* SINPE/TRANSF. */}
+                              <td
+                                className="px-3 py-2.5 text-center"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={p.sinpeTransf}
+                                  onChange={() => toggleBoolean(p.id, "sinpeTransf", p.sinpeTransf)}
+                                  className="h-4 w-4 cursor-pointer accent-blue-600"
+                                  title={p.sinpeTransf ? "SINPE/Transferencia confirmada" : "Marcar como SINPE/Transferencia"}
+                                />
+                              </td>
+                            </tr>
+
+                            {/* Expanded row */}
+                            {isExpanded && (
+                              <tr key={`${p.id}-expanded`} className="border-b border-[var(--border)]">
+                                <td colSpan={8} className="p-0">
+                                  <div className="border-t border-[var(--amber)] bg-[var(--sand)] px-6 py-5">
+                                    <p className="mb-3 text-xs uppercase tracking-[0.25em] text-[var(--cocoa)]">
+                                      Datos de cobro — {p.number}
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                      <div>
+                                        <label className={labelClass}>Orden de Compra</label>
+                                        <input
+                                          className={inputClass}
+                                          value={rowDraft.ordenCompra}
+                                          onChange={(e) =>
+                                            setRowDraft((d) => ({ ...d, ordenCompra: e.target.value }))
+                                          }
+                                          placeholder="OC-0000"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelClass}>MIGO</label>
+                                        <input
+                                          className={inputClass}
+                                          type="number"
+                                          min={0}
+                                          value={rowDraft.migo}
+                                          onChange={(e) =>
+                                            setRowDraft((d) => ({ ...d, migo: e.target.value }))
+                                          }
+                                          placeholder="000000"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelClass}>N° Factura</label>
+                                        <input
+                                          className={inputClass}
+                                          value={rowDraft.numeroFactura}
+                                          onChange={(e) =>
+                                            setRowDraft((d) => ({ ...d, numeroFactura: e.target.value }))
+                                          }
+                                          placeholder="FE-0000"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelClass}>Fecha de Pago</label>
+                                        <input
+                                          className={inputClass}
+                                          type="date"
+                                          value={rowDraft.fechaPago}
+                                          onChange={(e) =>
+                                            setRowDraft((d) => ({ ...d, fechaPago: e.target.value }))
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="mt-4 flex items-center justify-between">
+                                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--cocoa)]">
+                                        {p.ordenCompra && <span>OC actual: <strong>{p.ordenCompra}</strong></span>}
+                                        {p.migo && <span>MIGO actual: <strong>{p.migo}</strong></span>}
+                                        {p.numeroFactura && <span>Factura actual: <strong>{p.numeroFactura}</strong></span>}
+                                        {p.fechaPago && <span>Pago: <strong>{formatDateShort(p.fechaPago)}</strong></span>}
+                                      </div>
+                                      <div className="flex items-center gap-2 shrink-0 ml-4">
+                                        <button
+                                          type="button"
+                                          onClick={() => setExpandedRow(null)}
+                                          className="btn-secondary inline-flex items-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)]"
+                                        >
+                                          Cancelar
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={rowSaving}
+                                          onClick={() => saveRow(p.id)}
+                                          className="btn-primary inline-flex items-center rounded-full px-5 py-2 text-xs font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                          {rowSaving ? "Guardando..." : "Guardar"}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
                         );
                       })}
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-[var(--border)] bg-[var(--sand)]">
-                        <td colSpan={2} className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                        <td colSpan={3} className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cocoa)]">
                           Total pagado
                         </td>
                         <td className="px-3 py-2.5 font-semibold text-emerald-700">
@@ -703,13 +597,12 @@ export function CobrosPage() {
                               .reduce((sum, p) => sum + Number(p.total), 0)
                           )}
                         </td>
-                        <td colSpan={8} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
+                        <td colSpan={4} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
                           {group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length !== 1 ? "s" : ""}
                         </td>
                       </tr>
                     </tfoot>
                   </table>
-                </TableScroller>
                 </div>
               )}
             </section>
