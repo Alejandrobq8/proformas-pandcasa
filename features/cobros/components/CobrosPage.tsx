@@ -500,11 +500,11 @@ export function CobrosPage() {
                             {isExpanded && (
                               <tr key={`${p.id}-expanded`} className="border-b border-[var(--border)]">
                                 <td colSpan={8} className="p-0">
-                                  <div className="border-t border-[var(--amber)] bg-[var(--sand)] px-6 py-5">
+                                  <div className="border-t border-[var(--amber)] bg-[var(--sand)] px-6 py-4">
                                     <p className="mb-3 text-xs uppercase tracking-[0.25em] text-[var(--cocoa)]">
                                       Datos de cobro — {p.number}
                                     </p>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 max-w-sm">
                                       <div>
                                         <label className={labelClass}>Orden de Compra</label>
                                         <input
@@ -552,30 +552,22 @@ export function CobrosPage() {
                                         />
                                       </div>
                                     </div>
-                                    <div className="mt-4 flex items-center justify-between">
-                                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--cocoa)]">
-                                        {p.ordenCompra && <span>OC actual: <strong>{p.ordenCompra}</strong></span>}
-                                        {p.migo && <span>MIGO actual: <strong>{p.migo}</strong></span>}
-                                        {p.numeroFactura && <span>Factura actual: <strong>{p.numeroFactura}</strong></span>}
-                                        {p.fechaPago && <span>Pago: <strong>{formatDateShort(p.fechaPago)}</strong></span>}
-                                      </div>
-                                      <div className="flex items-center gap-2 shrink-0 ml-4">
-                                        <button
-                                          type="button"
-                                          onClick={() => setExpandedRow(null)}
-                                          className="btn-secondary inline-flex items-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)]"
-                                        >
-                                          Cancelar
-                                        </button>
-                                        <button
-                                          type="button"
-                                          disabled={rowSaving}
-                                          onClick={() => saveRow(p.id)}
-                                          className="btn-primary inline-flex items-center rounded-full px-5 py-2 text-xs font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                          {rowSaving ? "Guardando..." : "Guardar"}
-                                        </button>
-                                      </div>
+                                    <div className="mt-4 flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => setExpandedRow(null)}
+                                        className="btn-secondary inline-flex items-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)]"
+                                      >
+                                        Cancelar
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={rowSaving}
+                                        onClick={() => saveRow(p.id)}
+                                        className="btn-primary inline-flex items-center rounded-full px-5 py-2 text-xs font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        {rowSaving ? "Guardando..." : "Guardar"}
+                                      </button>
                                     </div>
                                   </div>
                                 </td>
