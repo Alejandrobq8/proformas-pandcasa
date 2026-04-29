@@ -229,7 +229,7 @@ export function CobrosPage() {
     }
     return Array.from(groups.entries())
       .sort(([a], [b]) => b.localeCompare(a))
-      .map(([key, items]) => ({ key, label: formatMonthLabel(key), items }));
+      .map(([key, items]) => ({ key, label: formatMonthLabel(key), items: [...items].reverse() }));
   }, [proformas]);
 
   useEffect(() => {
