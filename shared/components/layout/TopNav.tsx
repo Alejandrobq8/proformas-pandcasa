@@ -8,6 +8,7 @@ import { useState } from "react";
 
 const navItems = [
   { href: "/proformas", label: "Proformas" },
+  { href: "/cobros", label: "Cobros" },
   { href: "/clientes", label: "Clientes" },
   { href: "/menu", label: "Menu" },
   { href: "/configuracion", label: "Ajustes" },

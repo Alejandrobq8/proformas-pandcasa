@@ -22,16 +22,19 @@ export async function GET(request: Request) {
   const dateParam = searchParams.get("date")?.trim() ?? "";
   const amountMinParam = searchParams.get("amountMin")?.trim() ?? "";
   const amountMaxParam = searchParams.get("amountMax")?.trim() ?? "";
+  const migoParam = searchParams.get("migo")?.trim() ?? "";
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
   const filtersActive =
-    numberParam || clientParam || dateParam || amountMinParam || amountMaxParam;
+    numberParam || clientParam || dateParam || amountMinParam || amountMaxParam || migoParam;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
   const amountRangeFilters = filtersActive
     ? parseAmountRange(amountMinParam, amountMaxParam)
     : null;
   const amountRangeQuery = !filtersActive ? parseAmountQuery(q) : null;
+
+  const migoValue = migoParam ? parseInt(migoParam, 10) : null;
 
   const andFilters = [
     numberParam
@@ -64,6 +67,9 @@ export async function GET(request: Request) {
               : {}),
           },
         }
+      : null,
+    migoValue !== null && !isNaN(migoValue)
+      ? { migo: migoValue }
       : null,
   ].filter((value): value is NonNullable<typeof value> => value !== null);
 
