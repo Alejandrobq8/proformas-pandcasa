@@ -80,6 +80,7 @@ type Proforma = {
   fechaPago: string | null;
   verificacionPago: boolean;
   sinpeTransf: boolean;
+  cancelado: boolean;
 };
 
 type EditState = { id: string; field: string } | null;
@@ -305,7 +306,7 @@ export function CobrosPage() {
     }
   }
 
-  async function toggleBoolean(id: string, field: "verificacionPago" | "sinpeTransf", current: boolean) {
+  async function toggleBoolean(id: string, field: "verificacionPago" | "sinpeTransf" | "cancelado", current: boolean) {
     setProformas((prev) =>
       prev.map((p) => (p.id === id ? { ...p, [field]: !current } : p))
     );
@@ -351,6 +352,7 @@ export function CobrosPage() {
     "Fecha de Pago",
     "Verificado",
     "SINPE/TRANSF.",
+    "Cancelado",
   ];
 
   return (
@@ -440,8 +442,9 @@ export function CobrosPage() {
       ) : (
         grouped.map((group) => {
           const isCollapsed = collapsedMonths.has(group.key);
-          const paid = group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length;
-          const pending = group.items.length - paid;
+          const cancelled = group.items.filter((p) => p.cancelado).length;
+          const paid = group.items.filter((p) => (p.verificacionPago || p.sinpeTransf) && !p.cancelado).length;
+          const pending = group.items.length - paid - cancelled;
 
           return (
             <section
@@ -487,6 +490,11 @@ export function CobrosPage() {
                       {pending} pendiente{pending !== 1 ? "s" : ""}
                     </span>
                   )}
+                  {cancelled > 0 && (
+                    <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">
+                      {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
+                    </span>
+                  )}
                 </div>
               </button>
 
@@ -510,11 +518,14 @@ export function CobrosPage() {
                       <tbody>
                         {group.items.map((p, index) => {
                           const isVerified = p.verificacionPago;
+                          const isPaid = (isVerified || p.sinpeTransf) && !p.cancelado;
                           return (
                             <tr
                               key={p.id}
                               className={`border-b border-[var(--border)] last:border-0 transition-colors ${
-                                isVerified || p.sinpeTransf
+                                p.cancelado
+                                  ? "bg-red-50/60 opacity-60 dark:bg-red-950/20"
+                                  : isPaid
                                   ? "bg-emerald-50/60 dark:bg-emerald-950/20"
                                   : index % 2 === 1
                                   ? "bg-[var(--sand)]/40"
@@ -641,6 +652,17 @@ export function CobrosPage() {
                                   title={p.sinpeTransf ? "SINPE/Transferencia confirmada" : "Marcar como SINPE/Transferencia"}
                                 />
                               </td>
+
+                              {/* Cancelado */}
+                              <td className="px-3 py-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={p.cancelado}
+                                  onChange={() => toggleBoolean(p.id, "cancelado", p.cancelado)}
+                                  className="h-4 w-4 cursor-pointer accent-red-600"
+                                  title={p.cancelado ? "Pedido cancelado" : "Marcar como cancelado"}
+                                />
+                              </td>
                             </tr>
                           );
                         })}
@@ -653,12 +675,13 @@ export function CobrosPage() {
                           <td className="px-3 py-2.5 font-semibold text-emerald-700">
                             {formatCRC(
                               group.items
-                                .filter((p) => p.verificacionPago || p.sinpeTransf)
+                                .filter((p) => (p.verificacionPago || p.sinpeTransf) && !p.cancelado)
                                 .reduce((sum, p) => sum + Number(p.total), 0)
                             )}
                           </td>
-                          <td colSpan={8} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
-                            {group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{group.items.filter((p) => p.verificacionPago || p.sinpeTransf).length !== 1 ? "s" : ""}
+                          <td colSpan={9} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
+                            {paid} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{paid !== 1 ? "s" : ""}
+                            {cancelled > 0 && ` · ${cancelled} cancelada${cancelled !== 1 ? "s" : ""}`}
                           </td>
                         </tr>
                       </tfoot>
