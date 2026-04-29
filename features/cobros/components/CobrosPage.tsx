@@ -1,8 +1,70 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { formatCRC } from "@/shared/lib/money";
 import { sileo } from "sileo";
+
+function TableScroller({ children }: { children: React.ReactNode }) {
+  const tableWrapRef = useRef<HTMLDivElement>(null);
+  const topBarRef = useRef<HTMLDivElement>(null);
+  const phantomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tableWrap = tableWrapRef.current;
+    const topBar = topBarRef.current;
+    const phantom = phantomRef.current;
+    if (!tableWrap || !topBar || !phantom) return;
+
+    const syncPhantomWidth = () => {
+      phantom.style.width = `${tableWrap.scrollWidth}px`;
+    };
+    syncPhantomWidth();
+
+    let fromTop = false;
+    let fromTable = false;
+
+    const onTopScroll = () => {
+      if (fromTable) return;
+      fromTop = true;
+      tableWrap.scrollLeft = topBar.scrollLeft;
+      fromTop = false;
+    };
+
+    const onTableScroll = () => {
+      if (fromTop) return;
+      fromTable = true;
+      topBar.scrollLeft = tableWrap.scrollLeft;
+      fromTable = false;
+    };
+
+    topBar.addEventListener("scroll", onTopScroll);
+    tableWrap.addEventListener("scroll", onTableScroll);
+
+    const ro = new ResizeObserver(syncPhantomWidth);
+    ro.observe(tableWrap);
+
+    return () => {
+      topBar.removeEventListener("scroll", onTopScroll);
+      tableWrap.removeEventListener("scroll", onTableScroll);
+      ro.disconnect();
+    };
+  }, []);
+
+  return (
+    <>
+      <div
+        ref={topBarRef}
+        className="overflow-x-scroll overflow-y-hidden border-b border-[var(--border)]"
+        style={{ height: 12 }}
+      >
+        <div ref={phantomRef} style={{ height: 1 }} />
+      </div>
+      <div ref={tableWrapRef} className="overflow-x-auto">
+        {children}
+      </div>
+    </>
+  );
+}
 
 type Proforma = {
   id: string;
@@ -430,7 +492,8 @@ export function CobrosPage() {
 
               {/* Table */}
               {!isCollapsed && (
-                <div className="overflow-x-auto border-t border-[var(--border)]">
+                <div className="border-t border-[var(--border)]">
+                <TableScroller>
                   <table className="w-full min-w-[900px] text-sm">
                     <thead>
                       <tr className="border-b border-[var(--border)] bg-[var(--sand)]">
@@ -618,6 +681,7 @@ export function CobrosPage() {
                       })}
                     </tbody>
                   </table>
+                </TableScroller>
                 </div>
               )}
             </section>
