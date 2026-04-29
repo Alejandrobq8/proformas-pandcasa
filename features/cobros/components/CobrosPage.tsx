@@ -680,6 +680,23 @@ export function CobrosPage() {
                         );
                       })}
                     </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-[var(--border)] bg-[var(--sand)]">
+                        <td colSpan={2} className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                          Total pagado
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold text-emerald-700">
+                          {formatCRC(
+                            group.items
+                              .filter((p) => p.verificacionPago)
+                              .reduce((sum, p) => sum + Number(p.total), 0)
+                          )}
+                        </td>
+                        <td colSpan={7} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
+                          {group.items.filter((p) => p.verificacionPago).length} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} verificada{group.items.filter((p) => p.verificacionPago).length !== 1 ? "s" : ""}
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </TableScroller>
                 </div>
