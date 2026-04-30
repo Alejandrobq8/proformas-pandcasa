@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     : null;
   const amountRangeQuery = !filtersActive ? parseAmountQuery(q) : null;
 
-  const migoValue = migoParam ? parseInt(migoParam, 10) : null;
+  const migoValue = migoParam || null;
 
   const andFilters = [
     numberParam
@@ -68,8 +68,8 @@ export async function GET(request: Request) {
           },
         }
       : null,
-    migoValue !== null && !isNaN(migoValue)
-      ? { migo: migoValue }
+    migoValue !== null
+      ? { migo: { contains: migoValue, mode: "insensitive" as const } }
       : null,
   ].filter((value): value is NonNullable<typeof value> => value !== null);
 
