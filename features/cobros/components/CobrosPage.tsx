@@ -594,7 +594,6 @@ export function CobrosPage() {
                                   isSaving={saving.has(`${p.id}:migo`)}
                                   displayValue={p.migo !== null ? String(p.migo) : ""}
                                   inputValue={editValue}
-                                  inputType="number"
                                   onActivate={() => startEdit(p.id, "migo", p.migo !== null ? String(p.migo) : "")}
                                   onCommit={() => commitEdit(p.id, "migo")}
                                   onCancel={() => setEditing(null)}
