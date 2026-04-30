@@ -7,7 +7,7 @@ import type { Prisma } from "@prisma/client";
 
 const cobroSchema = z.object({
   ordenCompra: z.string().nullable().optional(),
-  migo: z.number().int().nullable().optional(),
+  migo: z.string().nullable().optional(),
   numeroFactura: z.string().nullable().optional(),
   fechaPago: z.string().nullable().optional(),
   verificacionPago: z.boolean().optional(),

@@ -53,7 +53,7 @@ model Proforma {
   total                 Decimal         @db.Decimal(12, 2)
   notes                 String?
   ordenCompra           String?
-  migo                  Int?
+  migo                  String?
   numeroFactura         String?
   fechaPago             DateTime?
   verificacionPago      Boolean         @default(false)

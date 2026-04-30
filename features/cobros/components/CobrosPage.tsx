@@ -75,7 +75,7 @@ type Proforma = {
   clientNombre: string;
   clientEmpresa: string | null;
   ordenCompra: string | null;
-  migo: number | null;
+  migo: string | null;
   numeroFactura: string | null;
   fechaPago: string | null;
   verificacionPago: boolean;
@@ -265,16 +265,11 @@ export function CobrosPage() {
     const proforma = proformas.find((p) => p.id === id);
     if (!proforma) return;
 
-    let nextValue: string | number | null = editValue.trim() || null;
-    if (field === "migo") {
-      nextValue = editValue.trim() ? parseInt(editValue.trim(), 10) : null;
-      if (nextValue !== null && isNaN(nextValue as number)) return;
-    }
+    const nextValue: string | null = editValue.trim() || null;
 
     const original = proforma[field as keyof Proforma];
-    const originalStr =
-      original === null || original === undefined ? "" : String(original);
-    const newStr = nextValue === null ? "" : String(nextValue);
+    const originalStr = original === null || original === undefined ? "" : String(original);
+    const newStr = nextValue ?? "";
     if (newStr === originalStr) return;
 
     const key = `${id}:${field}`;
