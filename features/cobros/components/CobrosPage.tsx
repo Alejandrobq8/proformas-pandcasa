@@ -104,11 +104,8 @@ function formatMonthLabel(key: string) {
 
 function formatDateShort(dateStr: string | null) {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("es-CR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const [year, month, day] = dateStr.split("T")[0].split("-");
+  return `${day}/${month}/${year}`;
 }
 
 function toInputDate(dateStr: string | null) {
