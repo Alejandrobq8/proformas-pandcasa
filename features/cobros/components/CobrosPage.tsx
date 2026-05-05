@@ -177,6 +177,8 @@ export function CobrosPage() {
   const [filterAmountMin, setFilterAmountMin] = useState("");
   const [filterAmountMax, setFilterAmountMax] = useState("");
   const [filterMigo, setFilterMigo] = useState("");
+  const [filterOC, setFilterOC] = useState("");
+  const [filterFactura, setFilterFactura] = useState("");
 
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,6 +202,8 @@ export function CobrosPage() {
     if (filterAmountMin) params.set("amountMin", filterAmountMin);
     if (filterAmountMax) params.set("amountMax", filterAmountMax);
     if (filterMigo) params.set("migo", filterMigo);
+    if (filterOC) params.set("oc", filterOC);
+    if (filterFactura) params.set("factura", filterFactura);
     try {
       const res = await fetch(`/api/proformas?${params}`);
       if (!res.ok) throw new Error("error");
@@ -211,7 +215,7 @@ export function CobrosPage() {
     } finally {
       setLoading(false);
     }
-  }, [filterNumber, filterClient, filterAmountMin, filterAmountMax, filterMigo]);
+  }, [filterNumber, filterClient, filterAmountMin, filterAmountMax, filterMigo, filterOC, filterFactura]);
 
   useEffect(() => {
     const timer = setTimeout(fetchProformas, 300);
@@ -327,10 +331,12 @@ export function CobrosPage() {
     setFilterAmountMin("");
     setFilterAmountMax("");
     setFilterMigo("");
+    setFilterOC("");
+    setFilterFactura("");
   }
 
   const filtersActive =
-    filterNumber || filterClient || filterAmountMin || filterAmountMax || filterMigo;
+    filterNumber || filterClient || filterAmountMin || filterAmountMax || filterMigo || filterOC || filterFactura;
 
   const columns = [
     "N° Proforma",
@@ -363,7 +369,7 @@ export function CobrosPage() {
             </button>
           ) : null}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
           <input
             className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
             placeholder="N° proforma"
@@ -399,6 +405,18 @@ export function CobrosPage() {
             min={0}
             value={filterMigo}
             onChange={(e) => setFilterMigo(e.target.value)}
+          />
+          <input
+            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            placeholder="N° OC"
+            value={filterOC}
+            onChange={(e) => setFilterOC(e.target.value)}
+          />
+          <input
+            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+            placeholder="N° factura"
+            value={filterFactura}
+            onChange={(e) => setFilterFactura(e.target.value)}
           />
         </div>
       </div>

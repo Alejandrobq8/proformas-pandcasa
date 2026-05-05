@@ -4,7 +4,9 @@
       "Bash(grep -A 10 \"item-title\\\\|item-list\" /c/Users/aleja/Documents/VS_Code_Projects/proformas-pandcasa/app/proformas/[id]/print-template/page.tsx)",
       "Bash(npx prisma *)",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Bash(Get-ChildItem -Recurse \"c:\\\\Users\\\\Usuario\\\\Documents\\\\VS_CODE\\\\Projects\\\\proformas-pandcasa\\\\features\\\\cobros\" -File)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

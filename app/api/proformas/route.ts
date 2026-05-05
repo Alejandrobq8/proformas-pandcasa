@@ -23,11 +23,13 @@ export async function GET(request: Request) {
   const amountMinParam = searchParams.get("amountMin")?.trim() ?? "";
   const amountMaxParam = searchParams.get("amountMax")?.trim() ?? "";
   const migoParam = searchParams.get("migo")?.trim() ?? "";
+  const ocParam = searchParams.get("oc")?.trim() ?? "";
+  const facturaParam = searchParams.get("factura")?.trim() ?? "";
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
   const filtersActive =
-    numberParam || clientParam || dateParam || amountMinParam || amountMaxParam || migoParam;
+    numberParam || clientParam || dateParam || amountMinParam || amountMaxParam || migoParam || ocParam || facturaParam;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
   const amountRangeFilters = filtersActive
     ? parseAmountRange(amountMinParam, amountMaxParam)
@@ -70,6 +72,12 @@ export async function GET(request: Request) {
       : null,
     migoValue !== null
       ? { migo: { contains: migoValue, mode: "insensitive" as const } }
+      : null,
+    ocParam
+      ? { ordenCompra: { contains: ocParam, mode: "insensitive" as const } }
+      : null,
+    facturaParam
+      ? { numeroFactura: { contains: facturaParam, mode: "insensitive" as const } }
       : null,
   ].filter((value): value is NonNullable<typeof value> => value !== null);
 
