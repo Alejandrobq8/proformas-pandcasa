@@ -545,7 +545,9 @@ export function CobrosPage() {
                               {/* N° Proforma */}
                               <td className="px-3 py-2 whitespace-nowrap">
                                 <a
-                                  href={`/proformas/${p.id}/edit`}
+                                  href={`/proformas/${p.id}/print`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   className="font-semibold text-[var(--accent)] transition hover:text-[var(--amber-strong)] hover:underline"
                                 >
                                   {p.number}
