@@ -500,6 +500,9 @@ export function CobrosPage() {
           const cancelled = group.items.filter((p) => p.cancelado).length;
           const paid = group.items.filter((p) => (p.verificacionPago || p.sinpeTransf) && !p.cancelado).length;
           const pending = group.items.length - paid - cancelled;
+          const groupTotal = group.items.reduce((sum, p) => sum + Number(p.total), 0);
+          const groupCancelledTotal = group.items.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0);
+          const groupSaldo = groupTotal - groupCancelledTotal;
 
           return (
             <section
@@ -740,6 +743,43 @@ export function CobrosPage() {
                             {cancelled > 0 && ` · ${cancelled} cancelada${cancelled !== 1 ? "s" : ""}`}
                           </td>
                         </tr>
+                        <tr className="border-t border-[var(--border)] bg-[var(--sand)]">
+                          <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                            Total del mes
+                          </td>
+                          <td className="px-3 py-2 font-semibold">
+                            {formatCRC(groupTotal)}
+                          </td>
+                          <td colSpan={9} className="px-3 py-2 text-xs text-[var(--cocoa)]">
+                            {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
+                          </td>
+                        </tr>
+                        {cancelled > 0 && (
+                          <>
+                            <tr className="border-t border-red-100 bg-red-50/40 dark:bg-red-950/10">
+                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-600">
+                                Total canceladas
+                              </td>
+                              <td className="px-3 py-2 font-semibold text-red-700">
+                                {formatCRC(groupCancelledTotal)}
+                              </td>
+                              <td colSpan={9} className="px-3 py-2 text-xs text-red-600">
+                                {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
+                              </td>
+                            </tr>
+                            <tr className="border-t border-emerald-100 bg-emerald-50/40 dark:bg-emerald-950/10">
+                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                                Saldo restante
+                              </td>
+                              <td className="px-3 py-2 font-semibold text-emerald-700">
+                                {formatCRC(groupSaldo)}
+                              </td>
+                              <td colSpan={9} className="px-3 py-2 text-xs text-emerald-700">
+                                descontando canceladas
+                              </td>
+                            </tr>
+                          </>
+                        )}
                       </tfoot>
                     </table>
                   </TableScroller>
