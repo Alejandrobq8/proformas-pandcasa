@@ -351,6 +351,17 @@ export function CobrosPage() {
     [proformas]
   );
   const saldoRestante = totalGeneral - totalCancelado;
+  const totalPorCobrar = useMemo(
+    () =>
+      proformas
+        .filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf)
+        .reduce((sum, p) => sum + Number(p.total), 0),
+    [proformas]
+  );
+  const porCobrarCount = useMemo(
+    () => proformas.filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf).length,
+    [proformas]
+  );
 
   const columns = [
     "N° Proforma",
@@ -445,7 +456,7 @@ export function CobrosPage() {
 
       {/* Money summary cards */}
       {!loading && proformas.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-5 shadow-sm">
             <p className="text-xs uppercase tracking-[0.25em] text-[var(--cocoa)] mb-1">Total general</p>
             <p className="font-[var(--font-cormorant)] text-2xl font-semibold">
@@ -453,6 +464,15 @@ export function CobrosPage() {
             </p>
             <p className="mt-1 text-xs text-[var(--cocoa)]">
               {proformas.length} proforma{proformas.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900 dark:bg-amber-950/10">
+            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-amber-700">Por cobrar</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-amber-700">
+              {formatCRC(totalPorCobrar)}
+            </p>
+            <p className="mt-1 text-xs text-amber-700">
+              {porCobrarCount} pendiente{porCobrarCount !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="rounded-3xl border border-red-200 bg-red-50/50 p-5 shadow-sm dark:border-red-900 dark:bg-red-950/10">
@@ -503,6 +523,12 @@ export function CobrosPage() {
           const groupTotal = group.items.reduce((sum, p) => sum + Number(p.total), 0);
           const groupCancelledTotal = group.items.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0);
           const groupSaldo = groupTotal - groupCancelledTotal;
+          const groupPorCobrar = group.items
+            .filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf)
+            .reduce((sum, p) => sum + Number(p.total), 0);
+          const groupPorCobrarCount = group.items.filter(
+            (p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf
+          ).length;
 
           return (
             <section
@@ -754,6 +780,19 @@ export function CobrosPage() {
                             {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                           </td>
                         </tr>
+                        {groupPorCobrarCount > 0 && (
+                          <tr className="border-t border-amber-100 bg-amber-50/40 dark:bg-amber-950/10">
+                            <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+                              Por cobrar
+                            </td>
+                            <td className="px-3 py-2 font-semibold text-amber-700">
+                              {formatCRC(groupPorCobrar)}
+                            </td>
+                            <td colSpan={9} className="px-3 py-2 text-xs text-amber-700">
+                              {groupPorCobrarCount} pendiente{groupPorCobrarCount !== 1 ? "s" : ""}
+                            </td>
+                          </tr>
+                        )}
                         {cancelled > 0 && (
                           <>
                             <tr className="border-t border-red-100 bg-red-50/40 dark:bg-red-950/10">
