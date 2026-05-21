@@ -338,6 +338,20 @@ export function CobrosPage() {
   const filtersActive =
     filterNumber || filterClient || filterAmountMin || filterAmountMax || filterMigo || filterOC || filterFactura;
 
+  const totalGeneral = useMemo(
+    () => proformas.reduce((sum, p) => sum + Number(p.total), 0),
+    [proformas]
+  );
+  const totalCancelado = useMemo(
+    () => proformas.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0),
+    [proformas]
+  );
+  const cancelledCount = useMemo(
+    () => proformas.filter((p) => p.cancelado).length,
+    [proformas]
+  );
+  const saldoRestante = totalGeneral - totalCancelado;
+
   const columns = [
     "N° Proforma",
     "Fecha",
@@ -427,6 +441,37 @@ export function CobrosPage() {
           {total} proforma{total !== 1 ? "s" : ""}{" "}
           {filtersActive ? "encontrada" + (total !== 1 ? "s" : "") : "en total"}
         </p>
+      )}
+
+      {/* Money summary cards */}
+      {!loading && proformas.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-5 shadow-sm">
+            <p className="text-xs uppercase tracking-[0.25em] text-[var(--cocoa)] mb-1">Total general</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold">
+              {formatCRC(totalGeneral)}
+            </p>
+            <p className="mt-1 text-xs text-[var(--cocoa)]">
+              {proformas.length} proforma{proformas.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-red-200 bg-red-50/50 p-5 shadow-sm dark:border-red-900 dark:bg-red-950/10">
+            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-red-600">Total canceladas</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-red-700">
+              {formatCRC(totalCancelado)}
+            </p>
+            <p className="mt-1 text-xs text-red-600">
+              {cancelledCount} cancelada{cancelledCount !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm dark:border-emerald-900 dark:bg-emerald-950/10">
+            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-emerald-700">Saldo restante</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-emerald-700">
+              {formatCRC(saldoRestante)}
+            </p>
+            <p className="mt-1 text-xs text-emerald-700">descontando canceladas</p>
+          </div>
+        </div>
       )}
 
       {/* Error */}
