@@ -467,36 +467,36 @@ export function CobrosPage() {
             </p>
           </div>
           <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900 dark:bg-amber-950/10">
-            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-amber-700">Por cobrar</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-amber-700">
+            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">Por cobrar</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-amber-700 dark:text-amber-400">
               {formatCRC(totalPorCobrar)}
             </p>
-            <p className="mt-1 text-xs text-amber-700">
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
               {porCobrarCount} pendiente{porCobrarCount !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="rounded-3xl border border-red-200 bg-red-50/50 p-5 shadow-sm dark:border-red-900 dark:bg-red-950/10">
-            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-red-600">Total canceladas</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-red-700">
+            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-red-600 dark:text-red-400">Total canceladas</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-red-700 dark:text-red-400">
               {formatCRC(totalCancelado)}
             </p>
-            <p className="mt-1 text-xs text-red-600">
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
               {cancelledCount} cancelada{cancelledCount !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm dark:border-emerald-900 dark:bg-emerald-950/10">
-            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-emerald-700">Saldo restante</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-emerald-700">
+            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">Saldo restante</p>
+            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-emerald-700 dark:text-emerald-400">
               {formatCRC(saldoRestante)}
             </p>
-            <p className="mt-1 text-xs text-emerald-700">descontando canceladas</p>
+            <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-400">descontando canceladas</p>
           </div>
         </div>
       )}
 
       {/* Error */}
       {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       ) : null}
@@ -565,17 +565,17 @@ export function CobrosPage() {
                     {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                   </span>
                   {paid > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-emerald-700">
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
                       {paid} pagada{paid !== 1 ? "s" : ""}
                     </span>
                   )}
                   {pending > 0 && (
-                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-amber-700">
+                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
                       {pending} pendiente{pending !== 1 ? "s" : ""}
                     </span>
                   )}
                   {cancelled > 0 && (
-                    <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">
+                    <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600 dark:bg-red-950/40 dark:text-red-400">
                       {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
                     </span>
                   )}
@@ -781,39 +781,39 @@ export function CobrosPage() {
                           </td>
                         </tr>
                         {groupPorCobrarCount > 0 && (
-                          <tr className="border-t border-amber-100 bg-amber-50/40 dark:bg-amber-950/10">
-                            <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+                          <tr className="border-t border-amber-100 bg-amber-50/40 dark:border-amber-900 dark:bg-amber-950/10">
+                            <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400">
                               Por cobrar
                             </td>
-                            <td className="px-3 py-2 font-semibold text-amber-700">
+                            <td className="px-3 py-2 font-semibold text-amber-700 dark:text-amber-400">
                               {formatCRC(groupPorCobrar)}
                             </td>
-                            <td colSpan={9} className="px-3 py-2 text-xs text-amber-700">
+                            <td colSpan={9} className="px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
                               {groupPorCobrarCount} pendiente{groupPorCobrarCount !== 1 ? "s" : ""}
                             </td>
                           </tr>
                         )}
                         {cancelled > 0 && (
                           <>
-                            <tr className="border-t border-red-100 bg-red-50/40 dark:bg-red-950/10">
-                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-600">
+                            <tr className="border-t border-red-100 bg-red-50/40 dark:border-red-900 dark:bg-red-950/10">
+                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-600 dark:text-red-400">
                                 Total canceladas
                               </td>
-                              <td className="px-3 py-2 font-semibold text-red-700">
+                              <td className="px-3 py-2 font-semibold text-red-700 dark:text-red-400">
                                 {formatCRC(groupCancelledTotal)}
                               </td>
-                              <td colSpan={9} className="px-3 py-2 text-xs text-red-600">
+                              <td colSpan={9} className="px-3 py-2 text-xs text-red-600 dark:text-red-400">
                                 {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
                               </td>
                             </tr>
-                            <tr className="border-t border-emerald-100 bg-emerald-50/40 dark:bg-emerald-950/10">
-                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                            <tr className="border-t border-emerald-100 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/10">
+                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
                                 Saldo restante
                               </td>
-                              <td className="px-3 py-2 font-semibold text-emerald-700">
+                              <td className="px-3 py-2 font-semibold text-emerald-700 dark:text-emerald-400">
                                 {formatCRC(groupSaldo)}
                               </td>
-                              <td colSpan={9} className="px-3 py-2 text-xs text-emerald-700">
+                              <td colSpan={9} className="px-3 py-2 text-xs text-emerald-700 dark:text-emerald-400">
                                 descontando canceladas
                               </td>
                             </tr>

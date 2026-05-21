@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "sileo/styles.css";
 
+@custom-variant dark (&:where(.theme-dark, .theme-dark *));
+
 :root {
   --background: #f4efe9;
   --foreground: #1d2430;

@@ -39,7 +39,7 @@ const statusLabel: Record<Proforma["status"], string> = {
 const statusStyles: Record<Proforma["status"], string> = {
   DRAFT: "bg-[var(--sand)] text-[var(--cocoa)]",
   SENT: "bg-[var(--amber)] text-[var(--cocoa)]",
-  PAID: "bg-emerald-100 text-emerald-800",
+  PAID: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400",
 };
 
 function toNumber(value: unknown) {
@@ -327,7 +327,7 @@ export function ProformasPage() {
       ) : null}
 
         {error ? (
-        <p className="mt-4 rounded-[1.4rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="mt-4 rounded-[1.4rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </p>
       ) : null}
