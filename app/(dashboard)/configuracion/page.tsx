@@ -12,8 +12,7 @@ export default function ConfiguracionPage() {
           Ajustes generales
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
-          Personaliza la empresa, preferencias visuales y acciones de sesion en
-          una interfaz con mayor profundidad y orden.
+          Datos de la empresa y opciones de sesion.
         </p>
       </section>
       <div className="grid gap-8">

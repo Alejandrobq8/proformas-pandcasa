@@ -160,11 +160,10 @@ export function ProformasPage() {
               Proformas
             </p>
             <h2 className="mt-3 font-[var(--font-cormorant)] text-3xl font-semibold sm:text-4xl">
-              Centro de documentos con filtros rapidos y acciones directas.
+              Proformas
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
-              Consulta, edita y exporta cada proforma desde una vista mas clara,
-              con mejor jerarquia visual y movimiento sutil al entrar.
+              Consulta, edita y descarga tus proformas.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">

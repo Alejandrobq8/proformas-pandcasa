@@ -103,11 +103,10 @@ export function ClientesPage() {
               Clientes
             </p>
             <h2 className="mt-3 font-[var(--font-cormorant)] text-3xl font-semibold sm:text-4xl">
-              Base de clientes con acciones rapidas y mejor lectura.
+              Clientes
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
-              Busca, edita y registra contactos desde una vista mas ordenada,
-              con entradas suaves y tarjetas mas vivas.
+              Busca, crea y edita los clientes registrados.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">

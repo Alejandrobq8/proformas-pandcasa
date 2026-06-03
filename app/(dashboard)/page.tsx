@@ -4,17 +4,17 @@ const quickLinks = [
   {
     href: "/proformas",
     label: "Proformas",
-    description: "Crea documentos con salida PDF y seguimiento rapido.",
+    description: "Crea y descarga proformas en PDF.",
   },
   {
     href: "/clientes",
     label: "Clientes",
-    description: "Centraliza datos, empresas y cedulas juridicas.",
+    description: "Registra empresas y contactos.",
   },
   {
     href: "/menu",
     label: "Menu",
-    description: "Mantiene precios, categorias y productos actualizados.",
+    description: "Administra productos y precios.",
   },
 ];
 
@@ -25,16 +25,14 @@ export default function HomePage() {
         <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-end">
           <div>
             <span className="soft-badge border-white/20 bg-white/10 text-white">
-              Flujo moderno para ventas
+              Pan d&apos; Casa
             </span>
             <h1 className="mt-5 max-w-3xl font-[var(--font-cormorant)] text-4xl font-semibold leading-tight sm:text-5xl">
-              Proformas con presencia visual, control rapido y una navegacion
-              mucho mas viva.
+              Panel de ventas
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-white/82 sm:text-base">
-              Administra clientes, productos y documentos desde una interfaz
-              mas limpia, con profundidad visual y apariciones suaves al entrar
-              en cada pantalla.
+              Desde aqui podes crear proformas, gestionar clientes y actualizar
+              el menu.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
@@ -55,26 +53,26 @@ export default function HomePage() {
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
             <div className="rounded-[1.6rem] border border-white/18 bg-white/10 p-5 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.28em] text-white/70">
-                Experiencia
+                Proformas
               </p>
               <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-                UI mas actual
+                PDF directo
               </p>
             </div>
             <div className="rounded-[1.6rem] border border-white/18 bg-white/10 p-5 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.28em] text-white/70">
-                Apertura
+                Clientes
               </p>
               <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-                Transiciones suaves
+                Autocompletado
               </p>
             </div>
             <div className="rounded-[1.6rem] border border-white/18 bg-white/10 p-5 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.28em] text-white/70">
-                Enfoque
+                Cobros
               </p>
               <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-                Lectura mas clara
+                Seguimiento
               </p>
             </div>
           </div>
@@ -118,19 +116,19 @@ export default function HomePage() {
             <div className="interactive-card rounded-[1.5rem] border border-[var(--border)] bg-white/30 p-5">
               <p className="text-sm font-semibold">1. Registra al cliente</p>
               <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
-                Guarda nombre, empresa y cedula para reutilizarlos al cotizar.
+                Guarda nombre, empresa y cedula para usarlos en proformas.
               </p>
             </div>
             <div className="interactive-card rounded-[1.5rem] border border-[var(--border)] bg-white/30 p-5">
               <p className="text-sm font-semibold">2. Arma la proforma</p>
               <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
-                Combina items, cantidades y precios con una lectura mas ordenada.
+                Agrega items, cantidades y precios.
               </p>
             </div>
             <div className="interactive-card rounded-[1.5rem] border border-[var(--border)] bg-white/30 p-5">
               <p className="text-sm font-semibold">3. Exporta y comparte</p>
               <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
-                Genera el PDF final y manten un historial limpio para seguimiento.
+                Descarga el PDF y revisa el historial en Cobros.
               </p>
             </div>
           </div>

@@ -23,30 +23,29 @@ export default async function LoginPage() {
             Acceso al sistema
           </span>
           <h1 className="mt-5 font-[var(--font-cormorant)] text-4xl font-semibold leading-tight sm:text-5xl">
-            Proformas Pan d&apos; Casa con una entrada mas actual y clara.
+            Pan d&apos; Casa
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-6 text-white/82 sm:text-base">
-            Inicia sesion para administrar clientes, menu y documentos desde el
-            panel renovado.
+            Inicia sesion para continuar.
           </p>
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.24em] text-white/70">
-                Visual
+                Proformas
               </p>
-              <p className="mt-2 text-sm font-semibold">Capas y profundidad</p>
+              <p className="mt-2 text-sm font-semibold">Con salida PDF</p>
             </div>
             <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.24em] text-white/70">
-                Flujo
+                Clientes
               </p>
-              <p className="mt-2 text-sm font-semibold">Navegacion suave</p>
+              <p className="mt-2 text-sm font-semibold">Y menu de productos</p>
             </div>
             <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.24em] text-white/70">
-                Orden
+                Cobros
               </p>
-              <p className="mt-2 text-sm font-semibold">Contenido mas legible</p>
+              <p className="mt-2 text-sm font-semibold">Y seguimiento</p>
             </div>
           </div>
         </section>
@@ -59,7 +58,7 @@ export default async function LoginPage() {
             Inicia sesion
           </h2>
           <p className="mt-2 text-sm text-[var(--cocoa)]">
-            Usa el usuario creado en el seed de Prisma para entrar al panel.
+            Ingresa tus credenciales para acceder.
           </p>
           <LoginForm />
         </section>

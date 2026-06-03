@@ -163,7 +163,7 @@ export function MenuPage() {
           Menu de productos
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
-          Administra bocadillos, postres y queques con sus precios.
+          Productos y precios por categoria.
         </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
