@@ -557,6 +557,8 @@ export default async function ProformaTemplatePage({
           <br />
           MÉTODOS DE PAGO: TRANSFERENCIA BANCARIA O SINPE
           <br />
+          LINK DE PAGO: Puede solicitarlo por WhatsApp o correo
+          <br />
           <strong>Importante: </strong>Enviar comprobante de pago al número de
           WhatsApp {company?.phone ?? "-"} o al correo {company?.email ?? "-"}
         </div>

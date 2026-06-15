@@ -6,7 +6,11 @@
       "Bash(echo \"Exit code: $?\")",
       "Bash(echo \"Exit: $?\")",
       "Bash(Get-ChildItem -Recurse \"c:\\\\Users\\\\Usuario\\\\Documents\\\\VS_CODE\\\\Projects\\\\proformas-pandcasa\\\\features\\\\cobros\" -File)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(npx --no prisma migrate dev --name add_payment_link)",
+      "Bash(npm install *)",
+      "Bash(dir /a .env*)",
+      "PowerShell($env:DATABASE_URL)"
     ]
   }
 }
