@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClientAutocomplete } from "./ClientAutocomplete";
 import { formatCRC } from "@/shared/lib/money";
+import { useLocalStorageDraft } from "@/shared/hooks/useLocalStorageDraft";
 import { sileo } from "sileo";
 
 type Item = {
@@ -35,6 +36,33 @@ function makeItem(): Item {
     quantity: 0,
     unitPrice: 0,
   };
+}
+
+type DraftState = {
+  clientId: string | null;
+  clientNombre: string;
+  clientEmpresa: string;
+  clientCedulaJuridica: string;
+  showUnitPrice: boolean;
+  status: ProformaStatus;
+  discount: number;
+  notes: string;
+  items: Item[];
+  totalDrafts: Record<string, string>;
+};
+
+function formatDraftTime(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  if (sameDay) {
+    return date.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
+  }
+  return (
+    date.toLocaleDateString("es-CR", { day: "numeric", month: "short" }) +
+    " " +
+    date.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" })
+  );
 }
 
 export function ProformaForm({ initial }: { initial?: ProformaData }) {
@@ -83,6 +111,87 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     [items]
   );
   const isEdit = Boolean(initial?.id);
+
+  const draftKey = initial?.id
+    ? `proforma_draft_edit_${initial.id}`
+    : "proforma_draft_new";
+  const { draft, hasDraft, draftSavedAt, saveDraft, clearDraft } =
+    useLocalStorageDraft<DraftState>(draftKey);
+  const draftApplied = useRef(false);
+
+  // Apply recovered draft to form state once after it loads from localStorage
+  useEffect(() => {
+    if (!hasDraft || !draft || draftApplied.current) return;
+    draftApplied.current = true;
+    setClientId(draft.clientId);
+    setClientNombre(draft.clientNombre);
+    setClientEmpresa(draft.clientEmpresa);
+    setClientCedulaJuridica(draft.clientCedulaJuridica);
+    setShowUnitPrice(draft.showUnitPrice);
+    setStatus(draft.status);
+    setDiscount(draft.discount);
+    setNotes(draft.notes);
+    setItems(draft.items);
+    setTotalDrafts(draft.totalDrafts);
+  }, [hasDraft, draft]);
+
+  // Auto-save form state to localStorage (debounced 800ms)
+  useEffect(() => {
+    const hasContent =
+      isEdit ||
+      clientNombre !== "" ||
+      clientEmpresa !== "" ||
+      notes !== "" ||
+      items.some((i) => i.description !== "" || i.quantity > 0 || i.unitPrice > 0);
+    if (!hasContent) return;
+    const timer = setTimeout(() => {
+      saveDraft({
+        clientId,
+        clientNombre,
+        clientEmpresa,
+        clientCedulaJuridica,
+        showUnitPrice,
+        status,
+        discount,
+        notes,
+        items,
+        totalDrafts,
+      });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [
+    clientId,
+    clientNombre,
+    clientEmpresa,
+    clientCedulaJuridica,
+    showUnitPrice,
+    status,
+    discount,
+    notes,
+    items,
+    totalDrafts,
+    isEdit,
+    saveDraft,
+  ]);
+
+  const discardDraft = useCallback(() => {
+    clearDraft();
+    setClientId(initial?.clientId ?? null);
+    setClientNombre(initial?.clientNombre ?? "");
+    setClientEmpresa(initial?.clientEmpresa ?? "");
+    setClientCedulaJuridica(initial?.clientCedulaJuridica ?? "");
+    setShowUnitPrice(initial?.showUnitPrice ?? true);
+    setStatus(initial?.status ?? "DRAFT");
+    setDiscount(initial?.discount ?? 0);
+    setNotes(initial?.notes ?? "");
+    setItems(
+      initial?.items?.length
+        ? initial.items.map((item) => ({ ...item, id: makeItem().id }))
+        : [makeItem()]
+    );
+    setTotalDrafts({});
+  }, [clearDraft, initial]);
+
   const previewUrl = isEdit
     ? `/proformas/${initial?.id}/print-template`
     : null;
@@ -170,6 +279,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
 
     const createdId = data?.id;
     if (!initial?.id && createdId) {
+      clearDraft();
       sileo.success({
         title: nextStatus === "DRAFT" ? "Borrador guardado" : "Proforma guardada",
         description:
@@ -182,6 +292,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       return;
     }
 
+    clearDraft();
     setStatus(nextStatus ?? status);
     setLastSavedAt(
       new Date().toLocaleTimeString("es-CR", {
@@ -205,6 +316,21 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
 
   return (
     <form className="grid gap-8" onSubmit={handleSubmit}>
+      {hasDraft && draftSavedAt ? (
+        <div className="flex flex-col gap-3 rounded-3xl border border-[var(--amber)] bg-[var(--amber)]/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-[var(--cocoa)]">
+            Borrador local recuperado — guardado el{" "}
+            <span className="font-semibold">{formatDraftTime(draftSavedAt)}</span>
+          </p>
+          <button
+            type="button"
+            className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] sm:w-auto"
+            onClick={discardDraft}
+          >
+            Descartar borrador
+          </button>
+        </div>
+      ) : null}
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
