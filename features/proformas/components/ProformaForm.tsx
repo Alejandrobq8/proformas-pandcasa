@@ -2,19 +2,24 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ClientAutocomplete } from "./ClientAutocomplete";
 import { formatCRC } from "@/shared/lib/money";
 import { useLocalStorageDraft } from "@/shared/hooks/useLocalStorageDraft";
+import { proformaSchema, type ProformaStatus } from "@/features/proformas/schema";
+import { Card } from "@/shared/components/ui/Card";
+import { Button } from "@/shared/components/ui/Button";
+import { Field, Input, Textarea } from "@/shared/components/ui/Input";
 import { sileo } from "sileo";
 
-type Item = {
-  id: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-};
+const proformaFormSchema = proformaSchema.extend({
+  totalDrafts: z.record(z.string(), z.string()),
+});
 
-type ProformaStatus = "DRAFT" | "SENT" | "PAID";
+type ProformaFormValues = z.infer<typeof proformaFormSchema>;
+type Item = ProformaFormValues["items"][number];
 
 type ProformaData = {
   id?: string;
@@ -26,30 +31,29 @@ type ProformaData = {
   discount?: number | null;
   notes?: string | null;
   status?: ProformaStatus;
-  items: Array<Omit<Item, "id">>;
+  items: Item[];
 };
 
-function makeItem(): Item {
+function buildDefaultValues(initial?: ProformaData): ProformaFormValues {
   return {
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    description: "",
-    quantity: 0,
-    unitPrice: 0,
+    clientId: initial?.clientId ?? null,
+    clientNombre: initial?.clientNombre ?? "",
+    clientEmpresa: initial?.clientEmpresa ?? "",
+    clientCedulaJuridica: initial?.clientCedulaJuridica ?? "",
+    showUnitPrice: initial?.showUnitPrice ?? true,
+    status: initial?.status ?? "DRAFT",
+    discount: initial?.discount ?? 0,
+    notes: initial?.notes ?? "",
+    items: initial?.items?.length
+      ? initial.items.map(({ description, quantity, unitPrice }) => ({
+          description,
+          quantity,
+          unitPrice,
+        }))
+      : [{ description: "", quantity: 0, unitPrice: 0 }],
+    totalDrafts: {},
   };
 }
-
-type DraftState = {
-  clientId: string | null;
-  clientNombre: string;
-  clientEmpresa: string;
-  clientCedulaJuridica: string;
-  showUnitPrice: boolean;
-  status: ProformaStatus;
-  discount: number;
-  notes: string;
-  items: Item[];
-  totalDrafts: Record<string, string>;
-};
 
 function formatDraftTime(iso: string): string {
   const date = new Date(iso);
@@ -65,173 +69,129 @@ function formatDraftTime(iso: string): string {
   );
 }
 
+function StepBadge({ step, label }: { step: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="rounded-[3px] border border-rc-ink px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-rc-ink">
+        {step}
+      </span>
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 export function ProformaForm({ initial }: { initial?: ProformaData }) {
   const router = useRouter();
-  const [clientId, setClientId] = useState(initial?.clientId ?? null);
-  const [clientNombre, setClientNombre] = useState(
-    initial?.clientNombre ?? ""
-  );
-  const [clientEmpresa, setClientEmpresa] = useState(
-    initial?.clientEmpresa ?? ""
-  );
-  const [clientCedulaJuridica, setClientCedulaJuridica] = useState(
-    initial?.clientCedulaJuridica ?? ""
-  );
-  const [showUnitPrice, setShowUnitPrice] = useState(
-    initial?.showUnitPrice ?? true
-  );
-  const [status, setStatus] = useState<ProformaStatus>(
-    initial?.status ?? "DRAFT"
-  );
-  const [discount, setDiscount] = useState<number>(initial?.discount ?? 0);
-  const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [items, setItems] = useState<Item[]>(
-    initial?.items?.length
-      ? initial.items.map((item) => ({ ...item, id: makeItem().id }))
-      : [makeItem()]
-  );
-  const [totalDrafts, setTotalDrafts] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    setValue,
+    getValues,
+  } = useForm<ProformaFormValues>({
+    resolver: zodResolver(proformaFormSchema),
+    defaultValues: buildDefaultValues(initial),
+  });
+
+  const { fields, append, remove, move } = useFieldArray({
+    control,
+    name: "items",
+  });
+
+  const watchedItems = useWatch({ control, name: "items" });
+  const watchedDiscount = useWatch({ control, name: "discount" });
+  const watchedTotalDrafts = useWatch({ control, name: "totalDrafts" });
+
+  const isEdit = Boolean(initial?.id);
+
   const subtotal = useMemo(
     () =>
-      items.reduce(
+      (watchedItems ?? []).reduce(
         (sum, item) => sum + item.quantity * item.unitPrice,
         0
       ),
-    [items]
+    [watchedItems]
   );
-  const total = subtotal - (discount || 0);
-  const itemsCount = items.length;
+  const total = subtotal - (watchedDiscount || 0);
+  const itemsCount = fields.length;
   const unitsCount = useMemo(
-    () => items.reduce((sum, item) => sum + item.quantity, 0),
-    [items]
+    () => (watchedItems ?? []).reduce((sum, item) => sum + item.quantity, 0),
+    [watchedItems]
   );
-  const isEdit = Boolean(initial?.id);
 
   const draftKey = initial?.id
     ? `proforma_draft_edit_${initial.id}`
     : "proforma_draft_new";
   const { draft, hasDraft, draftSavedAt, saveDraft, clearDraft } =
-    useLocalStorageDraft<DraftState>(draftKey);
+    useLocalStorageDraft<ProformaFormValues>(draftKey);
   const draftApplied = useRef(false);
 
-  // Apply recovered draft to form state once after it loads from localStorage
+  // Apply recovered draft to the form once after it loads from localStorage
   useEffect(() => {
     if (!hasDraft || !draft || draftApplied.current) return;
     draftApplied.current = true;
-    setClientId(draft.clientId);
-    setClientNombre(draft.clientNombre);
-    setClientEmpresa(draft.clientEmpresa);
-    setClientCedulaJuridica(draft.clientCedulaJuridica);
-    setShowUnitPrice(draft.showUnitPrice);
-    setStatus(draft.status);
-    setDiscount(draft.discount);
-    setNotes(draft.notes);
-    setItems(draft.items);
-    setTotalDrafts(draft.totalDrafts);
-  }, [hasDraft, draft]);
+    reset(draft);
+  }, [hasDraft, draft, reset]);
 
   // Auto-save form state to localStorage (debounced 800ms)
   useEffect(() => {
+    const values = watchedItems;
+    const current = getValues();
     const hasContent =
       isEdit ||
-      clientNombre !== "" ||
-      clientEmpresa !== "" ||
-      notes !== "" ||
-      items.some((i) => i.description !== "" || i.quantity > 0 || i.unitPrice > 0);
+      current.clientNombre !== "" ||
+      current.clientEmpresa !== "" ||
+      current.notes !== "" ||
+      (values ?? []).some(
+        (item) => item.description !== "" || item.quantity > 0 || item.unitPrice > 0
+      );
     if (!hasContent) return;
     const timer = setTimeout(() => {
-      saveDraft({
-        clientId,
-        clientNombre,
-        clientEmpresa,
-        clientCedulaJuridica,
-        showUnitPrice,
-        status,
-        discount,
-        notes,
-        items,
-        totalDrafts,
-      });
+      saveDraft(getValues());
     }, 800);
     return () => clearTimeout(timer);
-  }, [
-    clientId,
-    clientNombre,
-    clientEmpresa,
-    clientCedulaJuridica,
-    showUnitPrice,
-    status,
-    discount,
-    notes,
-    items,
-    totalDrafts,
-    isEdit,
-    saveDraft,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedItems, watchedDiscount, watchedTotalDrafts, isEdit, saveDraft]);
 
   const discardDraft = useCallback(() => {
     clearDraft();
-    setClientId(initial?.clientId ?? null);
-    setClientNombre(initial?.clientNombre ?? "");
-    setClientEmpresa(initial?.clientEmpresa ?? "");
-    setClientCedulaJuridica(initial?.clientCedulaJuridica ?? "");
-    setShowUnitPrice(initial?.showUnitPrice ?? true);
-    setStatus(initial?.status ?? "DRAFT");
-    setDiscount(initial?.discount ?? 0);
-    setNotes(initial?.notes ?? "");
-    setItems(
-      initial?.items?.length
-        ? initial.items.map((item) => ({ ...item, id: makeItem().id }))
-        : [makeItem()]
-    );
-    setTotalDrafts({});
-  }, [clearDraft, initial]);
+    reset(buildDefaultValues(initial));
+  }, [clearDraft, initial, reset]);
 
   const previewUrl = isEdit
     ? `/proformas/${initial?.id}/print-template`
     : null;
   const submitLabel = isEdit ? "Guardar cambios" : "Guardar proforma";
 
-  function updateItem(index: number, patch: Partial<Item>) {
-    setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, ...patch } : item))
-    );
-  }
-
   function addItem() {
-    setItems((prev) => [...prev, makeItem()]);
+    append({ description: "", quantity: 0, unitPrice: 0 });
   }
 
   function moveItem(index: number, direction: "up" | "down") {
-    setItems((prev) => {
-      const nextIndex = direction === "up" ? index - 1 : index + 1;
-      if (nextIndex < 0 || nextIndex >= prev.length) {
-        return prev;
-      }
-
-      const next = [...prev];
-      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
-      return next;
-    });
+    const nextIndex = direction === "up" ? index - 1 : index + 1;
+    if (nextIndex < 0 || nextIndex >= fields.length) return;
+    move(index, nextIndex);
   }
 
   function removeItem(index: number) {
-    setItems((prev) => {
-      const removed = prev[index];
-      if (removed) {
-        setTotalDrafts((current) => {
-          const next = { ...current };
-          delete next[removed.id];
-          return next;
-        });
+    const removedId = fields[index]?.id;
+    remove(index);
+    if (removedId) {
+      const current = getValues("totalDrafts");
+      if (current[removedId]) {
+        const next = { ...current };
+        delete next[removedId];
+        setValue("totalDrafts", next);
       }
-      return prev.filter((_, i) => i !== index);
-    });
+    }
     sileo.success({
       title: "Producto eliminado",
       description: "El item fue removido de la proforma.",
@@ -239,20 +199,23 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     });
   }
 
-  async function saveProforma(nextStatus?: ProformaStatus) {
+  async function saveProforma(
+    nextStatus: ProformaStatus | undefined,
+    values: ProformaFormValues
+  ) {
     setError(null);
     setSaving(true);
 
     const payload = {
-      clientId,
-      clientNombre,
-      clientEmpresa,
-      clientCedulaJuridica,
-      showUnitPrice,
-      discount: discount || 0,
-      notes,
-      items,
-      status: nextStatus ?? status,
+      clientId: values.clientId,
+      clientNombre: values.clientNombre,
+      clientEmpresa: values.clientEmpresa,
+      clientCedulaJuridica: values.clientCedulaJuridica,
+      showUnitPrice: values.showUnitPrice,
+      discount: values.discount || 0,
+      notes: values.notes,
+      items: values.items,
+      status: nextStatus ?? values.status,
     };
 
     const res = await fetch(
@@ -293,7 +256,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     }
 
     clearDraft();
-    setStatus(nextStatus ?? status);
+    setValue("status", nextStatus ?? values.status);
     setLastSavedAt(
       new Date().toLocaleTimeString("es-CR", {
         hour: "2-digit",
@@ -309,446 +272,370 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
     });
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await saveProforma();
-  }
+  const onSubmit = handleSubmit((values) => saveProforma(undefined, values));
 
   return (
-    <form className="grid gap-8" onSubmit={handleSubmit}>
+    <form className="grid gap-8" onSubmit={onSubmit}>
       {hasDraft && draftSavedAt ? (
-        <div className="flex flex-col gap-3 rounded-3xl border border-[var(--amber)] bg-[var(--amber)]/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-[var(--cocoa)]">
+        <Card variant="stat" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-rc-ink/80">
             Borrador local recuperado — guardado el{" "}
-            <span className="font-semibold">{formatDraftTime(draftSavedAt)}</span>
+            <span className="font-semibold text-rc-ink">
+              {formatDraftTime(draftSavedAt)}
+            </span>
           </p>
-          <button
-            type="button"
-            className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:border-[var(--amber-strong)] sm:w-auto"
-            onClick={discardDraft}
-          >
+          <Button variant="ghost" size="sm" onClick={discardDraft}>
             Descartar borrador
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : null}
-      <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+
+      <Card variant="plain">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Paso 1
-              </span>
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Cliente
-              </p>
-            </div>
-            <h3 className="font-[var(--font-cormorant)] text-2xl font-semibold">
+            <StepBadge step="Paso 1" label="Cliente" />
+            <h3 className="mt-2 font-serif text-2xl font-semibold text-rc-ink">
               Seleccion y datos
             </h3>
-            <p className="mt-2 text-sm text-[var(--cocoa)]">
+            <p className="mt-1.5 text-sm text-rc-ink/70">
               Busca un cliente o completa los datos manualmente.
             </p>
           </div>
-          <a
-            className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] transition hover:text-[var(--amber-strong)]"
-            href="/clientes"
-          >
+          <Button variant="ghost" size="sm" href="/clientes">
             Nuevo cliente
-          </a>
+          </Button>
         </div>
 
-        <div className="mt-4 grid gap-3">
+        <div className="mt-5 grid gap-3">
           <ClientAutocomplete
             onSelect={(cliente) => {
-              setClientId(cliente.id);
-              setClientNombre(cliente.nombre);
-              setClientEmpresa(cliente.empresa ?? "");
-              setClientCedulaJuridica(cliente.cedulaJuridica ?? "");
+              setValue("clientId", cliente.id);
+              setValue("clientNombre", cliente.nombre);
+              setValue("clientEmpresa", cliente.empresa ?? "");
+              setValue("clientCedulaJuridica", cliente.cedulaJuridica ?? "");
             }}
           />
           <div className="grid gap-3 md:grid-cols-2">
-            <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-              placeholder="Nombre"
-              value={clientNombre}
-              onChange={(event) => setClientNombre(event.target.value)}
-              required
-            />
-            <input
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-              placeholder="Empresa"
-              value={clientEmpresa}
-              onChange={(event) => setClientEmpresa(event.target.value)}
-            />
+            <Input placeholder="Nombre" {...register("clientNombre")} />
+            <Input placeholder="Empresa" {...register("clientEmpresa")} />
           </div>
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+          <Input
             placeholder="Cedula juridica (opcional)"
-            value={clientCedulaJuridica}
-            onChange={(event) => setClientCedulaJuridica(event.target.value)}
+            {...register("clientCedulaJuridica")}
           />
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+      <Card variant="plain">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Paso 2
-              </span>
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Items
-              </p>
-            </div>
-            <h3 className="font-[var(--font-cormorant)] text-2xl font-semibold">
+            <StepBadge step="Paso 2" label="Items" />
+            <h3 className="mt-2 font-serif text-2xl font-semibold text-rc-ink">
               Detalle de la proforma
             </h3>
-            <p className="mt-2 text-sm text-[var(--cocoa)]">
+            <p className="mt-1.5 text-sm text-rc-ink/70">
               Usa varias lineas para describir cada item con vinetas.
             </p>
           </div>
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+            <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-rc-ink/70">
               <input
                 type="checkbox"
-                checked={showUnitPrice}
-                onChange={(event) => setShowUnitPrice(event.target.checked)}
-                className="h-4 w-4 accent-[var(--accent)]"
+                className="h-4 w-4 accent-[var(--rc-gold)]"
+                {...register("showUnitPrice")}
               />
               Mostrar precio unitario en PDF
             </label>
-            <button
-              type="button"
-              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
-              onClick={addItem}
-            >
+            <Button variant="ghost" size="sm" onClick={addItem}>
               Agregar item
-            </button>
+            </Button>
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4 shadow-sm"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                  <span className="rounded-full border border-[var(--border)] px-3 py-1">
-                    Item {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-sm font-semibold normal-case text-[var(--cocoa)]">
-                    Total: {formatCRC(item.quantity * item.unitPrice)}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {items.length > 1 ? (
-                    <>
-                      <button
-                        type="button"
-                        className="btn-secondary inline-flex h-10 w-10 items-center justify-center rounded-full p-0 disabled:cursor-not-allowed disabled:opacity-45"
-                        onClick={() => moveItem(index, "up")}
-                        disabled={index === 0}
-                        aria-label={`Subir item ${index + 1}`}
-                        title="Subir"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
+        <div className="mt-5 space-y-3">
+          {fields.map((field, index) => {
+            const item = watchedItems?.[index] ?? field;
+            return (
+              <Card key={field.id} variant="stat">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="rounded-[3px] border border-rc-ink px-2.5 py-1 font-mono text-[10px] font-bold text-rc-ink">
+                      Item {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-mono text-sm font-semibold text-rc-ink">
+                      Total: {formatCRC(item.quantity * item.unitPrice)}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {fields.length > 1 ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveItem(index, "up")}
+                          disabled={index === 0}
+                          aria-label={`Subir item ${index + 1}`}
+                          title="Subir"
                         >
-                          <path d="M12 19V5" />
-                          <path d="m5 12 7-7 7 7" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-secondary inline-flex h-10 w-10 items-center justify-center rounded-full p-0 disabled:cursor-not-allowed disabled:opacity-45"
-                        onClick={() => moveItem(index, "down")}
-                        disabled={index === items.length - 1}
-                        aria-label={`Bajar item ${index + 1}`}
-                        title="Bajar"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 19V5" />
+                            <path d="m5 12 7-7 7 7" />
+                          </svg>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveItem(index, "down")}
+                          disabled={index === fields.length - 1}
+                          aria-label={`Bajar item ${index + 1}`}
+                          title="Bajar"
                         >
-                          <path d="M12 5v14" />
-                          <path d="m19 12-7 7-7-7" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        className="text-xs uppercase tracking-[0.2em] text-red-600 transition hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                        onClick={() => removeItem(index)}
-                      >
-                        Quitar
-                      </button>
-                    </>
-                  ) : null}
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 5v14" />
+                            <path d="m19 12-7 7-7-7" />
+                          </svg>
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => removeItem(index)}>
+                          Quitar
+                        </Button>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr,1fr]">
-                <div>
-                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                    Descripción
-                  </label>
-                  <textarea
-                    className="mt-2 min-h-[96px] w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                    placeholder="Descripcion (usa lineas nuevas para vinetas)"
-                    value={item.description}
-                    onChange={(event) =>
-                      updateItem(index, { description: event.target.value })
-                    }
-                    required
-                  />
-                  <p className="mt-2 text-xs text-[var(--cocoa)]">
-                    Primera linea como titulo, el resto como lista.
-                  </p>
-                </div>
-                <div>
-                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                    Cantidad
-                  </label>
-                  <input
-                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                    type="text"
-                    inputMode="numeric"
-                    value={item.quantity === 0 ? "" : item.quantity}
-                    onChange={(event) => {
-                      const cleaned = event.target.value.replace(/[^\d]/g, "");
-                      const nextQuantity = cleaned ? Number(cleaned) : 0;
-                      const draft = totalDrafts[item.id];
-                      if (draft && nextQuantity > 0) {
-                        const totalValue = Number(draft);
-                        const nextUnit = totalValue / nextQuantity;
-                        updateItem(index, {
-                          quantity: nextQuantity,
-                          unitPrice: Number.isFinite(nextUnit) ? nextUnit : 0,
-                        });
-                      } else {
-                        updateItem(index, {
-                          quantity: nextQuantity,
-                        });
+                <div className="mt-4 grid gap-3 md:grid-cols-[2fr,1fr,1fr,1fr]">
+                  <Field
+                    label="Descripción"
+                    htmlFor={`item-${field.id}-description`}
+                    hint="Primera linea como titulo, el resto como lista."
+                  >
+                    <Textarea
+                      id={`item-${field.id}-description`}
+                      className="min-h-[96px]"
+                      placeholder="Descripcion (usa lineas nuevas para vinetas)"
+                      required
+                      {...register(`items.${index}.description`)}
+                    />
+                  </Field>
+                  <Field label="Cantidad" htmlFor={`item-${field.id}-quantity`}>
+                    <Input
+                      id={`item-${field.id}-quantity`}
+                      type="text"
+                      inputMode="numeric"
+                      value={item.quantity === 0 ? "" : item.quantity}
+                      onChange={(event) => {
+                        const cleaned = event.target.value.replace(/[^\d]/g, "");
+                        const nextQuantity = cleaned ? Number(cleaned) : 0;
+                        const draftTotal = getValues("totalDrafts")[field.id];
+                        if (draftTotal && nextQuantity > 0) {
+                          const totalValue = Number(draftTotal);
+                          const nextUnit = totalValue / nextQuantity;
+                          setValue(`items.${index}.quantity`, nextQuantity);
+                          setValue(
+                            `items.${index}.unitPrice`,
+                            Number.isFinite(nextUnit) ? nextUnit : 0
+                          );
+                        } else {
+                          setValue(`items.${index}.quantity`, nextQuantity);
+                        }
+                      }}
+                      required
+                    />
+                  </Field>
+                  <Field label="Precio unitario" htmlFor={`item-${field.id}-unitPrice`}>
+                    <Input
+                      id={`item-${field.id}-unitPrice`}
+                      type="text"
+                      inputMode="decimal"
+                      value={item.unitPrice === 0 ? "" : item.unitPrice}
+                      onChange={(event) => {
+                        const normalized = event.target.value
+                          .replace(",", ".")
+                          .replace(/[^\d.]/g, "");
+                        setValue(
+                          `items.${index}.unitPrice`,
+                          normalized ? Number(normalized) : 0
+                        );
+                        const current = getValues("totalDrafts");
+                        if (current[field.id]) {
+                          const next = { ...current };
+                          delete next[field.id];
+                          setValue("totalDrafts", next);
+                        }
+                      }}
+                      required
+                    />
+                  </Field>
+                  <Field label="Total" htmlFor={`item-${field.id}-total`}>
+                    <Input
+                      id={`item-${field.id}-total`}
+                      type="text"
+                      inputMode="decimal"
+                      value={
+                        watchedTotalDrafts?.[field.id] ??
+                        (item.quantity > 0 && item.unitPrice > 0
+                          ? String(item.quantity * item.unitPrice)
+                          : "")
                       }
-                    }}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                    Precio unitario
-                  </label>
-                  <input
-                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                    type="text"
-                    inputMode="decimal"
-                    value={item.unitPrice === 0 ? "" : item.unitPrice}
-                    onChange={(event) => {
-                      const normalized = event.target.value
-                        .replace(",", ".")
-                        .replace(/[^\d.]/g, "");
-                      updateItem(index, {
-                        unitPrice: normalized ? Number(normalized) : 0,
-                      });
-                      setTotalDrafts((current) => {
-                        if (!current[item.id]) return current;
-                        const next = { ...current };
-                        delete next[item.id];
-                        return next;
-                      });
-                    }}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                    Total
-                  </label>
-                  <input
-                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--paper)] px-3 py-2 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-                    type="text"
-                    inputMode="decimal"
-                    value={
-                      totalDrafts[item.id] ??
-                      (item.quantity > 0 && item.unitPrice > 0
-                        ? String(item.quantity * item.unitPrice)
-                        : "")
-                    }
-                    onChange={(event) => {
-                      const normalized = event.target.value
-                        .replace(",", ".")
-                        .replace(/[^\d.]/g, "");
-                      const totalValue = normalized ? Number(normalized) : 0;
-                      setTotalDrafts((current) => ({
-                        ...current,
-                        [item.id]: normalized,
-                      }));
-                      if (item.quantity > 0) {
-                        const nextUnit = totalValue / item.quantity;
-                        updateItem(index, {
-                          unitPrice: Number.isFinite(nextUnit) ? nextUnit : 0,
+                      onChange={(event) => {
+                        const normalized = event.target.value
+                          .replace(",", ".")
+                          .replace(/[^\d.]/g, "");
+                        const totalValue = normalized ? Number(normalized) : 0;
+                        setValue("totalDrafts", {
+                          ...getValues("totalDrafts"),
+                          [field.id]: normalized,
                         });
-                      }
-                    }}
-                  />
+                        if (item.quantity > 0) {
+                          const nextUnit = totalValue / item.quantity;
+                          setValue(
+                            `items.${index}.unitPrice`,
+                            Number.isFinite(nextUnit) ? nextUnit : 0
+                          );
+                        }
+                      }}
+                    />
+                  </Field>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Card>
+            );
+          })}
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+      <Card variant="plain">
         <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Paso 3
-              </span>
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-                Entrega
-              </p>
-            </div>
-            <textarea
-              className="mt-2 min-h-[120px] w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
+            <StepBadge step="Paso 3" label="Entrega" />
+            <Textarea
+              className="mt-3 min-h-[120px]"
               placeholder="Detalles de la entrega."
+              {...register("notes")}
             />
           </div>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+          <Card variant="stat">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
               Resumen
             </p>
-            <div className="mt-2 flex items-center justify-between text-xs text-[var(--cocoa)]">
+            <div className="mt-2.5 flex items-center justify-between font-mono text-xs text-rc-ink/70">
               <span>{itemsCount} items</span>
               <span>{unitsCount} unidades</span>
             </div>
-            <div className="my-3 h-px bg-[var(--border)]" />
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between">
+            <div className="my-3 border-t border-dashed border-rc-line" />
+            <div className="mt-3 space-y-2.5 text-sm">
+              <div className="flex justify-between text-rc-ink">
                 <span>Subtotal</span>
-                <span>{formatCRC(subtotal)}</span>
+                <span className="font-mono">{formatCRC(subtotal)}</span>
               </div>
-              <div className="flex justify-between items-center gap-3">
+              <div className="flex items-center justify-between gap-3 text-rc-ink">
                 <span>Descuento</span>
                 <input
-                  className="w-28 rounded-xl border border-[var(--border)] bg-[var(--paper)] px-2 py-1 text-right text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+                  className="w-28 rounded-[3px] border-[1.5px] border-rc-line bg-rc-surface px-2 py-1.5 text-right font-mono text-sm text-rc-ink outline-none transition-shadow focus:border-rc-ink focus:shadow-[2px_2px_0_var(--rc-gold)]"
                   type="number"
                   min={0}
                   step="0.01"
-                  value={discount}
-                  onChange={(event) => setDiscount(Number(event.target.value))}
+                  {...register("discount", {
+                    setValueAs: (value) => (value === "" ? 0 : Number(value)),
+                  })}
                 />
               </div>
-              <div className="flex justify-between text-base font-semibold">
+              <div className="flex justify-between text-base font-semibold text-rc-ink">
                 <span>Total</span>
-                <span>{formatCRC(total)}</span>
+                <span className="font-mono">{formatCRC(total)}</span>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
         {error ? (
-          <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+          <p className="mt-4 rounded-[3px] border border-rc-stamp bg-rc-stamp/10 px-4 py-3 text-sm text-rc-stamp">
             {error}
           </p>
         ) : null}
-      </section>
+      </Card>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
+        <div className="font-mono text-xs uppercase tracking-[0.16em] text-rc-ink/60">
           {lastSavedAt ? `Guardado ${lastSavedAt}` : "Sin guardar"}
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          <Button
+            variant="ghost"
             disabled={saving}
-            onClick={() => saveProforma("DRAFT")}
+            onClick={() => saveProforma("DRAFT", getValues())}
           >
             Guardar borrador
-          </button>
+          </Button>
           {initial?.id ? (
-            <button
-              type="button"
-              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
+            <Button
+              variant="ghost"
               onClick={() => window.open(`/api/proformas/${initial.id}/pdf`, "_blank")}
             >
               Descargar PDF
-            </button>
+            </Button>
           ) : null}
           {previewUrl ? (
-            <button
-              type="button"
-              className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
-              onClick={() => window.open(previewUrl, "_blank")}
-            >
+            <Button variant="ghost" onClick={() => window.open(previewUrl, "_blank")}>
               Abrir vista previa
-            </button>
+            </Button>
           ) : null}
-          <button
-            className="btn-primary w-full rounded-full px-6 py-3 text-center text-sm font-semibold shadow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-            disabled={saving}
-            type="submit"
-          >
+          <Button disabled={saving} type="submit">
             {saving ? "Guardando..." : submitLabel}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-6 shadow-sm">
+      <Card variant="plain">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
               Vista previa
             </p>
-            <h3 className="font-[var(--font-cormorant)] text-2xl font-semibold">
+            <h3 className="mt-1 font-serif text-2xl font-semibold text-rc-ink">
               PDF en vivo
             </h3>
           </div>
-          <button
-            type="button"
-            className="btn-secondary inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition hover:border-[var(--amber-strong)] sm:w-auto"
-            onClick={() => saveProforma()}
+          <Button
+            variant="ghost"
+            onClick={() => saveProforma(undefined, getValues())}
             disabled={saving}
           >
             Actualizar vista previa
-          </button>
+          </Button>
         </div>
         <div className="mt-4">
           {previewUrl ? (
             <iframe
               key={previewKey}
               title="Vista previa PDF"
-              className="h-[720px] w-full rounded-2xl border border-[var(--border)] bg-white"
+              className="h-[720px] w-full rounded-[3px] border border-rc-line bg-white"
               src={previewUrl}
             />
           ) : (
-            <div className="rounded-2xl border border-dashed border-[var(--border)] p-6 text-sm text-[var(--cocoa)]">
+            <div className="rounded-[3px] border border-dashed border-rc-line p-6 text-sm text-rc-ink/60">
               Guarda la proforma para ver la vista previa.
             </div>
           )}
         </div>
-      </section>
+      </Card>
     </form>
   );
 }
-
-
-

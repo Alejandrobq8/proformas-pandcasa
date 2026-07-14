@@ -1,11 +1,24 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Toaster } from "sileo";
 
 export function Providers({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  );
+
   const toastOptions = useMemo(
     () => ({
       roundness: 18,
@@ -22,8 +35,10 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <SessionProvider>
-      <Toaster position="top-center" offset={16} options={toastOptions} />
-      {children}
+      <QueryClientProvider client={queryClient}>
+        <Toaster position="top-center" offset={16} options={toastOptions} />
+        {children}
+      </QueryClientProvider>
     </SessionProvider>
   );
 }

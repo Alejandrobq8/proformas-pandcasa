@@ -3,6 +3,11 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { formatCRC } from "@/shared/lib/money";
 import { sileo } from "sileo";
+import { PageHeader } from "@/shared/components/ui/PageHeader";
+import { Card, StatCard } from "@/shared/components/ui/Card";
+import { Button } from "@/shared/components/ui/Button";
+import { Field, Input } from "@/shared/components/ui/Input";
+import { Badge } from "@/shared/components/ui/Badge";
 
 function TableScroller({ children }: { children: React.ReactNode }) {
   const tableWrapRef = useRef<HTMLDivElement>(null);
@@ -54,7 +59,7 @@ function TableScroller({ children }: { children: React.ReactNode }) {
     <>
       <div
         ref={topBarRef}
-        className="overflow-x-scroll overflow-y-hidden border-b border-[var(--border)]"
+        className="overflow-x-scroll overflow-y-hidden border-b border-rc-line"
         style={{ height: 12 }}
       >
         <div ref={phantomRef} style={{ height: 1 }} />
@@ -142,7 +147,7 @@ function EditableCell({
         autoFocus
         type={inputType}
         value={inputValue}
-        className="w-full min-w-[90px] rounded-lg border border-[var(--amber-strong)] bg-[var(--paper)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
+        className="w-full min-w-[90px] rounded-[3px] border-[1.5px] border-rc-ink bg-rc-surface px-2 py-1 text-sm text-rc-ink outline-none"
         onChange={(e) => onChange(e.target.value)}
         onBlur={onCommit}
         onKeyDown={(e) => {
@@ -158,14 +163,14 @@ function EditableCell({
       type="button"
       onClick={onActivate}
       title="Click para editar"
-      className={`min-w-[90px] w-full rounded-lg px-2 py-1 text-left text-sm transition hover:bg-[var(--sand)] ${
+      className={`min-w-[90px] w-full rounded-[3px] px-2 py-1 text-left text-sm text-rc-ink transition hover:bg-rc-kraft ${
         isSaving ? "opacity-50 cursor-wait" : "cursor-text"
       }`}
     >
       {displayValue ? (
         displayValue
       ) : (
-        <span className="text-[var(--cocoa)] opacity-50 select-none">{placeholder}</span>
+        <span className="text-rc-ink/40 select-none">{placeholder}</span>
       )}
     </button>
   );
@@ -379,136 +384,147 @@ export function CobrosPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      {/* Filters */}
-      <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">Filtros</p>
+    <div className="grid gap-8">
+      <PageHeader
+        eyebrow="Cobros"
+        title="Cobros"
+        description="Seguimiento de pagos y facturacion por mes."
+      />
+
+      <Card variant="plain">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
+            Filtros
+          </p>
           {filtersActive ? (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] transition hover:text-[var(--amber-strong)]"
-            >
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
               Limpiar
-            </button>
+            </Button>
           ) : null}
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="N° proforma"
-            value={filterNumber}
-            onChange={(e) => setFilterNumber(e.target.value)}
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Solicitante"
-            value={filterClient}
-            onChange={(e) => setFilterClient(e.target.value)}
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Monto mínimo"
-            type="number"
-            min={0}
-            value={filterAmountMin}
-            onChange={(e) => setFilterAmountMin(e.target.value)}
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="Monto máximo"
-            type="number"
-            min={0}
-            value={filterAmountMax}
-            onChange={(e) => setFilterAmountMax(e.target.value)}
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="MIGO"
-            type="number"
-            min={0}
-            value={filterMigo}
-            onChange={(e) => setFilterMigo(e.target.value)}
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="N° OC"
-            value={filterOC}
-            onChange={(e) => setFilterOC(e.target.value)}
-          />
-          <input
-            className="rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-2.5 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
-            placeholder="N° factura"
-            value={filterFactura}
-            onChange={(e) => setFilterFactura(e.target.value)}
-          />
+          <Field label="N° proforma" htmlFor="cobro-filter-number">
+            <Input
+              id="cobro-filter-number"
+              placeholder="N° proforma"
+              value={filterNumber}
+              onChange={(e) => setFilterNumber(e.target.value)}
+            />
+          </Field>
+          <Field label="Solicitante" htmlFor="cobro-filter-client">
+            <Input
+              id="cobro-filter-client"
+              placeholder="Solicitante"
+              value={filterClient}
+              onChange={(e) => setFilterClient(e.target.value)}
+            />
+          </Field>
+          <Field label="Monto minimo" htmlFor="cobro-filter-min">
+            <Input
+              id="cobro-filter-min"
+              placeholder="Monto minimo"
+              type="number"
+              min={0}
+              value={filterAmountMin}
+              onChange={(e) => setFilterAmountMin(e.target.value)}
+            />
+          </Field>
+          <Field label="Monto maximo" htmlFor="cobro-filter-max">
+            <Input
+              id="cobro-filter-max"
+              placeholder="Monto maximo"
+              type="number"
+              min={0}
+              value={filterAmountMax}
+              onChange={(e) => setFilterAmountMax(e.target.value)}
+            />
+          </Field>
+          <Field label="MIGO" htmlFor="cobro-filter-migo">
+            <Input
+              id="cobro-filter-migo"
+              placeholder="MIGO"
+              type="number"
+              min={0}
+              value={filterMigo}
+              onChange={(e) => setFilterMigo(e.target.value)}
+            />
+          </Field>
+          <Field label="N° OC" htmlFor="cobro-filter-oc">
+            <Input
+              id="cobro-filter-oc"
+              placeholder="N° OC"
+              value={filterOC}
+              onChange={(e) => setFilterOC(e.target.value)}
+            />
+          </Field>
+          <Field label="N° factura" htmlFor="cobro-filter-factura">
+            <Input
+              id="cobro-filter-factura"
+              placeholder="N° factura"
+              value={filterFactura}
+              onChange={(e) => setFilterFactura(e.target.value)}
+            />
+          </Field>
         </div>
-      </div>
+      </Card>
 
-      {/* Summary */}
-      {!loading && (
-        <p className="text-xs uppercase tracking-[0.25em] text-[var(--cocoa)]">
+      {!loading ? (
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-rc-ink/60">
           {total} proforma{total !== 1 ? "s" : ""}{" "}
           {filtersActive ? "encontrada" + (total !== 1 ? "s" : "") : "en total"}
         </p>
-      )}
+      ) : null}
 
-      {/* Money summary cards */}
-      {!loading && proformas.length > 0 && (
+      {!loading && proformas.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] p-5 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.25em] text-[var(--cocoa)] mb-1">Total general</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold">
-              {formatCRC(totalGeneral)}
+          <StatCard label="Total general" value={formatCRC(totalGeneral)} />
+          <Card variant="stat">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-rc-gold-dark">
+              Por cobrar
             </p>
-            <p className="mt-1 text-xs text-[var(--cocoa)]">
-              {proformas.length} proforma{proformas.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900 dark:bg-amber-950/10">
-            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">Por cobrar</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-amber-700 dark:text-amber-400">
+            <p className="mt-1.5 font-serif text-2xl text-rc-gold-dark">
               {formatCRC(totalPorCobrar)}
             </p>
-            <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+            <p className="mt-1 text-xs text-rc-ink/60">
               {porCobrarCount} pendiente{porCobrarCount !== 1 ? "s" : ""}
             </p>
-          </div>
-          <div className="rounded-3xl border border-red-200 bg-red-50/50 p-5 shadow-sm dark:border-red-900 dark:bg-red-950/10">
-            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-red-600 dark:text-red-400">Total canceladas</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-red-700 dark:text-red-400">
+          </Card>
+          <Card variant="stat" className="border-rc-stamp">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-rc-stamp">
+              Total canceladas
+            </p>
+            <p className="mt-1.5 font-serif text-2xl text-rc-stamp">
               {formatCRC(totalCancelado)}
             </p>
-            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            <p className="mt-1 text-xs text-rc-ink/60">
               {cancelledCount} cancelada{cancelledCount !== 1 ? "s" : ""}
             </p>
-          </div>
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm dark:border-emerald-900 dark:bg-emerald-950/10">
-            <p className="mb-1 text-xs uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">Saldo restante</p>
-            <p className="font-[var(--font-cormorant)] text-2xl font-semibold text-emerald-700 dark:text-emerald-400">
+          </Card>
+          <Card variant="stat" className="border-[#4a6b46]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#4a6b46]">
+              Saldo restante
+            </p>
+            <p className="mt-1.5 font-serif text-2xl text-[#4a6b46]">
               {formatCRC(saldoRestante)}
             </p>
-            <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-400">descontando canceladas</p>
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
-      {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
-          {error}
+            <p className="mt-1 text-xs text-rc-ink/60">descontando canceladas</p>
+          </Card>
         </div>
       ) : null}
 
-      {/* Loading */}
+      {error ? (
+        <p className="rounded-[3px] border border-rc-stamp bg-rc-stamp/10 px-4 py-3 text-sm text-rc-stamp">
+          {error}
+        </p>
+      ) : null}
+
       {loading ? (
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] px-6 py-12 text-center text-sm text-[var(--cocoa)] shadow-sm">
+        <Card variant="plain" className="py-12 text-center text-sm text-rc-ink/60">
           Cargando...
-        </div>
+        </Card>
       ) : grouped.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-[var(--border)] bg-[var(--paper)] px-6 py-12 text-center shadow-sm">
-          <p className="text-sm text-[var(--cocoa)]">
+        <div className="rounded-[2px] border border-dashed border-rc-line bg-rc-surface px-6 py-12 text-center">
+          <p className="text-sm text-rc-ink/60">
             {filtersActive
               ? "No se encontraron proformas con esos filtros."
               : "Aún no hay proformas registradas."}
@@ -533,13 +549,12 @@ export function CobrosPage() {
           return (
             <section
               key={group.key}
-              className="rounded-3xl border border-[var(--border)] bg-[var(--paper)] shadow-sm overflow-hidden"
+              className="overflow-hidden rounded-[2px] border border-rc-ink bg-rc-surface"
             >
-              {/* Month header */}
               <button
                 type="button"
                 onClick={() => toggleMonth(group.key)}
-                className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left transition hover:bg-[var(--sand)]"
+                className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition hover:bg-rc-kraft"
               >
                 <div className="flex items-center gap-3">
                   <svg
@@ -551,48 +566,47 @@ export function CobrosPage() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className={`text-[var(--cocoa)] transition-transform duration-200 ${isCollapsed ? "-rotate-90" : ""}`}
+                    className={`text-rc-ink/60 transition-transform duration-200 ${isCollapsed ? "-rotate-90" : ""}`}
                     aria-hidden="true"
                   >
                     <path d="m6 9 6 6 6-6" />
                   </svg>
-                  <h2 className="font-[var(--font-cormorant)] text-xl font-semibold">
+                  <h2 className="font-serif text-xl font-semibold text-rc-ink">
                     {group.label}
                   </h2>
                 </div>
-                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-                  <span className="hidden sm:block">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="hidden font-mono uppercase tracking-[0.14em] text-rc-ink/60 sm:block">
                     {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                   </span>
-                  {paid > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  {paid > 0 ? (
+                    <Badge tone="success">
                       {paid} pagada{paid !== 1 ? "s" : ""}
-                    </span>
-                  )}
-                  {pending > 0 && (
-                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                    </Badge>
+                  ) : null}
+                  {pending > 0 ? (
+                    <Badge tone="gold">
                       {pending} pendiente{pending !== 1 ? "s" : ""}
-                    </span>
-                  )}
-                  {cancelled > 0 && (
-                    <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600 dark:bg-red-950/40 dark:text-red-400">
+                    </Badge>
+                  ) : null}
+                  {cancelled > 0 ? (
+                    <Badge tone="danger">
                       {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
-                    </span>
-                  )}
+                    </Badge>
+                  ) : null}
                 </div>
               </button>
 
-              {/* Table */}
-              {!isCollapsed && (
-                <div className="border-t border-[var(--border)]">
+              {!isCollapsed ? (
+                <div className="border-t border-rc-line">
                   <TableScroller>
                     <table className="w-full min-w-[900px] text-sm">
                       <thead>
-                        <tr className="border-b border-[var(--border)] bg-[var(--sand)]">
+                        <tr className="border-b-2 border-rc-ink bg-rc-kraft">
                           {columns.map((col) => (
                             <th
                               key={col}
-                              className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--cocoa)] whitespace-nowrap"
+                              className="whitespace-nowrap px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-rc-gold-dark"
                             >
                               {col}
                             </th>
@@ -606,60 +620,54 @@ export function CobrosPage() {
                           return (
                             <tr
                               key={p.id}
-                              className={`border-b border-[var(--border)] last:border-0 transition-colors ${
+                              className={`border-b border-rc-line last:border-0 transition-colors ${
                                 p.cancelado
-                                  ? "bg-red-50/60 opacity-60 dark:bg-red-950/20"
+                                  ? "bg-rc-stamp/10 opacity-70"
                                   : isPaid
-                                  ? "bg-emerald-50/60 dark:bg-emerald-950/20"
+                                  ? "bg-[#4a6b46]/10"
                                   : index % 2 === 1
-                                  ? "bg-[var(--sand)]/40"
+                                  ? "bg-rc-kraft/30"
                                   : ""
                               }`}
                             >
-                              {/* N° Proforma */}
-                              <td className="px-3 py-2 whitespace-nowrap">
+                              <td className="whitespace-nowrap px-3 py-2">
                                 <a
                                   href={`/api/proformas/${p.id}/pdf`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="font-semibold text-[var(--accent)] transition hover:text-[var(--amber-strong)] hover:underline"
+                                  className="font-mono font-semibold text-rc-ink transition hover:text-rc-gold-dark hover:underline"
                                 >
                                   {p.number}
                                 </a>
                               </td>
 
-                              {/* Fecha */}
-                              <td className="px-3 py-2 whitespace-nowrap text-[var(--cocoa)]">
+                              <td className="whitespace-nowrap px-3 py-2 text-rc-ink/70">
                                 {formatDateShort(p.createdAt)}
                               </td>
 
-                              {/* Monto total */}
-                              <td className="px-3 py-2 whitespace-nowrap font-semibold">
+                              <td className="whitespace-nowrap px-3 py-2 font-mono font-semibold text-rc-ink">
                                 {formatCRC(Number(p.total))}
                               </td>
 
-                              {/* Descripción entrega */}
-                              <td className="px-3 py-2 max-w-[200px]">
+                              <td className="max-w-[200px] px-3 py-2">
                                 {p.notes ? (
-                                  <span className="block truncate text-[var(--cocoa)]" title={p.notes}>
+                                  <span className="block truncate text-rc-ink/70" title={p.notes}>
                                     {p.notes}
                                   </span>
                                 ) : (
-                                  <span className="text-[var(--cocoa)] opacity-40">—</span>
+                                  <span className="text-rc-ink/30">—</span>
                                 )}
                               </td>
 
-                              {/* Solicitante */}
-                              <td className="px-3 py-2 whitespace-nowrap">
-                                <span className="font-medium">{p.clientNombre}</span>
-                                {p.clientEmpresa && (
-                                  <span className="block text-xs text-[var(--cocoa)]">
+                              <td className="whitespace-nowrap px-3 py-2">
+                                <span className="font-medium text-rc-ink">{p.clientNombre}</span>
+                                {p.clientEmpresa ? (
+                                  <span className="block text-xs text-rc-ink/60">
                                     {p.clientEmpresa}
                                   </span>
-                                )}
+                                ) : null}
                               </td>
 
-                              {/* Orden de Compra */}
                               <td className="px-3 py-2">
                                 <EditableCell
                                   isActive={editing?.id === p.id && editing?.field === "ordenCompra"}
@@ -673,7 +681,6 @@ export function CobrosPage() {
                                 />
                               </td>
 
-                              {/* MIGO */}
                               <td className="px-3 py-2">
                                 <EditableCell
                                   isActive={editing?.id === p.id && editing?.field === "migo"}
@@ -687,7 +694,6 @@ export function CobrosPage() {
                                 />
                               </td>
 
-                              {/* N° Factura */}
                               <td className="px-3 py-2">
                                 <EditableCell
                                   isActive={editing?.id === p.id && editing?.field === "numeroFactura"}
@@ -701,7 +707,6 @@ export function CobrosPage() {
                                 />
                               </td>
 
-                              {/* Fecha de pago */}
                               <td className="px-3 py-2">
                                 <EditableCell
                                   isActive={editing?.id === p.id && editing?.field === "fechaPago"}
@@ -716,35 +721,32 @@ export function CobrosPage() {
                                 />
                               </td>
 
-                              {/* Verificado */}
                               <td className="px-3 py-2 text-center">
                                 <input
                                   type="checkbox"
                                   checked={isVerified}
                                   onChange={() => toggleBoolean(p.id, "verificacionPago", isVerified)}
-                                  className="h-4 w-4 cursor-pointer accent-emerald-600"
+                                  className="h-4 w-4 cursor-pointer accent-[#4a6b46]"
                                   title={isVerified ? "Pago verificado" : "Marcar como verificado"}
                                 />
                               </td>
 
-                              {/* SINPE/TRANSF. */}
                               <td className="px-3 py-2 text-center">
                                 <input
                                   type="checkbox"
                                   checked={p.sinpeTransf}
                                   onChange={() => toggleBoolean(p.id, "sinpeTransf", p.sinpeTransf)}
-                                  className="h-4 w-4 cursor-pointer accent-blue-600"
+                                  className="h-4 w-4 cursor-pointer accent-[var(--rc-gold)]"
                                   title={p.sinpeTransf ? "SINPE/Transferencia confirmada" : "Marcar como SINPE/Transferencia"}
                                 />
                               </td>
 
-                              {/* Cancelado */}
                               <td className="px-3 py-2 text-center">
                                 <input
                                   type="checkbox"
                                   checked={p.cancelado}
                                   onChange={() => toggleBoolean(p.id, "cancelado", p.cancelado)}
-                                  className="h-4 w-4 cursor-pointer accent-red-600"
+                                  className="h-4 w-4 cursor-pointer accent-[var(--rc-stamp)]"
                                   title={p.cancelado ? "Pedido cancelado" : "Marcar como cancelado"}
                                 />
                               </td>
@@ -753,77 +755,77 @@ export function CobrosPage() {
                         })}
                       </tbody>
                       <tfoot>
-                        <tr className="border-t-2 border-[var(--border)] bg-[var(--sand)]">
-                          <td colSpan={2} className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                        <tr className="border-t-2 border-rc-ink bg-rc-kraft">
+                          <td colSpan={2} className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-rc-gold-dark">
                             Total pagado
                           </td>
-                          <td className="px-3 py-2.5 font-semibold text-emerald-700">
+                          <td className="px-3 py-2.5 font-mono font-semibold text-[#4a6b46]">
                             {formatCRC(
                               group.items
                                 .filter((p) => (p.verificacionPago || p.sinpeTransf) && !p.cancelado)
                                 .reduce((sum, p) => sum + Number(p.total), 0)
                             )}
                           </td>
-                          <td colSpan={9} className="px-3 py-2.5 text-xs text-[var(--cocoa)]">
+                          <td colSpan={9} className="px-3 py-2.5 text-xs text-rc-ink/60">
                             {paid} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{paid !== 1 ? "s" : ""}
                             {cancelled > 0 && ` · ${cancelled} cancelada${cancelled !== 1 ? "s" : ""}`}
                           </td>
                         </tr>
-                        <tr className="border-t border-[var(--border)] bg-[var(--sand)]">
-                          <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cocoa)]">
+                        <tr className="border-t border-rc-line bg-rc-kraft">
+                          <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-rc-gold-dark">
                             Total del mes
                           </td>
-                          <td className="px-3 py-2 font-semibold">
+                          <td className="px-3 py-2 font-mono font-semibold text-rc-ink">
                             {formatCRC(groupTotal)}
                           </td>
-                          <td colSpan={9} className="px-3 py-2 text-xs text-[var(--cocoa)]">
+                          <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                             {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                           </td>
                         </tr>
-                        {groupPorCobrarCount > 0 && (
-                          <tr className="border-t border-amber-100 bg-amber-50/40 dark:border-amber-900 dark:bg-amber-950/10">
-                            <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400">
+                        {groupPorCobrarCount > 0 ? (
+                          <tr className="border-t border-rc-line bg-rc-kraft/60">
+                            <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-rc-gold-dark">
                               Por cobrar
                             </td>
-                            <td className="px-3 py-2 font-semibold text-amber-700 dark:text-amber-400">
+                            <td className="px-3 py-2 font-mono font-semibold text-rc-gold-dark">
                               {formatCRC(groupPorCobrar)}
                             </td>
-                            <td colSpan={9} className="px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+                            <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                               {groupPorCobrarCount} pendiente{groupPorCobrarCount !== 1 ? "s" : ""}
                             </td>
                           </tr>
-                        )}
-                        {cancelled > 0 && (
+                        ) : null}
+                        {cancelled > 0 ? (
                           <>
-                            <tr className="border-t border-red-100 bg-red-50/40 dark:border-red-900 dark:bg-red-950/10">
-                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-600 dark:text-red-400">
+                            <tr className="border-t border-rc-line bg-rc-stamp/10">
+                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-rc-stamp">
                                 Total canceladas
                               </td>
-                              <td className="px-3 py-2 font-semibold text-red-700 dark:text-red-400">
+                              <td className="px-3 py-2 font-mono font-semibold text-rc-stamp">
                                 {formatCRC(groupCancelledTotal)}
                               </td>
-                              <td colSpan={9} className="px-3 py-2 text-xs text-red-600 dark:text-red-400">
+                              <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                                 {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
                               </td>
                             </tr>
-                            <tr className="border-t border-emerald-100 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/10">
-                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+                            <tr className="border-t border-rc-line bg-[#4a6b46]/10">
+                              <td colSpan={2} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#4a6b46]">
                                 Saldo restante
                               </td>
-                              <td className="px-3 py-2 font-semibold text-emerald-700 dark:text-emerald-400">
+                              <td className="px-3 py-2 font-mono font-semibold text-[#4a6b46]">
                                 {formatCRC(groupSaldo)}
                               </td>
-                              <td colSpan={9} className="px-3 py-2 text-xs text-emerald-700 dark:text-emerald-400">
+                              <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                                 descontando canceladas
                               </td>
                             </tr>
                           </>
-                        )}
+                        ) : null}
                       </tfoot>
                     </table>
                   </TableScroller>
                 </div>
-              )}
+              ) : null}
             </section>
           );
         })

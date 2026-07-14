@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Work_Sans, Cormorant_Garamond } from "next/font/google";
+import { Work_Sans, Cormorant_Garamond, Fraunces, Space_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -13,6 +13,18 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -31,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${workSans.variable} ${cormorant.variable} antialiased`}
+        className={`${workSans.variable} ${cormorant.variable} ${fraunces.variable} ${spaceMono.variable} antialiased`}
       >
         <Script
           id="theme-init"

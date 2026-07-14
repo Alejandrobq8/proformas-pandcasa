@@ -21,6 +21,20 @@
   --toast-muted: #dfe8e4;
   --surface-glow: rgba(255, 255, 255, 0.52);
   --surface-shadow: rgba(19, 27, 37, 0.1);
+
+  /* --- recibo design system (new UI kit, see shared/components/ui) --- */
+  --rc-ink: #2b2118;
+  --rc-paper: #f6efe1;
+  --rc-kraft: #e9dcc0;
+  --rc-kraft-dark: #dccba3;
+  --rc-gold: #b9822f;
+  --rc-gold-dark: #8f631f;
+  --rc-stamp: #a8392f;
+  --rc-line: #c9b98f;
+  --rc-receipt-paper: #fffdf8;
+  --rc-receipt-ink: #2b2118;
+  --rc-receipt-stamp: #a8392f;
+  --rc-surface: #fffdf8;
 }
 
 html.theme-dark {
@@ -41,6 +55,16 @@ html.theme-dark {
   --toast-muted: #d9e6f4;
   --surface-glow: rgba(255, 255, 255, 0.06);
   --surface-shadow: rgba(0, 0, 0, 0.28);
+
+  --rc-ink: #f2e8d8;
+  --rc-paper: #2b2118;
+  --rc-kraft: #3e3120;
+  --rc-kraft-dark: #271e15;
+  --rc-gold: #d6a24f;
+  --rc-gold-dark: #f0bf6e;
+  --rc-stamp: #e2685a;
+  --rc-line: #5a4931;
+  --rc-surface: #34281d;
 }
 
 @theme inline {
@@ -55,6 +79,19 @@ html.theme-dark {
   --color-accent: var(--accent);
   --font-sans: var(--font-work-sans);
   --font-display: var(--font-cormorant);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-space-mono);
+
+  --color-rc-ink: var(--rc-ink);
+  --color-rc-paper: var(--rc-paper);
+  --color-rc-kraft: var(--rc-kraft);
+  --color-rc-kraft-dark: var(--rc-kraft-dark);
+  --color-rc-gold: var(--rc-gold);
+  --color-rc-gold-dark: var(--rc-gold-dark);
+  --color-rc-stamp: var(--rc-stamp);
+  --color-rc-line: var(--rc-line);
+  --color-rc-receipt-paper: var(--rc-receipt-paper);
+  --color-rc-surface: var(--rc-surface);
 }
 
 html {
@@ -102,6 +139,27 @@ html.theme-dark textarea {
 html.theme-dark select option {
   background-color: var(--paper);
   color: var(--foreground);
+}
+
+/* recibo design system fields opt out of the legacy input/select/textarea theming above */
+input.rc-input,
+select.rc-input,
+textarea.rc-input {
+  color: var(--rc-ink);
+  caret-color: var(--rc-gold);
+}
+
+html.theme-dark input.rc-input,
+html.theme-dark select.rc-input,
+html.theme-dark textarea.rc-input {
+  background-color: var(--rc-surface);
+  border-color: var(--rc-line);
+  color: var(--rc-ink);
+}
+
+html.theme-dark select.rc-input option {
+  background-color: var(--rc-surface);
+  color: var(--rc-ink);
 }
 
 html.theme-dark .proforma-filters input,
@@ -652,4 +710,63 @@ html.theme-dark .bin-button {
   body::before {
     display: none;
   }
+}
+
+/* --- recibo design system: paper texture + signature receipt illustration --- */
+.rc-paper-texture {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--rc-ink) 4%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+.rc-receipt {
+  position: relative;
+  background: var(--rc-receipt-paper);
+  border: 1px solid var(--rc-line);
+  padding: 1.4rem 1.4rem 1.6rem;
+  color: var(--rc-receipt-ink);
+  font-family: var(--font-space-mono), monospace;
+}
+
+.rc-receipt::before,
+.rc-receipt::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: radial-gradient(
+      circle at 8px 0,
+      transparent 6px,
+      var(--rc-receipt-paper) 6.5px
+    )
+    repeat-x;
+  background-size: 16px 12px;
+}
+
+.rc-receipt::before {
+  top: -6px;
+}
+
+.rc-receipt::after {
+  bottom: -6px;
+  transform: rotate(180deg);
+}
+
+.rc-stamp {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--rc-receipt-stamp);
+  color: var(--rc-receipt-stamp);
+  border-radius: 9999px;
+  font-family: var(--font-space-mono), monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  opacity: 0.85;
 }

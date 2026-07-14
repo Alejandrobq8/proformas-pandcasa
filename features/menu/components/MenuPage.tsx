@@ -1,28 +1,51 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { formatCRC } from "@/shared/lib/money";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { menuCategorySchema, type MenuCategory } from "@/features/menu/schema";
+import type { MenuItemRecord as MenuItem } from "@/features/menu/api";
+import {
+  useMenuItemsQuery,
+  useCreateMenuItem,
+  useUpdateMenuItem,
+  useDeleteMenuItem,
+} from "@/features/menu/hooks";
+import { PageHeader } from "@/shared/components/ui/PageHeader";
+import { StatCard, Card } from "@/shared/components/ui/Card";
+import { Button } from "@/shared/components/ui/Button";
+import { Field, Input, Textarea, Select } from "@/shared/components/ui/Input";
+import { Badge } from "@/shared/components/ui/Badge";
 
-type MenuItem = {
-  id: string;
-  category: "BOCADILLOS" | "POSTRES" | "QUEQUES";
-  name: string;
-  description: string | null;
-  price: number | string;
-};
-
-const categories: Array<{ value: MenuItem["category"]; label: string }> = [
+const categories: Array<{ value: MenuCategory; label: string }> = [
   { value: "BOCADILLOS", label: "Bocadillos" },
   { value: "POSTRES", label: "Postres" },
   { value: "QUEQUES", label: "Queques" },
 ];
 
-const emptyForm: {
-  category: MenuItem["category"];
-  name: string;
-  description: string;
-  price: string;
-} = {
+const menuFormSchema = z.object({
+  category: menuCategorySchema,
+  name: z.string().min(1, "Nombre requerido"),
+  description: z.string().optional(),
+  price: z
+    .string()
+    .min(1, "Precio requerido")
+    .refine(
+      (value) => Number.isFinite(Number(value.replace(",", "."))),
+      "Precio invalido"
+    )
+    .refine(
+      (value) => Number(value.replace(",", ".")) >= 0,
+      "Precio invalido"
+    ),
+});
+
+type MenuFormValues = z.infer<typeof menuFormSchema>;
+
+const emptyForm: MenuFormValues = {
   category: "BOCADILLOS",
   name: "",
   description: "",
@@ -39,20 +62,32 @@ function toNumber(value: unknown) {
 }
 
 export function MenuPage() {
-  const [activeCategory, setActiveCategory] = useState<
-    MenuItem["category"]
-  >("BOCADILLOS");
+  const [activeCategory, setActiveCategory] = useState<MenuCategory>("BOCADILLOS");
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"list" | "form">("list");
 
-  const debounceQuery = useMemo(() => query, [query]);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<MenuFormValues>({
+    resolver: zodResolver(menuFormSchema),
+    defaultValues: emptyForm,
+  });
+
+  const debouncedQuery = useDebouncedValue(query, 300);
+  const { data, isFetching } = useMenuItemsQuery(debouncedQuery, activeCategory);
+  const items = data?.data ?? [];
+  const total = data?.total ?? 0;
+
+  const createMenuItem = useCreateMenuItem();
+  const updateMenuItem = useUpdateMenuItem();
+  const deleteMenuItem = useDeleteMenuItem();
 
   useEffect(() => {
     if (!success) return;
@@ -60,27 +95,9 @@ export function MenuPage() {
     return () => clearTimeout(clearSuccessTimeout);
   }, [success]);
 
-  async function loadItems(search: string, category: MenuItem["category"]) {
-    setLoading(true);
-    const res = await fetch(
-      `/api/menu-items?q=${encodeURIComponent(search)}&category=${category}`
-    );
-    const payload = await res.json();
-    setItems(payload.data ?? []);
-    setTotal(payload.total ?? 0);
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadItems(debounceQuery, activeCategory);
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [debounceQuery, activeCategory]);
-
   function resetForm() {
     setEditingId(null);
-    setForm({ ...emptyForm, category: activeCategory });
+    reset({ ...emptyForm, category: activeCategory });
     setError(null);
   }
 
@@ -92,7 +109,7 @@ export function MenuPage() {
 
   function startEdit(item: MenuItem) {
     setEditingId(item.id);
-    setForm({
+    reset({
       category: item.category,
       name: item.name,
       description: item.description ?? "",
@@ -103,110 +120,76 @@ export function MenuPage() {
     setActiveTab("form");
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const onSubmit = handleSubmit(async (values) => {
     setError(null);
     setSuccess(null);
 
-    const priceNumber = Number(String(form.price).replace(",", "."));
-    if (!Number.isFinite(priceNumber) || priceNumber < 0) {
-      setError("Precio invalido.");
-      return;
-    }
-
     const payload = {
-      category: form.category,
-      name: form.name.trim(),
-      description: form.description.trim() || null,
-      price: priceNumber,
+      category: values.category,
+      name: values.name.trim(),
+      description: values.description?.trim() || null,
+      price: Number(values.price.replace(",", ".")),
     };
 
-    const res = await fetch(
-      editingId ? `/api/menu-items/${editingId}` : "/api/menu-items",
-      {
-        method: editingId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+    try {
+      if (editingId) {
+        await updateMenuItem.mutateAsync({ id: editingId, input: payload });
+      } else {
+        await createMenuItem.mutateAsync(payload);
       }
-    );
-
-    if (!res.ok) {
-      const response = await res.json().catch(() => null);
-      setError(response?.error ?? "No se pudo guardar el producto.");
-      return;
+      resetForm();
+      setSuccess(editingId ? "Producto actualizado." : "Producto agregado.");
+      setActiveTab("list");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo guardar el producto."
+      );
     }
-
-    resetForm();
-    setSuccess(editingId ? "Producto actualizado." : "Producto agregado.");
-    setActiveTab("list");
-    await loadItems(query, activeCategory);
-  }
+  });
 
   async function handleDelete(id: string) {
     if (!confirm("Eliminar producto?")) return;
-    const res = await fetch(`/api/menu-items/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      const response = await res.json().catch(() => null);
-      setError(response?.error ?? "No se pudo eliminar el producto.");
-      return;
+    try {
+      await deleteMenuItem.mutateAsync(id);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo eliminar el producto."
+      );
     }
-    await loadItems(query, activeCategory);
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="hero-panel rounded-[2rem] px-7 py-8 sm:px-8 sm:py-9">
-        <p className="text-xs uppercase tracking-[0.3em] text-white/72">
-          Menu
-        </p>
-        <h1 className="mt-3 font-[var(--font-cormorant)] text-3xl font-semibold sm:text-4xl">
-          Menu de productos
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82">
-          Productos y precios por categoria.
-        </p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.24em] text-white/68">
-              Items
-            </p>
-            <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-              {total}
-            </p>
-          </div>
-          <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.24em] text-white/68">
-              Categoria
-            </p>
-            <p className="mt-2 text-sm font-semibold text-white/88">
-              {categories.find((item) => item.value === activeCategory)?.label}
-            </p>
-          </div>
-          <div className="rounded-[1.4rem] border border-white/18 bg-white/10 p-4 backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.24em] text-white/68">
-              Vista
-            </p>
-            <p className="mt-2 text-sm font-semibold text-white/88">
-              Catalogo editable
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="grid gap-8">
+      <PageHeader
+        eyebrow="Menu"
+        title="Menu de productos"
+        description="Productos y precios por categoria."
+        aside={
+          <>
+            <StatCard label="Items" value={total} />
+            <StatCard
+              label="Categoria"
+              value={categories.find((c) => c.value === activeCategory)?.label}
+            />
+            <StatCard label="Vista" value="Catalogo editable" />
+          </>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2.5">
         {categories.map((category) => (
           <button
             key={category.value}
             type="button"
-            className={`inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] text-center transition ${
+            className={`rounded-[3px] border px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition ${
               activeCategory === category.value
-                ? "border-white/20 bg-[var(--foreground)] text-[var(--paper)] shadow-lg shadow-black/8"
-                : "border-[var(--border)] bg-white/35 text-[var(--cocoa)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                ? "border-rc-ink bg-rc-kraft text-rc-ink"
+                : "border-rc-line text-rc-ink/70 hover:bg-rc-kraft/40"
             }`}
             onClick={() => {
               setActiveCategory(category.value);
               if (!editingId) {
-                setForm((prev) => ({ ...prev, category: category.value }));
+                setValue("category", category.value);
               }
             }}
           >
@@ -215,227 +198,147 @@ export function MenuPage() {
         ))}
       </div>
 
-      <div className="grid gap-8">
-        {activeTab === "list" ? (
-        <section className="tab-pane surface-panel rounded-[2rem] p-6 sm:p-7">
+      {activeTab === "list" ? (
+        <Card variant="plain">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
                 Productos
               </p>
-              <h2 className="font-[var(--font-cormorant)] text-2xl font-semibold">
+              <h2 className="mt-1 font-serif text-2xl font-semibold text-rc-ink">
                 {total} registrados
               </h2>
             </div>
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <input
-                className="w-full rounded-full border border-[var(--border)] bg-white/45 px-4 py-2 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] sm:w-64"
+              <Input
+                className="sm:w-64"
                 placeholder="Buscar por nombre"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
-              <button
-                type="button"
-                className="btn-primary w-full rounded-full px-5 py-2 text-center text-sm font-semibold sm:w-auto"
-                onClick={startCreate}
-              >
-                Nuevo producto
-              </button>
+              <Button onClick={startCreate}>Nuevo producto</Button>
             </div>
           </div>
 
           {error ? (
-            <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+            <p className="mt-4 rounded-[3px] border border-rc-stamp bg-rc-stamp/10 px-4 py-3 text-sm text-rc-stamp">
               {error}
             </p>
           ) : null}
           {success ? (
-            <p className="mt-4 rounded-[1.3rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+            <p className="mt-4 rounded-[3px] border border-[#4a6b46] bg-[#4a6b46]/10 px-4 py-3 text-sm text-[#4a6b46]">
               {success}
             </p>
           ) : null}
 
-          <div className="stagger-children mt-6 space-y-4">
-            {loading ? (
-              <p className="text-sm text-[var(--cocoa)]">Cargando...</p>
+          <div className="mt-6 space-y-3">
+            {isFetching ? (
+              <p className="text-sm text-rc-ink/60">Cargando...</p>
             ) : items.length === 0 ? (
-              <p className="text-sm text-[var(--cocoa)]">
+              <p className="text-sm text-rc-ink/60">
                 No hay productos en esta categoria.
               </p>
             ) : (
               items.map((item) => (
-                <div
+                <Card
                   key={item.id}
-                  className="interactive-card flex flex-col gap-3 rounded-[1.6rem] border border-[var(--border)] bg-white/35 px-4 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+                  variant="plain"
+                  className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="font-semibold">{item.name}</p>
+                    <p className="font-semibold text-rc-ink">{item.name}</p>
                     {item.description ? (
-                      <p className="text-xs text-[var(--cocoa)]">
-                        {item.description}
-                      </p>
+                      <p className="text-xs text-rc-ink/60">{item.description}</p>
                     ) : null}
                   </div>
                   <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
-                    <span className="rounded-full bg-[var(--sand)] px-3 py-1 text-xs font-semibold text-[var(--cocoa)]">
-                      {formatCRC(toNumber(item.price))}
-                    </span>
-                    <button
-                      className="editBtn"
+                    <Badge tone="gold">{formatCRC(toNumber(item.price))}</Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => startEdit(item)}
-                      type="button"
                       aria-label="Editar"
                       title="Editar"
                     >
-                      <svg height="1em" viewBox="0 0 512 512" aria-hidden="true">
-                        <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z" />
-                      </svg>
-                    </button>
-                    <button
-                      className="bin-button"
+                      Editar
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => handleDelete(item.id)}
-                      type="button"
                       aria-label="Eliminar"
                     >
-                      <svg
-                        className="bin-top"
-                        viewBox="0 0 39 7"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <line y1="5" x2="39" y2="5" stroke="white" strokeWidth="4" />
-                        <line
-                          x1="12"
-                          y1="1.5"
-                          x2="26.0357"
-                          y2="1.5"
-                          stroke="white"
-                          strokeWidth="3"
-                        />
-                      </svg>
-                      <svg
-                        className="bin-bottom"
-                        viewBox="0 0 33 39"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <mask id={`bin-mask-${item.id}`} fill="white">
-                          <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z" />
-                        </mask>
-                        <path
-                          d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z"
-                          fill="white"
-                          mask={`url(#bin-mask-${item.id})`}
-                        />
-                        <path d="M12 6L12 29" stroke="white" strokeWidth="4" />
-                        <path d="M21 6V29" stroke="white" strokeWidth="4" />
-                      </svg>
-                    </button>
+                      Eliminar
+                    </Button>
                   </div>
-                </div>
+                </Card>
               ))
             )}
           </div>
-        </section>
-        ) : (
-        <section className="tab-pane surface-panel rounded-[2rem] p-6 sm:p-7">
+        </Card>
+      ) : (
+        <Card variant="plain">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
                 {editingId ? "Editar" : "Nuevo"} producto
               </p>
-              <h3 className="font-[var(--font-cormorant)] text-xl font-semibold">
+              <h3 className="mt-1 font-serif text-xl font-semibold text-rc-ink">
                 Datos del producto
               </h3>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               {editingId ? (
-                <button
-                  className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] transition hover:text-[var(--amber-strong)]"
-                  onClick={startCreate}
-                  type="button"
-                >
+                <Button variant="ghost" size="sm" onClick={startCreate}>
                   Limpiar
-                </button>
+                </Button>
               ) : null}
-              <button
-                className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] transition hover:text-[var(--amber-strong)]"
-                onClick={() => setActiveTab("list")}
-                type="button"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setActiveTab("list")}>
                 Ver listado
-              </button>
+              </Button>
             </div>
           </div>
 
-          <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
-            <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-              Categoria
-              <select
-                className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-                value={form.category}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    category: event.target.value as MenuItem["category"],
-                  }))
-                }
-              >
+          <form className="mt-5 grid gap-4" onSubmit={onSubmit}>
+            <Field label="Categoria" htmlFor="category">
+              <Select id="category" {...register("category")}>
                 {categories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
                 ))}
-              </select>
-            </label>
-            <input
-              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-              placeholder="Nombre"
-              value={form.name}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, name: event.target.value }))
-              }
-              required
-            />
-            <textarea
-              className="min-h-[90px] rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-              placeholder="Descripcion (opcional)"
-              value={form.description}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, description: event.target.value }))
-              }
-            />
-            <input
-              className="rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-              placeholder="Precio (CRC)"
-              value={form.price}
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  price: event.target.value,
-                }))
-              }
-              required
-            />
+              </Select>
+            </Field>
+            <Field label="Nombre" htmlFor="name" error={errors.name?.message}>
+              <Input id="name" placeholder="Nombre" {...register("name")} />
+            </Field>
+            <Field label="Descripcion" htmlFor="description" hint="Opcional">
+              <Textarea
+                id="description"
+                className="min-h-[90px]"
+                placeholder="Descripcion (opcional)"
+                {...register("description")}
+              />
+            </Field>
+            <Field label="Precio (CRC)" htmlFor="price" error={errors.price?.message}>
+              <Input id="price" placeholder="Precio (CRC)" {...register("price")} />
+            </Field>
             {error ? (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+              <p className="rounded-[3px] border border-rc-stamp bg-rc-stamp/10 px-4 py-3 text-sm text-rc-stamp">
                 {error}
               </p>
             ) : null}
             {success ? (
-              <p className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+              <p className="rounded-[3px] border border-[#4a6b46] bg-[#4a6b46]/10 px-4 py-3 text-sm text-[#4a6b46]">
                 {success}
               </p>
             ) : null}
-            <button className="btn-primary rounded-full px-5 py-3 text-sm font-semibold">
+            <Button type="submit">
               {editingId ? "Guardar cambios" : "Guardar producto"}
-            </button>
+            </Button>
           </form>
-        </section>
-        )}
-      </div>
-    </section>
+        </Card>
+      )}
+    </div>
   );
 }

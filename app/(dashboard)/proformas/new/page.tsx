@@ -1,17 +1,11 @@
 import { ProformaForm } from "@/features/proformas/components/ProformaForm";
+import { PageHeader } from "@/shared/components/ui/PageHeader";
 
 export default function ProformaNewPage() {
   return (
-    <>
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-          Nueva proforma
-        </p>
-        <h2 className="font-[var(--font-cormorant)] text-2xl font-semibold">
-          Crear proforma
-        </h2>
-      </div>
+    <div className="grid gap-8">
+      <PageHeader eyebrow="Nueva proforma" title="Crear proforma" />
       <ProformaForm />
-    </>
+    </div>
   );
 }

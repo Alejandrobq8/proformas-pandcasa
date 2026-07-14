@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Input } from "@/shared/components/ui/Input";
 
 type Cliente = {
   id: string;
@@ -45,8 +46,7 @@ export function ClientAutocomplete({
 
   return (
     <div className="relative">
-      <input
-        className="w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-4 py-3 text-sm focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)] transition"
+      <Input
         placeholder="Buscar cliente..."
         value={query}
         onChange={(event) => {
@@ -56,17 +56,17 @@ export function ClientAutocomplete({
         onBlur={() => setTimeout(() => setOpen(false), 150)}
       />
       {open && results.length > 0 ? (
-        <div className="absolute z-10 mt-2 w-full rounded-2xl border border-[var(--border)] bg-[var(--paper)] p-2 shadow-lg">
+        <div className="absolute z-10 mt-1.5 w-full rounded-[3px] border border-rc-ink bg-rc-surface p-1.5 shadow-[3px_4px_0_var(--rc-line)]">
           {results.map((cliente) => (
             <button
               key={cliente.id}
-              className="w-full rounded-xl px-3 py-2 text-left text-sm transition hover:bg-[var(--sand)]"
+              className="w-full rounded-[2px] px-3 py-2 text-left text-sm transition hover:bg-rc-kraft"
               onClick={() => handleSelect(cliente)}
               type="button"
             >
-              <p className="font-semibold">{cliente.nombre}</p>
+              <p className="font-semibold text-rc-ink">{cliente.nombre}</p>
               {cliente.empresa || cliente.cedulaJuridica ? (
-                <p className="text-xs text-[var(--cocoa)]">
+                <p className="text-xs text-rc-ink/60">
                   {cliente.empresa ?? ""}
                   {cliente.cedulaJuridica
                     ? ` - ${cliente.cedulaJuridica}`

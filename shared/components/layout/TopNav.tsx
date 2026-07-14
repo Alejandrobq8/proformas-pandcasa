@@ -23,36 +23,36 @@ export function TopNav() {
   const pathname = usePathname();
 
   return (
-    <header className="app-shell sticky top-0 z-30 border-b backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b-2 border-rc-ink bg-rc-paper">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2.5 sm:px-5 sm:py-3 lg:px-6">
         <Link
-          className="group flex min-w-0 items-center gap-2.5 rounded-[1.5rem] border border-white/20 bg-white/30 px-2.5 py-1.5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-white/45"
+          className="group flex min-w-0 items-center gap-2.5"
           href="/"
           onClick={() => setOpen(false)}
         >
-          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[1.1rem] border border-white/40 bg-white/65 p-1 shadow-sm transition duration-300 group-hover:scale-[1.03] sm:h-12 sm:w-12">
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-rc-ink bg-rc-ink p-1 sm:h-12 sm:w-12">
             <Image
               src="/logo.png"
               alt="Pan d' Casa"
               width={56}
               height={56}
-              className="h-full w-full rounded-[1rem] object-cover"
+              className="h-full w-full rounded-full object-cover"
               priority
             />
           </div>
           <div className="min-w-0">
-            <p className="truncate font-[var(--font-cormorant)] text-lg font-semibold tracking-[0.04em] sm:text-xl">
+            <p className="truncate font-serif text-lg font-semibold tracking-[0.02em] text-rc-ink sm:text-xl">
               Pan d&apos; Casa
             </p>
-            <p className="truncate text-[10px] uppercase tracking-[0.32em] text-[var(--cocoa)] sm:text-xs">
-              Panel creativo
+            <p className="truncate text-[10px] uppercase tracking-[0.28em] text-rc-gold-dark sm:text-xs">
+              Panel de proformas
             </p>
           </div>
         </Link>
 
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-xl border border-white/25 bg-white/45 p-2.5 text-[var(--cocoa)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--amber-strong)] hover:text-[var(--accent)] md:hidden"
+          className="inline-flex items-center justify-center rounded-[3px] border border-rc-ink p-2.5 text-rc-ink transition hover:bg-rc-kraft md:hidden"
           aria-label="Abrir menu"
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
@@ -76,24 +76,24 @@ export function TopNav() {
 
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle variant="navbar" />
-          <nav className="flex items-center gap-1.5 rounded-[1.5rem] border border-white/20 bg-white/35 p-1.5 shadow-sm backdrop-blur">
-          {navItems.map((item) => {
-            const active = isActive(pathname, item.href);
+          <nav className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const active = isActive(pathname, item.href);
 
-            return (
-              <Link
-                key={item.href}
-                className={`topnav-link rounded-[1rem] px-3.5 py-2 text-sm font-semibold tracking-[0.04em] transition duration-300 ${
-                  active
-                    ? "bg-[var(--foreground)] text-[var(--paper)] shadow-lg shadow-black/10"
-                    : "text-[var(--cocoa)] hover:-translate-y-0.5 hover:bg-white/55 hover:text-[var(--accent)]"
-                }`}
-                href={item.href}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  className={`rounded-[3px] border px-3.5 py-2 text-sm font-semibold tracking-[0.02em] transition ${
+                    active
+                      ? "border-rc-ink bg-rc-kraft text-rc-ink"
+                      : "border-transparent text-rc-ink/80 hover:border-rc-line hover:bg-rc-kraft/50"
+                  }`}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
       </div>
@@ -101,7 +101,7 @@ export function TopNav() {
       <div
         className={`md:hidden ${
           open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-        } overflow-hidden border-t border-white/15 bg-white/40 px-4 transition-all duration-300`}
+        } overflow-hidden border-t border-rc-line bg-rc-paper px-4 transition-all duration-300`}
       >
         <nav className="flex flex-col gap-2 py-4">
           <ThemeToggle />
@@ -111,10 +111,10 @@ export function TopNav() {
             return (
               <Link
                 key={item.href}
-                className={`rounded-[1rem] border px-3.5 py-2.5 text-sm font-semibold transition ${
+                className={`rounded-[3px] border px-3.5 py-2.5 text-sm font-semibold transition ${
                   active
-                    ? "border-[var(--foreground)] bg-[var(--foreground)] text-[var(--paper)]"
-                    : "border-white/20 bg-white/45 text-[var(--foreground)] hover:border-[var(--amber-strong)] hover:text-[var(--accent)]"
+                    ? "border-rc-ink bg-rc-kraft text-rc-ink"
+                    : "border-rc-line text-rc-ink/80 hover:bg-rc-kraft/50"
                 }`}
                 href={item.href}
                 onClick={() => setOpen(false)}

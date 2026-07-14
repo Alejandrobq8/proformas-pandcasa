@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getServerUser } from "@/features/auth/server/session";
 import { ProformaForm } from "@/features/proformas/components/ProformaForm";
+import { PageHeader } from "@/shared/components/ui/PageHeader";
 import { prisma } from "@/shared/lib/prisma";
 
 function toNumber(value: unknown) {
@@ -51,16 +52,9 @@ export default async function ProformaEditPage({
   };
 
   return (
-    <>
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-          Editar proforma
-        </p>
-        <h2 className="font-[var(--font-cormorant)] text-2xl font-semibold">
-          {proforma.number}
-        </h2>
-      </div>
+    <div className="grid gap-8">
+      <PageHeader eyebrow="Editar proforma" title={proforma.number} />
       <ProformaForm initial={initial} />
-    </>
+    </div>
   );
 }

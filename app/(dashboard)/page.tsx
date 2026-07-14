@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Button } from "@/shared/components/ui/Button";
+import { Badge } from "@/shared/components/ui/Badge";
+import { Card, StatCard } from "@/shared/components/ui/Card";
 
 const quickLinks = [
   {
@@ -18,120 +21,128 @@ const quickLinks = [
   },
 ];
 
+const flujo = [
+  {
+    step: "1. Registra al cliente",
+    description: "Guarda nombre, empresa y cedula para usarlos en proformas.",
+  },
+  {
+    step: "2. Arma la proforma",
+    description: "Agrega items, cantidades y precios.",
+  },
+  {
+    step: "3. Exporta y comparte",
+    description: "Descarga el PDF y revisa el historial en Cobros.",
+  },
+];
+
 export default function HomePage() {
   return (
     <>
-      <section className="hero-panel rounded-[2rem] px-7 py-8 sm:px-10 sm:py-10">
-        <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-end">
-          <div>
-            <span className="soft-badge border-white/20 bg-white/10 text-white">
-              Pan d&apos; Casa
-            </span>
-            <h1 className="mt-5 max-w-3xl font-[var(--font-cormorant)] text-4xl font-semibold leading-tight sm:text-5xl">
-              Panel de ventas
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-white/82 sm:text-base">
-              Desde aqui podes crear proformas, gestionar clientes y actualizar
-              el menu.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                className="btn-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold"
-                href="/proformas"
-              >
-                Ir a proformas
-              </Link>
-              <Link
-                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/18"
-                href="/clientes"
-              >
-                Abrir clientes
-              </Link>
-            </div>
+      <section className="grid gap-10 py-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
+            Panaderia artesanal · Costa Rica
+          </p>
+          <h1 className="mt-3.5 font-serif text-4xl font-semibold leading-[1.05] text-rc-ink sm:text-5xl">
+            Cada proforma,
+            <br />
+            lista en minutos.
+          </h1>
+          <p className="mt-4 max-w-[38ch] text-sm leading-6 text-rc-ink/70 sm:text-base">
+            Arma la cotizacion, agrega los productos del menu y descarga el
+            PDF listo para enviar. Sin vueltas.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button href="/proformas/new">Nueva proforma</Button>
+            <Button href="/clientes" variant="ghost">
+              Ver clientes
+            </Button>
           </div>
+          <div className="mt-5 flex flex-wrap gap-2.5">
+            <Badge tone="neutral">Borrador</Badge>
+            <Badge tone="gold">Enviada</Badge>
+            <Badge tone="success">Pagada</Badge>
+          </div>
+        </div>
 
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <div className="rounded-[1.6rem] border border-white/18 bg-white/10 p-5 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.28em] text-white/70">
-                Proformas
-              </p>
-              <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-                PDF directo
-              </p>
+        <div className="flex justify-center">
+          <div className="rc-receipt w-[280px] rotate-3 shadow-[6px_8px_0_var(--rc-kraft-dark)]">
+            <div className="rc-stamp -right-3.5 top-4 h-16 w-16 -rotate-[14deg] text-[10px]">
+              Pagada
             </div>
-            <div className="rounded-[1.6rem] border border-white/18 bg-white/10 p-5 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.28em] text-white/70">
-                Clientes
-              </p>
-              <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-                Autocompletado
-              </p>
+            <h3 className="font-serif text-base tracking-[0.02em]">
+              PF-2026-0142
+            </h3>
+            <p className="mb-3.5 text-[10px] text-[#8a7f6c]">
+              Panaderia El Roble S.A.
+            </p>
+            <div className="flex justify-between text-[11px] text-[#4a4030]">
+              <span>Pan artesanal x12</span>
+              <span>18 400</span>
             </div>
-            <div className="rounded-[1.6rem] border border-white/18 bg-white/10 p-5 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.28em] text-white/70">
-                Cobros
-              </p>
-              <p className="mt-2 font-[var(--font-cormorant)] text-3xl font-semibold">
-                Seguimiento
-              </p>
+            <div className="mt-1 flex justify-between text-[11px] text-[#4a4030]">
+              <span>Queque de naranja</span>
+              <span>9 500</span>
+            </div>
+            <div className="mt-1 flex justify-between text-[11px] text-[#4a4030]">
+              <span>Bocadillos surtidos</span>
+              <span>22 000</span>
+            </div>
+            <div className="my-3 border-t border-dashed border-rc-line" />
+            <div className="flex justify-between text-[13px] font-bold">
+              <span>Total</span>
+              <span>₡49 900</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="surface-panel rounded-[2rem] p-7 sm:p-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-            Acceso rapido
-          </p>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {quickLinks.map((link) => (
-              <Link
-                key={link.href}
-                className="interactive-card rounded-[1.6rem] border border-[var(--border)] bg-white/35 p-5"
-                href={link.href}
-              >
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent)]">
-                  Modulo
-                </p>
-                <h2 className="mt-3 font-[var(--font-cormorant)] text-2xl font-semibold">
+      <section className="mt-6 grid gap-4 sm:grid-cols-3">
+        <StatCard label="Proformas" value="PDF directo" />
+        <StatCard label="Clientes" value="Autocompletado" />
+        <StatCard label="Cobros" value="Seguimiento" />
+      </section>
+
+      <section className="mt-14">
+        <h2 className="font-serif text-xl font-semibold text-rc-ink">
+          Acceso rapido
+        </h2>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {quickLinks.map((link, index) => (
+            <Link key={link.href} href={link.href}>
+              <Card variant="module">
+                <div className="font-mono text-xs text-rc-gold-dark">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+                <h3 className="mt-2 mb-1.5 font-serif text-xl text-rc-ink">
                   {link.label}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
+                </h3>
+                <p className="text-sm leading-6 text-rc-ink/70">
                   {link.description}
                 </p>
-                <span className="mt-5 inline-flex text-sm font-semibold text-[var(--amber-strong)]">
-                  Entrar
+                <span className="mt-3.5 inline-flex text-xs font-semibold text-rc-ink">
+                  Entrar →
                 </span>
-              </Link>
-            ))}
-          </div>
+              </Card>
+            </Link>
+          ))}
         </div>
+      </section>
 
-        <div className="surface-panel rounded-[2rem] p-7 sm:p-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--cocoa)]">
-            Flujo recomendado
-          </p>
-          <div className="mt-5 space-y-4">
-            <div className="interactive-card rounded-[1.5rem] border border-[var(--border)] bg-white/30 p-5">
-              <p className="text-sm font-semibold">1. Registra al cliente</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
-                Guarda nombre, empresa y cedula para usarlos en proformas.
+      <section className="mt-10">
+        <h2 className="font-serif text-xl font-semibold text-rc-ink">
+          Flujo recomendado
+        </h2>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {flujo.map((item) => (
+            <Card key={item.step} variant="plain">
+              <p className="text-sm font-semibold text-rc-ink">{item.step}</p>
+              <p className="mt-2 text-sm leading-6 text-rc-ink/70">
+                {item.description}
               </p>
-            </div>
-            <div className="interactive-card rounded-[1.5rem] border border-[var(--border)] bg-white/30 p-5">
-              <p className="text-sm font-semibold">2. Arma la proforma</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
-                Agrega items, cantidades y precios.
-              </p>
-            </div>
-            <div className="interactive-card rounded-[1.5rem] border border-[var(--border)] bg-white/30 p-5">
-              <p className="text-sm font-semibold">3. Exporta y comparte</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--cocoa)]">
-                Descarga el PDF y revisa el historial en Cobros.
-              </p>
-            </div>
-          </div>
+            </Card>
+          ))}
         </div>
       </section>
     </>

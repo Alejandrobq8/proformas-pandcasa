@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  companySettingsSchema,
+  type CompanySettingsInput,
+} from "@/features/settings/schema";
+import { Card } from "@/shared/components/ui/Card";
+import { Button } from "@/shared/components/ui/Button";
+import { Field, Input } from "@/shared/components/ui/Input";
 
-type FormState = {
-  name: string;
-  contactName: string;
-  cedula: string;
-  address: string;
-  phone: string;
-  email: string;
-  logoUrl: string;
-};
-
-const emptyForm: FormState = {
+const emptyForm: CompanySettingsInput = {
   name: "",
   contactName: "",
   cedula: "",
@@ -23,11 +22,20 @@ const emptyForm: FormState = {
 };
 
 export function CompanySettingsForm() {
-  const [form, setForm] = useState<FormState>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CompanySettingsInput>({
+    resolver: zodResolver(companySettingsSchema),
+    defaultValues: emptyForm,
+  });
 
   useEffect(() => {
     async function load() {
@@ -36,7 +44,7 @@ export function CompanySettingsForm() {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          setForm({
+          reset({
             name: data.name ?? "",
             contactName: data.contactName ?? "",
             cedula: data.cedula ?? "",
@@ -50,10 +58,9 @@ export function CompanySettingsForm() {
       setLoading(false);
     }
     void load();
-  }, []);
+  }, [reset]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const onSubmit = handleSubmit(async (values) => {
     setError(null);
     setSuccess(null);
     setSaving(true);
@@ -61,7 +68,7 @@ export function CompanySettingsForm() {
     const res = await fetch("/api/company-settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(values),
     });
 
     if (!res.ok) {
@@ -72,122 +79,66 @@ export function CompanySettingsForm() {
 
     setSuccess("Datos guardados correctamente.");
     setSaving(false);
-  }
+  });
 
   if (loading) {
     return (
-      <div className="surface-panel rounded-[2rem] p-6 sm:p-7">
-        <p className="text-sm text-[var(--cocoa)]">Cargando...</p>
-      </div>
+      <Card variant="plain">
+        <p className="text-sm text-rc-ink/60">Cargando...</p>
+      </Card>
     );
   }
 
   return (
-    <form
-      className="surface-panel rounded-[2rem] p-6 sm:p-7"
-      onSubmit={handleSubmit}
-    >
+    <form onSubmit={onSubmit}>
+      <Card variant="plain">
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="md:col-span-2">
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Nombre de la empresa
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.name}
-            onChange={(event) => setForm({ ...form, name: event.target.value })}
-            required
-          />
-        </div>
-        <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Nombre
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.contactName}
-            onChange={(event) =>
-              setForm({ ...form, contactName: event.target.value })
-            }
-          />
-        </div>
-        <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Cedula
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.cedula}
-            onChange={(event) => setForm({ ...form, cedula: event.target.value })}
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Direccion
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.address}
-            onChange={(event) =>
-              setForm({ ...form, address: event.target.value })
-            }
-          />
-        </div>
-        <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Telefono
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.phone}
-            onChange={(event) => setForm({ ...form, phone: event.target.value })}
-          />
-        </div>
-        <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Email
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.email}
-            onChange={(event) => setForm({ ...form, email: event.target.value })}
-            type="email"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="text-xs uppercase tracking-[0.2em] text-[var(--cocoa)]">
-            Logo URL (opcional)
-          </label>
-          <input
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--border)] bg-white/45 px-4 py-3 text-sm shadow-sm transition focus:border-[var(--amber-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--amber)]"
-            value={form.logoUrl}
-            onChange={(event) =>
-              setForm({ ...form, logoUrl: event.target.value })
-            }
-            type="url"
-          />
-        </div>
+        <Field
+          label="Nombre de la empresa"
+          htmlFor="name"
+          error={errors.name?.message}
+          className="md:col-span-2"
+        >
+          <Input id="name" {...register("name")} />
+        </Field>
+        <Field label="Nombre" htmlFor="contactName">
+          <Input id="contactName" {...register("contactName")} />
+        </Field>
+        <Field label="Cedula" htmlFor="cedula">
+          <Input id="cedula" {...register("cedula")} />
+        </Field>
+        <Field label="Direccion" htmlFor="address" className="md:col-span-2">
+          <Input id="address" {...register("address")} />
+        </Field>
+        <Field label="Telefono" htmlFor="phone">
+          <Input id="phone" {...register("phone")} />
+        </Field>
+        <Field label="Email" htmlFor="email" error={errors.email?.message}>
+          <Input id="email" type="email" {...register("email")} />
+        </Field>
+        <Field
+          label="Logo URL (opcional)"
+          htmlFor="logoUrl"
+          error={errors.logoUrl?.message}
+          className="md:col-span-2"
+        >
+          <Input id="logoUrl" type="url" {...register("logoUrl")} />
+        </Field>
       </div>
       {error ? (
-        <p className="mt-4 rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+        <p className="mt-4 rounded-[3px] border border-rc-stamp bg-rc-stamp/10 px-4 py-3 text-sm text-rc-stamp">
           {error}
         </p>
       ) : null}
       {success ? (
-        <p className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+        <p className="mt-4 rounded-[3px] border border-[#4a6b46] bg-[#4a6b46]/10 px-4 py-3 text-sm text-[#4a6b46]">
           {success}
         </p>
       ) : null}
-      <button
-        className="btn-primary mt-6 w-full rounded-full px-6 py-3 text-center text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-        disabled={saving}
-        type="submit"
-      >
+      <Button className="mt-6" disabled={saving} type="submit">
         {saving ? "Guardando..." : "Guardar datos"}
-      </button>
+      </Button>
+      </Card>
     </form>
   );
 }
-
-
-

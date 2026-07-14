@@ -45,8 +45,8 @@ export function ThemeToggle({
   const label = isDark ? "Modo claro" : "Modo oscuro";
   const buttonClassName =
     variant === "navbar"
-      ? "btn-secondary inline-flex h-12 w-12 items-center justify-center rounded-full p-0 sm:w-12"
-      : "btn-secondary inline-flex h-12 w-full items-center justify-center rounded-full px-4 sm:h-12 sm:w-12 sm:p-0";
+      ? "inline-flex h-11 w-11 items-center justify-center rounded-[3px] border border-rc-ink text-rc-ink transition hover:bg-rc-kraft sm:h-12 sm:w-12"
+      : "inline-flex h-12 w-full items-center justify-center gap-2 rounded-[3px] border border-rc-ink px-4 text-sm font-semibold text-rc-ink transition hover:bg-rc-kraft sm:h-12 sm:w-12 sm:p-0";
 
   return (
     <button
@@ -58,11 +58,7 @@ export function ThemeToggle({
       title={label}
     >
       <span
-        className={`inline-flex h-8 w-8 items-center justify-center rounded-full ${
-          isDark
-            ? "bg-[var(--accent)]/20 text-[var(--accent)]"
-            : "bg-[var(--amber-strong)]/16 text-[var(--amber-strong)]"
-        }`}
+        className="inline-flex h-6 w-6 items-center justify-center text-rc-gold-dark"
         aria-hidden="true"
       >
         {isDark ? (
