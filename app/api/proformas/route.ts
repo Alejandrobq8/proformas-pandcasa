@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const numberParam = searchParams.get("number")?.trim() ?? "";
   const clientParam = searchParams.get("client")?.trim() ?? "";
   const dateParam = searchParams.get("date")?.trim() ?? "";
-  const fechaEntregaParam = searchParams.get("fechaEntrega")?.trim() ?? "";
+  const entregaParam = searchParams.get("entrega")?.trim() ?? "";
   const amountMinParam = searchParams.get("amountMin")?.trim() ?? "";
   const amountMaxParam = searchParams.get("amountMax")?.trim() ?? "";
   const migoParam = searchParams.get("migo")?.trim() ?? "";
@@ -33,14 +33,13 @@ export async function GET(request: Request) {
     numberParam ||
     clientParam ||
     dateParam ||
-    fechaEntregaParam ||
+    entregaParam ||
     amountMinParam ||
     amountMaxParam ||
     migoParam ||
     ocParam ||
     facturaParam;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
-  const fechaEntregaRange = parseExactDay(fechaEntregaParam);
   const amountRangeFilters = filtersActive
     ? parseAmountRange(amountMinParam, amountMaxParam)
     : null;
@@ -68,13 +67,8 @@ export async function GET(request: Request) {
           },
         }
       : null,
-    fechaEntregaRange
-      ? {
-          fechaEntrega: {
-            gte: fechaEntregaRange.start,
-            lt: fechaEntregaRange.end,
-          },
-        }
+    entregaParam
+      ? { notes: { contains: entregaParam, mode: "insensitive" as const } }
       : null,
     amountRangeFilters
       ? {
@@ -203,17 +197,6 @@ function parseDateQuery(value: string) {
   }
 
   return null;
-}
-
-function parseExactDay(value: string) {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-  const [, year, month, day] = match;
-  const start = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
-  if (Number.isNaN(start.getTime())) return null;
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 1);
-  return { start, end };
 }
 
 function parseAmountQuery(value: string) {

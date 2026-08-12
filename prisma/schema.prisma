@@ -56,7 +56,6 @@ model Proforma {
   ordenCompra           String?
   migo                  String?
   numeroFactura         String?
-  fechaEntrega          DateTime?
   fechaPago             DateTime?
   verificacionPago      Boolean         @default(false)
   sinpeTransf           Boolean         @default(false)

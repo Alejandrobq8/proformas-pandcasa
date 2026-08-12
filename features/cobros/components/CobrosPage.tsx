@@ -82,7 +82,6 @@ type Proforma = {
   ordenCompra: string | null;
   migo: string | null;
   numeroFactura: string | null;
-  fechaEntrega: string | null;
   fechaPago: string | null;
   verificacionPago: boolean;
   sinpeTransf: boolean;
@@ -185,7 +184,8 @@ export function CobrosPage() {
   const [filterMigo, setFilterMigo] = useState("");
   const [filterOC, setFilterOC] = useState("");
   const [filterFactura, setFilterFactura] = useState("");
-  const [filterFechaEntrega, setFilterFechaEntrega] = useState("");
+  const [filterEntrega, setFilterEntrega] = useState("");
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +211,7 @@ export function CobrosPage() {
     if (filterMigo) params.set("migo", filterMigo);
     if (filterOC) params.set("oc", filterOC);
     if (filterFactura) params.set("factura", filterFactura);
-    if (filterFechaEntrega) params.set("fechaEntrega", filterFechaEntrega);
+    if (filterEntrega) params.set("entrega", filterEntrega);
     try {
       const res = await fetch(`/api/proformas?${params}`);
       if (!res.ok) throw new Error("error");
@@ -231,7 +231,7 @@ export function CobrosPage() {
     filterMigo,
     filterOC,
     filterFactura,
-    filterFechaEntrega,
+    filterEntrega,
   ]);
 
   useEffect(() => {
@@ -350,7 +350,7 @@ export function CobrosPage() {
     setFilterMigo("");
     setFilterOC("");
     setFilterFactura("");
-    setFilterFechaEntrega("");
+    setFilterEntrega("");
   }
 
   const filtersActive =
@@ -361,7 +361,10 @@ export function CobrosPage() {
     filterMigo ||
     filterOC ||
     filterFactura ||
-    filterFechaEntrega;
+    filterEntrega;
+
+  const moreFiltersActive =
+    filterAmountMin || filterAmountMax || filterMigo || filterOC || filterFactura;
 
   const totalGeneral = useMemo(
     () => proformas.reduce((sum, p) => sum + Number(p.total), 0),
@@ -397,7 +400,6 @@ export function CobrosPage() {
     "Orden de Compra",
     "MIGO",
     "N° Factura",
-    "Fecha de Entrega",
     "Fecha de Pago",
     "Verificado",
     "SINPE/TRANSF.",
@@ -423,7 +425,7 @@ export function CobrosPage() {
             </Button>
           ) : null}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-8">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="N° proforma" htmlFor="cobro-filter-number">
             <Input
               id="cobro-filter-number"
@@ -440,61 +442,91 @@ export function CobrosPage() {
               onChange={(e) => setFilterClient(e.target.value)}
             />
           </Field>
-          <Field label="Monto minimo" htmlFor="cobro-filter-min">
+          <Field label="Descripción de entrega" htmlFor="cobro-filter-entrega">
             <Input
-              id="cobro-filter-min"
-              placeholder="Monto minimo"
-              type="number"
-              min={0}
-              value={filterAmountMin}
-              onChange={(e) => setFilterAmountMin(e.target.value)}
-            />
-          </Field>
-          <Field label="Monto maximo" htmlFor="cobro-filter-max">
-            <Input
-              id="cobro-filter-max"
-              placeholder="Monto maximo"
-              type="number"
-              min={0}
-              value={filterAmountMax}
-              onChange={(e) => setFilterAmountMax(e.target.value)}
-            />
-          </Field>
-          <Field label="MIGO" htmlFor="cobro-filter-migo">
-            <Input
-              id="cobro-filter-migo"
-              placeholder="MIGO"
-              type="number"
-              min={0}
-              value={filterMigo}
-              onChange={(e) => setFilterMigo(e.target.value)}
-            />
-          </Field>
-          <Field label="N° OC" htmlFor="cobro-filter-oc">
-            <Input
-              id="cobro-filter-oc"
-              placeholder="N° OC"
-              value={filterOC}
-              onChange={(e) => setFilterOC(e.target.value)}
-            />
-          </Field>
-          <Field label="N° factura" htmlFor="cobro-filter-factura">
-            <Input
-              id="cobro-filter-factura"
-              placeholder="N° factura"
-              value={filterFactura}
-              onChange={(e) => setFilterFactura(e.target.value)}
-            />
-          </Field>
-          <Field label="Fecha de entrega" htmlFor="cobro-filter-fecha-entrega">
-            <Input
-              id="cobro-filter-fecha-entrega"
-              type="date"
-              value={filterFechaEntrega}
-              onChange={(e) => setFilterFechaEntrega(e.target.value)}
+              id="cobro-filter-entrega"
+              placeholder="Buscar en descripción de entrega"
+              value={filterEntrega}
+              onChange={(e) => setFilterEntrega(e.target.value)}
             />
           </Field>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setShowMoreFilters((prev) => !prev)}
+          className="mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-rc-gold-dark transition hover:text-rc-ink"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform duration-200 ${showMoreFilters ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+          {showMoreFilters ? "Menos filtros" : "Más filtros"}
+          {!showMoreFilters && moreFiltersActive ? (
+            <span className="h-1.5 w-1.5 rounded-full bg-rc-gold-dark" />
+          ) : null}
+        </button>
+
+        {showMoreFilters ? (
+          <div className="mt-3 grid gap-3 border-t border-dashed border-rc-line pt-4 sm:grid-cols-2 lg:grid-cols-5">
+            <Field label="Monto minimo" htmlFor="cobro-filter-min">
+              <Input
+                id="cobro-filter-min"
+                placeholder="Monto minimo"
+                type="number"
+                min={0}
+                value={filterAmountMin}
+                onChange={(e) => setFilterAmountMin(e.target.value)}
+              />
+            </Field>
+            <Field label="Monto maximo" htmlFor="cobro-filter-max">
+              <Input
+                id="cobro-filter-max"
+                placeholder="Monto maximo"
+                type="number"
+                min={0}
+                value={filterAmountMax}
+                onChange={(e) => setFilterAmountMax(e.target.value)}
+              />
+            </Field>
+            <Field label="MIGO" htmlFor="cobro-filter-migo">
+              <Input
+                id="cobro-filter-migo"
+                placeholder="MIGO"
+                type="number"
+                min={0}
+                value={filterMigo}
+                onChange={(e) => setFilterMigo(e.target.value)}
+              />
+            </Field>
+            <Field label="N° OC" htmlFor="cobro-filter-oc">
+              <Input
+                id="cobro-filter-oc"
+                placeholder="N° OC"
+                value={filterOC}
+                onChange={(e) => setFilterOC(e.target.value)}
+              />
+            </Field>
+            <Field label="N° factura" htmlFor="cobro-filter-factura">
+              <Input
+                id="cobro-filter-factura"
+                placeholder="N° factura"
+                value={filterFactura}
+                onChange={(e) => setFilterFactura(e.target.value)}
+              />
+            </Field>
+          </div>
+        ) : null}
       </Card>
 
       {!loading ? (
@@ -738,20 +770,6 @@ export function CobrosPage() {
 
                               <td className="px-3 py-2">
                                 <EditableCell
-                                  isActive={editing?.id === p.id && editing?.field === "fechaEntrega"}
-                                  isSaving={saving.has(`${p.id}:fechaEntrega`)}
-                                  displayValue={formatDateShort(p.fechaEntrega)}
-                                  inputValue={editValue}
-                                  inputType="date"
-                                  onActivate={() => startEdit(p.id, "fechaEntrega", toInputDate(p.fechaEntrega))}
-                                  onCommit={() => commitEdit(p.id, "fechaEntrega")}
-                                  onCancel={() => setEditing(null)}
-                                  onChange={setEditValue}
-                                />
-                              </td>
-
-                              <td className="px-3 py-2">
-                                <EditableCell
                                   isActive={editing?.id === p.id && editing?.field === "fechaPago"}
                                   isSaving={saving.has(`${p.id}:fechaPago`)}
                                   displayValue={formatDateShort(p.fechaPago)}
@@ -809,7 +827,7 @@ export function CobrosPage() {
                                 .reduce((sum, p) => sum + Number(p.total), 0)
                             )}
                           </td>
-                          <td colSpan={10} className="px-3 py-2.5 text-xs text-rc-ink/60">
+                          <td colSpan={9} className="px-3 py-2.5 text-xs text-rc-ink/60">
                             {paid} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{paid !== 1 ? "s" : ""}
                             {cancelled > 0 && ` · ${cancelled} cancelada${cancelled !== 1 ? "s" : ""}`}
                           </td>
@@ -821,7 +839,7 @@ export function CobrosPage() {
                           <td className="px-3 py-2 font-mono font-semibold text-rc-ink">
                             {formatCRC(groupTotal)}
                           </td>
-                          <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
+                          <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                             {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                           </td>
                         </tr>
@@ -833,7 +851,7 @@ export function CobrosPage() {
                             <td className="px-3 py-2 font-mono font-semibold text-rc-gold-dark">
                               {formatCRC(groupPorCobrar)}
                             </td>
-                            <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
+                            <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                               {groupPorCobrarCount} pendiente{groupPorCobrarCount !== 1 ? "s" : ""}
                             </td>
                           </tr>
@@ -847,7 +865,7 @@ export function CobrosPage() {
                               <td className="px-3 py-2 font-mono font-semibold text-rc-stamp">
                                 {formatCRC(groupCancelledTotal)}
                               </td>
-                              <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
+                              <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                                 {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
                               </td>
                             </tr>
@@ -858,7 +876,7 @@ export function CobrosPage() {
                               <td className="px-3 py-2 font-mono font-semibold text-[#4a6b46]">
                                 {formatCRC(groupSaldo)}
                               </td>
-                              <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
+                              <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
                                 descontando canceladas
                               </td>
                             </tr>
