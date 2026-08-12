@@ -20,8 +20,7 @@ export async function GET(request: Request) {
   const numberParam = searchParams.get("number")?.trim() ?? "";
   const clientParam = searchParams.get("client")?.trim() ?? "";
   const dateParam = searchParams.get("date")?.trim() ?? "";
-  const dateFromParam = searchParams.get("dateFrom")?.trim() ?? "";
-  const dateToParam = searchParams.get("dateTo")?.trim() ?? "";
+  const fechaEntregaParam = searchParams.get("fechaEntrega")?.trim() ?? "";
   const amountMinParam = searchParams.get("amountMin")?.trim() ?? "";
   const amountMaxParam = searchParams.get("amountMax")?.trim() ?? "";
   const migoParam = searchParams.get("migo")?.trim() ?? "";
@@ -34,15 +33,14 @@ export async function GET(request: Request) {
     numberParam ||
     clientParam ||
     dateParam ||
-    dateFromParam ||
-    dateToParam ||
+    fechaEntregaParam ||
     amountMinParam ||
     amountMaxParam ||
     migoParam ||
     ocParam ||
     facturaParam;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
-  const dateSpanRange = parseDateSpan(dateFromParam, dateToParam);
+  const fechaEntregaRange = parseExactDay(fechaEntregaParam);
   const amountRangeFilters = filtersActive
     ? parseAmountRange(amountMinParam, amountMaxParam)
     : null;
@@ -70,11 +68,11 @@ export async function GET(request: Request) {
           },
         }
       : null,
-    dateSpanRange
+    fechaEntregaRange
       ? {
-          createdAt: {
-            ...(dateSpanRange.start ? { gte: dateSpanRange.start } : {}),
-            ...(dateSpanRange.end ? { lt: dateSpanRange.end } : {}),
+          fechaEntrega: {
+            gte: fechaEntregaRange.start,
+            lt: fechaEntregaRange.end,
           },
         }
       : null,
@@ -207,25 +205,14 @@ function parseDateQuery(value: string) {
   return null;
 }
 
-function parseDateSpan(fromValue: string, toValue: string) {
-  if (!fromValue && !toValue) return null;
-
-  const parseDay = (value: string) => {
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!match) return null;
-    const [, year, month, day] = match;
-    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
-    return Number.isNaN(date.getTime()) ? null : date;
-  };
-
-  const start = fromValue ? parseDay(fromValue) : null;
-  let end = toValue ? parseDay(toValue) : null;
-  if (end) {
-    end = new Date(end);
-    end.setUTCDate(end.getUTCDate() + 1);
-  }
-
-  if (!start && !end) return null;
+function parseExactDay(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  const start = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  if (Number.isNaN(start.getTime())) return null;
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
   return { start, end };
 }
 

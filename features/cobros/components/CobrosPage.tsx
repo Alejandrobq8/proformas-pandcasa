@@ -82,6 +82,7 @@ type Proforma = {
   ordenCompra: string | null;
   migo: string | null;
   numeroFactura: string | null;
+  fechaEntrega: string | null;
   fechaPago: string | null;
   verificacionPago: boolean;
   sinpeTransf: boolean;
@@ -184,8 +185,7 @@ export function CobrosPage() {
   const [filterMigo, setFilterMigo] = useState("");
   const [filterOC, setFilterOC] = useState("");
   const [filterFactura, setFilterFactura] = useState("");
-  const [filterDateFrom, setFilterDateFrom] = useState("");
-  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterFechaEntrega, setFilterFechaEntrega] = useState("");
 
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,8 +211,7 @@ export function CobrosPage() {
     if (filterMigo) params.set("migo", filterMigo);
     if (filterOC) params.set("oc", filterOC);
     if (filterFactura) params.set("factura", filterFactura);
-    if (filterDateFrom) params.set("dateFrom", filterDateFrom);
-    if (filterDateTo) params.set("dateTo", filterDateTo);
+    if (filterFechaEntrega) params.set("fechaEntrega", filterFechaEntrega);
     try {
       const res = await fetch(`/api/proformas?${params}`);
       if (!res.ok) throw new Error("error");
@@ -232,8 +231,7 @@ export function CobrosPage() {
     filterMigo,
     filterOC,
     filterFactura,
-    filterDateFrom,
-    filterDateTo,
+    filterFechaEntrega,
   ]);
 
   useEffect(() => {
@@ -352,8 +350,7 @@ export function CobrosPage() {
     setFilterMigo("");
     setFilterOC("");
     setFilterFactura("");
-    setFilterDateFrom("");
-    setFilterDateTo("");
+    setFilterFechaEntrega("");
   }
 
   const filtersActive =
@@ -364,8 +361,7 @@ export function CobrosPage() {
     filterMigo ||
     filterOC ||
     filterFactura ||
-    filterDateFrom ||
-    filterDateTo;
+    filterFechaEntrega;
 
   const totalGeneral = useMemo(
     () => proformas.reduce((sum, p) => sum + Number(p.total), 0),
@@ -401,6 +397,7 @@ export function CobrosPage() {
     "Orden de Compra",
     "MIGO",
     "N° Factura",
+    "Fecha de Entrega",
     "Fecha de Pago",
     "Verificado",
     "SINPE/TRANSF.",
@@ -426,7 +423,7 @@ export function CobrosPage() {
             </Button>
           ) : null}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-9">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-8">
           <Field label="N° proforma" htmlFor="cobro-filter-number">
             <Input
               id="cobro-filter-number"
@@ -489,20 +486,12 @@ export function CobrosPage() {
               onChange={(e) => setFilterFactura(e.target.value)}
             />
           </Field>
-          <Field label="Fecha desde" htmlFor="cobro-filter-date-from">
+          <Field label="Fecha de entrega" htmlFor="cobro-filter-fecha-entrega">
             <Input
-              id="cobro-filter-date-from"
+              id="cobro-filter-fecha-entrega"
               type="date"
-              value={filterDateFrom}
-              onChange={(e) => setFilterDateFrom(e.target.value)}
-            />
-          </Field>
-          <Field label="Fecha hasta" htmlFor="cobro-filter-date-to">
-            <Input
-              id="cobro-filter-date-to"
-              type="date"
-              value={filterDateTo}
-              onChange={(e) => setFilterDateTo(e.target.value)}
+              value={filterFechaEntrega}
+              onChange={(e) => setFilterFechaEntrega(e.target.value)}
             />
           </Field>
         </div>
@@ -749,6 +738,20 @@ export function CobrosPage() {
 
                               <td className="px-3 py-2">
                                 <EditableCell
+                                  isActive={editing?.id === p.id && editing?.field === "fechaEntrega"}
+                                  isSaving={saving.has(`${p.id}:fechaEntrega`)}
+                                  displayValue={formatDateShort(p.fechaEntrega)}
+                                  inputValue={editValue}
+                                  inputType="date"
+                                  onActivate={() => startEdit(p.id, "fechaEntrega", toInputDate(p.fechaEntrega))}
+                                  onCommit={() => commitEdit(p.id, "fechaEntrega")}
+                                  onCancel={() => setEditing(null)}
+                                  onChange={setEditValue}
+                                />
+                              </td>
+
+                              <td className="px-3 py-2">
+                                <EditableCell
                                   isActive={editing?.id === p.id && editing?.field === "fechaPago"}
                                   isSaving={saving.has(`${p.id}:fechaPago`)}
                                   displayValue={formatDateShort(p.fechaPago)}
@@ -806,7 +809,7 @@ export function CobrosPage() {
                                 .reduce((sum, p) => sum + Number(p.total), 0)
                             )}
                           </td>
-                          <td colSpan={9} className="px-3 py-2.5 text-xs text-rc-ink/60">
+                          <td colSpan={10} className="px-3 py-2.5 text-xs text-rc-ink/60">
                             {paid} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada{paid !== 1 ? "s" : ""}
                             {cancelled > 0 && ` · ${cancelled} cancelada${cancelled !== 1 ? "s" : ""}`}
                           </td>
@@ -818,7 +821,7 @@ export function CobrosPage() {
                           <td className="px-3 py-2 font-mono font-semibold text-rc-ink">
                             {formatCRC(groupTotal)}
                           </td>
-                          <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                          <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                             {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                           </td>
                         </tr>
@@ -830,7 +833,7 @@ export function CobrosPage() {
                             <td className="px-3 py-2 font-mono font-semibold text-rc-gold-dark">
                               {formatCRC(groupPorCobrar)}
                             </td>
-                            <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                            <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                               {groupPorCobrarCount} pendiente{groupPorCobrarCount !== 1 ? "s" : ""}
                             </td>
                           </tr>
@@ -844,7 +847,7 @@ export function CobrosPage() {
                               <td className="px-3 py-2 font-mono font-semibold text-rc-stamp">
                                 {formatCRC(groupCancelledTotal)}
                               </td>
-                              <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                              <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                                 {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
                               </td>
                             </tr>
@@ -855,7 +858,7 @@ export function CobrosPage() {
                               <td className="px-3 py-2 font-mono font-semibold text-[#4a6b46]">
                                 {formatCRC(groupSaldo)}
                               </td>
-                              <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                              <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                                 descontando canceladas
                               </td>
                             </tr>
