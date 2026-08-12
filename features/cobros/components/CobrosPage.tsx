@@ -184,6 +184,8 @@ export function CobrosPage() {
   const [filterMigo, setFilterMigo] = useState("");
   const [filterOC, setFilterOC] = useState("");
   const [filterFactura, setFilterFactura] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
 
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,6 +211,8 @@ export function CobrosPage() {
     if (filterMigo) params.set("migo", filterMigo);
     if (filterOC) params.set("oc", filterOC);
     if (filterFactura) params.set("factura", filterFactura);
+    if (filterDateFrom) params.set("dateFrom", filterDateFrom);
+    if (filterDateTo) params.set("dateTo", filterDateTo);
     try {
       const res = await fetch(`/api/proformas?${params}`);
       if (!res.ok) throw new Error("error");
@@ -220,7 +224,17 @@ export function CobrosPage() {
     } finally {
       setLoading(false);
     }
-  }, [filterNumber, filterClient, filterAmountMin, filterAmountMax, filterMigo, filterOC, filterFactura]);
+  }, [
+    filterNumber,
+    filterClient,
+    filterAmountMin,
+    filterAmountMax,
+    filterMigo,
+    filterOC,
+    filterFactura,
+    filterDateFrom,
+    filterDateTo,
+  ]);
 
   useEffect(() => {
     const timer = setTimeout(fetchProformas, 300);
@@ -338,10 +352,20 @@ export function CobrosPage() {
     setFilterMigo("");
     setFilterOC("");
     setFilterFactura("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
   }
 
   const filtersActive =
-    filterNumber || filterClient || filterAmountMin || filterAmountMax || filterMigo || filterOC || filterFactura;
+    filterNumber ||
+    filterClient ||
+    filterAmountMin ||
+    filterAmountMax ||
+    filterMigo ||
+    filterOC ||
+    filterFactura ||
+    filterDateFrom ||
+    filterDateTo;
 
   const totalGeneral = useMemo(
     () => proformas.reduce((sum, p) => sum + Number(p.total), 0),
@@ -402,7 +426,7 @@ export function CobrosPage() {
             </Button>
           ) : null}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-9">
           <Field label="N° proforma" htmlFor="cobro-filter-number">
             <Input
               id="cobro-filter-number"
@@ -463,6 +487,22 @@ export function CobrosPage() {
               placeholder="N° factura"
               value={filterFactura}
               onChange={(e) => setFilterFactura(e.target.value)}
+            />
+          </Field>
+          <Field label="Fecha desde" htmlFor="cobro-filter-date-from">
+            <Input
+              id="cobro-filter-date-from"
+              type="date"
+              value={filterDateFrom}
+              onChange={(e) => setFilterDateFrom(e.target.value)}
+            />
+          </Field>
+          <Field label="Fecha hasta" htmlFor="cobro-filter-date-to">
+            <Input
+              id="cobro-filter-date-to"
+              type="date"
+              value={filterDateTo}
+              onChange={(e) => setFilterDateTo(e.target.value)}
             />
           </Field>
         </div>
