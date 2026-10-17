@@ -17,24 +17,31 @@ export function ThemeToggle({
 }: {
   variant?: ThemeToggleVariant;
 }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
+  const [theme, setTheme] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
     const saved =
       (window.localStorage.getItem(STORAGE_KEY) as Theme | null) ?? null;
-    if (saved === "light" || saved === "dark") {
-      return saved;
-    }
-
     const prefersDark = window.matchMedia?.(
       "(prefers-color-scheme: dark)"
     ).matches;
-    return prefersDark ? "dark" : "light";
-  });
+    const initial: Theme =
+      saved === "light" || saved === "dark"
+        ? saved
+        : prefersDark
+          ? "dark"
+          : "light";
+
+    setTheme(initial);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     applyTheme(theme);
     window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+  }, [mounted, theme]);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";

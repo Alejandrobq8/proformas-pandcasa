@@ -57,6 +57,26 @@ npm run prisma:migrate
 npm run prisma:seed
 ```
 
+## Ambiente de pruebas (staging local)
+Usa el mismo proyecto de Supabase pero un schema de Postgres separado
+(`staging`), para probar cambios sin tocar los datos reales y sin crear un
+segundo proyecto.
+
+1. Copiar `.env.test.example` -> `.env.test`.
+2. Completar `DATABASE_URL`/`DIRECT_URL` con las mismas credenciales de
+   produccion, agregando `schema=staging` a la cadena de conexion.
+3. Ejecutar:
+
+```bash
+npm run prisma:test:deploy
+npm run prisma:test:seed
+npm run dev:test
+```
+
+`SEED_SAMPLE_DATA="1"` en `.env.test` hace que el seed tambien cree un
+cliente y una proforma de ejemplo para poder abrir
+`/proformas/[id]/print-template` y revisar el PDF.
+
 ## Rutas principales
 - UI
   - `/clientes`

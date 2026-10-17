@@ -34,6 +34,46 @@ function parseDescription(description: string) {
   return { title: first, bullets: rest };
 }
 
+function SnowflakeIcon() {
+  return (
+    <svg
+      className="snowflake-icon"
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M12 2v20" />
+      <path d="M2 12h20" />
+      <path d="M5 5l14 14" />
+      <path d="M19 5L5 19" />
+      <path d="M12 2l-2 2.5M12 2l2 2.5" />
+      <path d="M12 22l-2-2.5M12 22l2-2.5" />
+      <path d="M2 12l2.5-2M2 12l2.5 2" />
+      <path d="M22 12l-2.5-2M22 12l-2.5 2" />
+    </svg>
+  );
+}
+
+function StarIcon() {
+  return (
+    <svg
+      className="star-icon"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 2l2.2 6.6H21l-5.6 4.1 2.2 6.6L12 15.2 6.4 19.3l2.2-6.6L3 8.6h6.8z" />
+    </svg>
+  );
+}
+
 export default async function ProformaTemplatePage({
   params,
   searchParams,
@@ -85,8 +125,9 @@ export default async function ProformaTemplatePage({
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&display=swap");
 
         :root {
-          --amber: #f4c430;
-          --coffee: #6b4b1a;
+          /* Paleta navidena (temporal). Original a restaurar en enero: --amber: #f4c430; --coffee: #6b4b1a; */
+          --amber: #2f6b45;
+          --coffee: #a32020;
           --ink: #2d2a26;
           --muted: #6b6b6b;
           --line: #d9cdbf;
@@ -113,8 +154,8 @@ export default async function ProformaTemplatePage({
         }
 
         .sheet {
-          --amber: #f4c430;
-          --coffee: #6b4b1a;
+          --amber: #2f6b45;
+          --coffee: #a32020;
           --ink: #2d2a26;
           --muted: #6b6b6b;
           --line: #d9cdbf;
@@ -137,9 +178,11 @@ export default async function ProformaTemplatePage({
           right: 0;
           background: linear-gradient(
             120deg,
-            var(--coffee) 0 40%,
-            #ffffff 40% 42%,
-            var(--amber) 42% 100%
+            var(--coffee) 0 33%,
+            #ffffff 33% 35%,
+            var(--amber) 35% 68%,
+            #ffffff 68% 70%,
+            var(--coffee) 70% 100%
           );
         }
 
@@ -151,12 +194,24 @@ export default async function ProformaTemplatePage({
         }
 
         .brand {
+          display: flex;
+          align-items: center;
+          gap: 8px;
           font-size: 28px;
           font-weight: 700;
           letter-spacing: 0.5px;
         }
 
+        .star-icon {
+          color: var(--amber);
+          flex-shrink: 0;
+        }
+
         .title {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 10px;
           text-align: right;
           font-size: 44px;
           font-family: "Inter", "Segoe UI", "Arial", sans-serif;
@@ -166,9 +221,14 @@ export default async function ProformaTemplatePage({
           letter-spacing: 1px;
         }
 
+        .snowflake-icon {
+          color: var(--amber);
+          flex-shrink: 0;
+        }
+
         .divider {
           margin: 18px 0 24px;
-          border-bottom: 3px solid var(--amber);
+          border-bottom: 3px dotted var(--amber);
         }
 
         .bill-to {
@@ -176,7 +236,8 @@ export default async function ProformaTemplatePage({
           grid-template-columns: 2fr 1fr;
           gap: 24px;
           padding-bottom: 16px;
-          border-bottom: 2px solid var(--coffee);
+          border-bottom: 2px dotted var(--coffee);
+          position: relative;
         }
 
         .bill-to h3 {
@@ -203,6 +264,11 @@ export default async function ProformaTemplatePage({
           margin-top: 6px;
         }
 
+        .content {
+          position: relative;
+          z-index: 1;
+        }
+
         table {
           width: 100%;
           border-collapse: collapse;
@@ -212,7 +278,7 @@ export default async function ProformaTemplatePage({
 
         thead th {
           background: var(--amber);
-          color: var(--coffee);
+          color: #ffffff;
           text-align: left;
           padding: 10px 12px;
           font-weight: 700;
@@ -261,10 +327,20 @@ export default async function ProformaTemplatePage({
           font-size: 16px;
         }
 
+        .xmas-greeting {
+          margin-top: 20px;
+          padding-top: 14px;
+          border-top: 1px dashed var(--amber);
+          text-align: center;
+          font-size: 13px;
+          font-style: italic;
+          color: var(--coffee);
+        }
+
         .terms {
           margin-top: 24px;
           padding-top: 16px;
-          border-top: 2px solid var(--amber);
+          border-top: 2px dotted var(--amber);
         }
 
         .terms h4 {
@@ -303,9 +379,11 @@ export default async function ProformaTemplatePage({
           height: 16px;
           background: linear-gradient(
             120deg,
-            var(--amber) 0 60%,
-            #ffffff 60% 62%,
-            var(--coffee) 62% 100%
+            var(--amber) 0 33%,
+            #ffffff 33% 35%,
+            var(--coffee) 35% 68%,
+            #ffffff 68% 70%,
+            var(--amber) 70% 100%
           );
         }
 
@@ -365,6 +443,7 @@ export default async function ProformaTemplatePage({
           .bill-to,
           table,
           .footer-grid,
+          .xmas-greeting,
           .terms,
           .contact-row {
             position: relative;
@@ -392,6 +471,7 @@ export default async function ProformaTemplatePage({
 
           .bill-to,
           .footer-grid,
+          .xmas-greeting,
           .terms,
           .contact-row {
             break-inside: avoid;
@@ -418,6 +498,7 @@ export default async function ProformaTemplatePage({
           }
 
           .title {
+            justify-content: flex-start;
             text-align: left;
             font-size: 36px;
             letter-spacing: 0.5px;
@@ -463,9 +544,16 @@ export default async function ProformaTemplatePage({
 
       <div className="top-band"></div>
 
+      <div className="content">
       <div className="header">
-        <div className="brand">{company?.name ?? "Pan d' Casa"}</div>
-        <div className="title">PROFORMA</div>
+        <div className="brand">
+          <StarIcon />
+          {company?.name ?? "Pan d' Casa"}
+        </div>
+        <div className="title">
+          <SnowflakeIcon />
+          PROFORMA
+        </div>
       </div>
 
       <div className="divider"></div>
@@ -574,6 +662,10 @@ export default async function ProformaTemplatePage({
         </div>
       </div>
 
+      <p className="xmas-greeting">
+        ¡Felices Fiestas de parte de {company?.name ?? "Pan d' Casa"}!
+      </p>
+
       <div className="terms">
         <h4>TÉRMINOS Y CONDICIONES</h4>
         <p>
@@ -581,7 +673,7 @@ export default async function ProformaTemplatePage({
             No se procede con el pedido, sino se recibe la orden de compra
             o visto bueno formal.
             <br />
-            Los pedidos no podrán cancelarse con menos de 20 horas de anticipación a 
+            Los pedidos no podrán cancelarse con menos de 20 horas de anticipación a
             la entrega, debido al proceso de preparación y planificación del mismo
           </strong>
           <br />
@@ -589,7 +681,7 @@ export default async function ProformaTemplatePage({
           costos, por lo que nos liberamos de toda responsabilidad por la falta de
           atención de servicios que no se encuentren en el presente documento, por
           lo que se recomienda revisar con detenimiento los servicios contratados.
-           
+
         </p>
       </div>
 
@@ -610,6 +702,7 @@ export default async function ProformaTemplatePage({
           <strong>Email.</strong>
           {company?.email ?? "-"}
         </div>
+      </div>
       </div>
 
       <div className="bottom-band"></div>

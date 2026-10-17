@@ -13,7 +13,10 @@
     "prisma:seed": "prisma db seed",
     "db:backup": "tsx prisma/backup.ts",
     "db:restore": "tsx prisma/restore.ts",
-    "db:verify": "tsx prisma/verify-transfer.ts"
+    "db:verify": "tsx prisma/verify-transfer.ts",
+    "dev:test": "dotenv -e .env.test -- next dev",
+    "prisma:test:deploy": "dotenv -e .env.test -- prisma migrate deploy",
+    "prisma:test:seed": "dotenv -e .env.test -- prisma db seed"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -38,6 +41,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.1.6",
     "tailwindcss": "^4",
