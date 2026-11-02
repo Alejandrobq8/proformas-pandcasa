@@ -6,7 +6,7 @@ import { sileo } from "sileo";
 import { PageHeader } from "@/shared/components/ui/PageHeader";
 import { Card, StatCard } from "@/shared/components/ui/Card";
 import { Button } from "@/shared/components/ui/Button";
-import { Field, Input } from "@/shared/components/ui/Input";
+import { Field, Input, Select } from "@/shared/components/ui/Input";
 import { Badge } from "@/shared/components/ui/Badge";
 
 function TableScroller({ children }: { children: React.ReactNode }) {
@@ -181,16 +181,17 @@ export function CobrosPage() {
   const [filterClient, setFilterClient] = useState("");
   const [filterAmountMin, setFilterAmountMin] = useState("");
   const [filterAmountMax, setFilterAmountMax] = useState("");
-  const [filterMigo, setFilterMigo] = useState("");
   const [filterOC, setFilterOC] = useState("");
+  const [filterMigo, setFilterMigo] = useState("");
   const [filterFactura, setFilterFactura] = useState("");
   const [filterEntrega, setFilterEntrega] = useState("");
+  const [filterOCStatus, setFilterOCStatus] = useState<"" | "con" | "sin">("");
+  const [filterPagoStatus, setFilterPagoStatus] = useState<"" | "pagada" | "pendiente">("");
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
 
   const currentMonthKey = getCurrentMonthKey();
   const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(new Set());
@@ -208,8 +209,8 @@ export function CobrosPage() {
     if (filterClient) params.set("client", filterClient);
     if (filterAmountMin) params.set("amountMin", filterAmountMin);
     if (filterAmountMax) params.set("amountMax", filterAmountMax);
-    if (filterMigo) params.set("migo", filterMigo);
     if (filterOC) params.set("oc", filterOC);
+    if (filterMigo) params.set("migo", filterMigo);
     if (filterFactura) params.set("factura", filterFactura);
     if (filterEntrega) params.set("entrega", filterEntrega);
     try {
@@ -217,7 +218,6 @@ export function CobrosPage() {
       if (!res.ok) throw new Error("error");
       const json = await res.json();
       setProformas(json.data ?? []);
-      setTotal(json.total ?? 0);
     } catch {
       setError("No se pudieron cargar las proformas.");
     } finally {
@@ -228,8 +228,8 @@ export function CobrosPage() {
     filterClient,
     filterAmountMin,
     filterAmountMax,
-    filterMigo,
     filterOC,
+    filterMigo,
     filterFactura,
     filterEntrega,
   ]);
@@ -239,9 +239,22 @@ export function CobrosPage() {
     return () => clearTimeout(timer);
   }, [fetchProformas]);
 
+  const visibleProformas = useMemo(
+    () =>
+      proformas.filter((p) => {
+        if (filterOCStatus === "con" && !p.ordenCompra) return false;
+        if (filterOCStatus === "sin" && p.ordenCompra) return false;
+        const isPaid = (p.verificacionPago || p.sinpeTransf) && !p.cancelado;
+        if (filterPagoStatus === "pagada" && !isPaid) return false;
+        if (filterPagoStatus === "pendiente" && isPaid) return false;
+        return true;
+      }),
+    [proformas, filterOCStatus, filterPagoStatus]
+  );
+
   const grouped = useMemo(() => {
     const groups = new Map<string, Proforma[]>();
-    for (const p of proformas) {
+    for (const p of visibleProformas) {
       const key = getMonthKey(p.createdAt);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(p);
@@ -249,7 +262,7 @@ export function CobrosPage() {
     return Array.from(groups.entries())
       .sort(([a], [b]) => b.localeCompare(a))
       .map(([key, items]) => ({ key, label: formatMonthLabel(key), items: [...items].reverse() }));
-  }, [proformas]);
+  }, [visibleProformas]);
 
   useEffect(() => {
     if (!monthsInitialized && grouped.length > 0) {
@@ -351,6 +364,8 @@ export function CobrosPage() {
     setFilterOC("");
     setFilterFactura("");
     setFilterEntrega("");
+    setFilterOCStatus("");
+    setFilterPagoStatus("");
   }
 
   const filtersActive =
@@ -361,34 +376,42 @@ export function CobrosPage() {
     filterMigo ||
     filterOC ||
     filterFactura ||
-    filterEntrega;
+    filterEntrega ||
+    filterOCStatus ||
+    filterPagoStatus;
 
   const moreFiltersActive =
-    filterAmountMin || filterAmountMax || filterMigo || filterOC || filterFactura;
+    filterAmountMin ||
+    filterAmountMax ||
+    filterMigo ||
+    filterOC ||
+    filterFactura ||
+    filterOCStatus ||
+    filterPagoStatus;
 
   const totalGeneral = useMemo(
-    () => proformas.reduce((sum, p) => sum + Number(p.total), 0),
-    [proformas]
+    () => visibleProformas.reduce((sum, p) => sum + Number(p.total), 0),
+    [visibleProformas]
   );
   const totalCancelado = useMemo(
-    () => proformas.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0),
-    [proformas]
+    () => visibleProformas.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0),
+    [visibleProformas]
   );
   const cancelledCount = useMemo(
-    () => proformas.filter((p) => p.cancelado).length,
-    [proformas]
+    () => visibleProformas.filter((p) => p.cancelado).length,
+    [visibleProformas]
   );
   const saldoRestante = totalGeneral - totalCancelado;
   const totalPorCobrar = useMemo(
     () =>
-      proformas
+      visibleProformas
         .filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf)
         .reduce((sum, p) => sum + Number(p.total), 0),
-    [proformas]
+    [visibleProformas]
   );
   const porCobrarCount = useMemo(
-    () => proformas.filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf).length,
-    [proformas]
+    () => visibleProformas.filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf).length,
+    [visibleProformas]
   );
 
   const columns = [
@@ -499,6 +522,14 @@ export function CobrosPage() {
                 onChange={(e) => setFilterAmountMax(e.target.value)}
               />
             </Field>
+            <Field label="N° OC" htmlFor="cobro-filter-oc">
+              <Input
+                id="cobro-filter-oc"
+                placeholder="N° OC"
+                value={filterOC}
+                onChange={(e) => setFilterOC(e.target.value)}
+              />
+            </Field>
             <Field label="MIGO" htmlFor="cobro-filter-migo">
               <Input
                 id="cobro-filter-migo"
@@ -509,14 +540,6 @@ export function CobrosPage() {
                 onChange={(e) => setFilterMigo(e.target.value)}
               />
             </Field>
-            <Field label="N° OC" htmlFor="cobro-filter-oc">
-              <Input
-                id="cobro-filter-oc"
-                placeholder="N° OC"
-                value={filterOC}
-                onChange={(e) => setFilterOC(e.target.value)}
-              />
-            </Field>
             <Field label="N° factura" htmlFor="cobro-filter-factura">
               <Input
                 id="cobro-filter-factura"
@@ -525,18 +548,40 @@ export function CobrosPage() {
                 onChange={(e) => setFilterFactura(e.target.value)}
               />
             </Field>
+            <Field label="Estado de OC" htmlFor="cobro-filter-oc-status">
+              <Select
+                id="cobro-filter-oc-status"
+                value={filterOCStatus}
+                onChange={(e) => setFilterOCStatus(e.target.value as "" | "con" | "sin")}
+              >
+                <option value="">Todas</option>
+                <option value="con">Con OC</option>
+                <option value="sin">Sin OC</option>
+              </Select>
+            </Field>
+            <Field label="Estado de pago" htmlFor="cobro-filter-pago-status">
+              <Select
+                id="cobro-filter-pago-status"
+                value={filterPagoStatus}
+                onChange={(e) => setFilterPagoStatus(e.target.value as "" | "pagada" | "pendiente")}
+              >
+                <option value="">Todas</option>
+                <option value="pagada">Pagadas</option>
+                <option value="pendiente">Pendientes</option>
+              </Select>
+            </Field>
           </div>
         ) : null}
       </Card>
 
       {!loading ? (
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-rc-ink/60">
-          {total} proforma{total !== 1 ? "s" : ""}{" "}
-          {filtersActive ? "encontrada" + (total !== 1 ? "s" : "") : "en total"}
+          {visibleProformas.length} proforma{visibleProformas.length !== 1 ? "s" : ""}{" "}
+          {filtersActive ? "encontrada" + (visibleProformas.length !== 1 ? "s" : "") : "en total"}
         </p>
       ) : null}
 
-      {!loading && proformas.length > 0 ? (
+      {!loading && visibleProformas.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Total general" value={formatCRC(totalGeneral)} />
           <Card variant="stat">
