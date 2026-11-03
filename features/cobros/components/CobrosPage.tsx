@@ -187,6 +187,8 @@ export function CobrosPage() {
   const [filterEntrega, setFilterEntrega] = useState("");
   const [filterOCStatus, setFilterOCStatus] = useState<"" | "con" | "sin">("");
   const [filterPagoStatus, setFilterPagoStatus] = useState<"" | "pagada" | "pendiente">("");
+  const [filterPagoDesde, setFilterPagoDesde] = useState("");
+  const [filterPagoHasta, setFilterPagoHasta] = useState("");
   const [showCancelled, setShowCancelled] = useState(true);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
@@ -248,10 +250,16 @@ export function CobrosPage() {
         const isPaid = (p.verificacionPago || p.sinpeTransf) && !p.cancelado;
         if (filterPagoStatus === "pagada" && !isPaid) return false;
         if (filterPagoStatus === "pendiente" && isPaid) return false;
+        if (filterPagoDesde || filterPagoHasta) {
+          const pagoDate = p.fechaPago ? p.fechaPago.split("T")[0] : null;
+          if (!pagoDate) return false;
+          if (filterPagoDesde && pagoDate < filterPagoDesde) return false;
+          if (filterPagoHasta && pagoDate > filterPagoHasta) return false;
+        }
         if (!showCancelled && p.cancelado) return false;
         return true;
       }),
-    [proformas, filterOCStatus, filterPagoStatus, showCancelled]
+    [proformas, filterOCStatus, filterPagoStatus, filterPagoDesde, filterPagoHasta, showCancelled]
   );
 
   const grouped = useMemo(() => {
@@ -368,6 +376,8 @@ export function CobrosPage() {
     setFilterEntrega("");
     setFilterOCStatus("");
     setFilterPagoStatus("");
+    setFilterPagoDesde("");
+    setFilterPagoHasta("");
     setShowCancelled(true);
   }
 
@@ -382,6 +392,8 @@ export function CobrosPage() {
     filterEntrega ||
     filterOCStatus ||
     filterPagoStatus ||
+    filterPagoDesde ||
+    filterPagoHasta ||
     !showCancelled;
 
   const moreFiltersActive =
@@ -391,7 +403,9 @@ export function CobrosPage() {
     filterOC ||
     filterFactura ||
     filterOCStatus ||
-    filterPagoStatus;
+    filterPagoStatus ||
+    filterPagoDesde ||
+    filterPagoHasta;
 
   const totalGeneral = useMemo(
     () => visibleProformas.reduce((sum, p) => sum + Number(p.total), 0),
@@ -584,6 +598,24 @@ export function CobrosPage() {
                 <option value="pagada">Pagadas</option>
                 <option value="pendiente">Pendientes</option>
               </Select>
+            </Field>
+            <Field label="Fecha de pago desde" htmlFor="cobro-filter-pago-desde">
+              <Input
+                id="cobro-filter-pago-desde"
+                type="date"
+                value={filterPagoDesde}
+                max={filterPagoHasta || undefined}
+                onChange={(e) => setFilterPagoDesde(e.target.value)}
+              />
+            </Field>
+            <Field label="Fecha de pago hasta" htmlFor="cobro-filter-pago-hasta">
+              <Input
+                id="cobro-filter-pago-hasta"
+                type="date"
+                value={filterPagoHasta}
+                min={filterPagoDesde || undefined}
+                onChange={(e) => setFilterPagoHasta(e.target.value)}
+              />
             </Field>
           </div>
         ) : null}
