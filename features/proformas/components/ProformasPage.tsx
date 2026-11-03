@@ -17,6 +17,7 @@ const emptyFilters: ProformaFilters = {
   date: "",
   amountMin: "",
   amountMax: "",
+  sinFechaEntrega: "",
 };
 
 const statusLabel: Record<ProformaRecord["status"], string> = {
@@ -33,6 +34,11 @@ const statusTone: Record<
   SENT: "gold",
   PAID: "success",
 };
+
+function formatFechaEntrega(value: string) {
+  const [year, month, day] = value.split("T")[0].split("-");
+  return `${day}/${month}/${year}`;
+}
 
 function toNumber(value: unknown) {
   if (typeof value === "number") return value;
@@ -146,6 +152,20 @@ export function ProformasPage() {
                   onChange={(event) => updateFilter("amountMax", event.target.value)}
                 />
               </Field>
+              <Field label="Fecha de entrega" htmlFor="filter-sin-fecha-entrega">
+                <label className="flex h-full cursor-pointer items-center gap-2 text-sm text-rc-ink">
+                  <input
+                    id="filter-sin-fecha-entrega"
+                    type="checkbox"
+                    className="h-4 w-4 accent-[var(--rc-gold)]"
+                    checked={filters.sinFechaEntrega === "1"}
+                    onChange={(event) =>
+                      updateFilter("sinFechaEntrega", event.target.checked ? "1" : "")
+                    }
+                  />
+                  Sin fecha asignada
+                </label>
+              </Field>
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
               <Button
@@ -206,6 +226,15 @@ export function ProformasPage() {
                   </p>
                   <p className="text-xs text-rc-ink/60">
                     Total {formatCRC(toNumber(proforma.total))}
+                  </p>
+                  <p className="mt-0.5 text-xs">
+                    {proforma.fechaEntrega ? (
+                      <span className="text-rc-ink/60">
+                        Entrega {formatFechaEntrega(proforma.fechaEntrega)}
+                      </span>
+                    ) : (
+                      <span className="text-rc-gold-dark">Sin fecha de entrega asignada</span>
+                    )}
                   </p>
                 </div>
                 <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:justify-end">

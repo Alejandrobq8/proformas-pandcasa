@@ -15,6 +15,7 @@ export type ProformaRecord = {
   status: ProformaStatus;
   subtotal: number | string;
   total: number | string;
+  fechaEntrega: string | null;
   items: ProformaItemRecord[];
 };
 
@@ -24,6 +25,7 @@ export type ProformaFilters = {
   date: string;
   amountMin: string;
   amountMax: string;
+  sinFechaEntrega: string;
 };
 
 export type ProformasResult = {
@@ -55,6 +57,7 @@ export async function listProformas(
   if (filters.date.trim()) params.set("date", filters.date.trim());
   if (filters.amountMin.trim()) params.set("amountMin", filters.amountMin.trim());
   if (filters.amountMax.trim()) params.set("amountMax", filters.amountMax.trim());
+  if (filters.sinFechaEntrega.trim()) params.set("sinFechaEntrega", filters.sinFechaEntrega.trim());
   params.set("take", String(take));
 
   const res = await fetch(`/api/proformas?${params.toString()}`);

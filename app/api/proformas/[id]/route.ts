@@ -89,6 +89,7 @@ export async function PUT(
           status,
           discount: parsed.data.discount ?? null,
           notes: parsed.data.notes ?? null,
+          fechaEntrega: parsed.data.fechaEntrega ? new Date(parsed.data.fechaEntrega) : null,
           subtotal,
           total,
           items: {

@@ -33,6 +33,7 @@ export async function GET(request: Request) {
   const pagoHastaParam = searchParams.get("pagoHasta")?.trim() ?? "";
   const incluirCanceladasParam = searchParams.get("incluirCanceladas");
   const incluirCanceladas = incluirCanceladasParam !== "0";
+  const sinFechaEntregaParam = searchParams.get("sinFechaEntrega") === "1";
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
@@ -50,6 +51,7 @@ export async function GET(request: Request) {
     pagoEstadoParam ||
     pagoDesdeParam ||
     pagoHastaParam ||
+    sinFechaEntregaParam ||
     !incluirCanceladas;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
   const amountRangeFilters = filtersActive
@@ -104,6 +106,7 @@ export async function GET(request: Request) {
     facturaParam
       ? { numeroFactura: { contains: facturaParam, mode: "insensitive" as const } }
       : null,
+    sinFechaEntregaParam ? { fechaEntrega: null } : null,
     ocEstadoParam === "con"
       ? { ordenCompra: { not: null } }
       : ocEstadoParam === "sin"
@@ -349,6 +352,7 @@ export async function POST(request: Request) {
           status,
           discount: parsed.data.discount ?? null,
           notes: parsed.data.notes ?? null,
+          fechaEntrega: parsed.data.fechaEntrega ? new Date(parsed.data.fechaEntrega) : null,
           subtotal,
           total,
           year,

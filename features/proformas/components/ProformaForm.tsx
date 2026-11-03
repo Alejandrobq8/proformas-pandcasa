@@ -30,6 +30,7 @@ type ProformaData = {
   showUnitPrice?: boolean;
   discount?: number | null;
   notes?: string | null;
+  fechaEntrega?: string | null;
   status?: ProformaStatus;
   items: Item[];
 };
@@ -44,6 +45,7 @@ function buildDefaultValues(initial?: ProformaData): ProformaFormValues {
     status: initial?.status ?? "DRAFT",
     discount: initial?.discount ?? 0,
     notes: initial?.notes ?? "",
+    fechaEntrega: initial?.fechaEntrega ? initial.fechaEntrega.split("T")[0] : "",
     items: initial?.items?.length
       ? initial.items.map(({ description, quantity, unitPrice }) => ({
           description,
@@ -214,6 +216,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       showUnitPrice: values.showUnitPrice,
       discount: values.discount || 0,
       notes: values.notes,
+      fechaEntrega: values.fechaEntrega || null,
       items: values.items,
       status: nextStatus ?? values.status,
     };
@@ -531,6 +534,14 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               placeholder="Detalles de la entrega."
               {...register("notes")}
             />
+            <Field
+              label="Fecha de entrega (opcional)"
+              htmlFor="fecha-entrega"
+              hint="Dejar en blanco si el cliente aun no ha confirmado fecha."
+              className="mt-3"
+            >
+              <Input id="fecha-entrega" type="date" {...register("fechaEntrega")} />
+            </Field>
           </div>
           <Card variant="stat">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
