@@ -26,6 +26,12 @@ export async function GET(request: Request) {
   const migoParam = searchParams.get("migo")?.trim() ?? "";
   const ocParam = searchParams.get("oc")?.trim() ?? "";
   const facturaParam = searchParams.get("factura")?.trim() ?? "";
+  const ocEstadoParam = searchParams.get("ocEstado")?.trim() ?? "";
+  const pagoEstadoParam = searchParams.get("pagoEstado")?.trim() ?? "";
+  const pagoDesdeParam = searchParams.get("pagoDesde")?.trim() ?? "";
+  const pagoHastaParam = searchParams.get("pagoHasta")?.trim() ?? "";
+  const incluirCanceladasParam = searchParams.get("incluirCanceladas");
+  const incluirCanceladas = incluirCanceladasParam !== "0";
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
@@ -38,7 +44,12 @@ export async function GET(request: Request) {
     amountMaxParam ||
     migoParam ||
     ocParam ||
-    facturaParam;
+    facturaParam ||
+    ocEstadoParam ||
+    pagoEstadoParam ||
+    pagoDesdeParam ||
+    pagoHastaParam ||
+    !incluirCanceladas;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
   const amountRangeFilters = filtersActive
     ? parseAmountRange(amountMinParam, amountMaxParam)
@@ -46,6 +57,7 @@ export async function GET(request: Request) {
   const amountRangeQuery = !filtersActive ? parseAmountQuery(q) : null;
 
   const migoValue = migoParam || null;
+  const pagoFechaRange = parsePagoFechaRange(pagoDesdeParam, pagoHastaParam);
 
   const andFilters = [
     numberParam
@@ -91,6 +103,36 @@ export async function GET(request: Request) {
     facturaParam
       ? { numeroFactura: { contains: facturaParam, mode: "insensitive" as const } }
       : null,
+    ocEstadoParam === "con"
+      ? { ordenCompra: { not: null } }
+      : ocEstadoParam === "sin"
+        ? { ordenCompra: null }
+        : null,
+    pagoEstadoParam === "pagada"
+      ? {
+          AND: [
+            { OR: [{ verificacionPago: true }, { sinpeTransf: true }] },
+            { cancelado: false },
+          ],
+        }
+      : pagoEstadoParam === "pendiente"
+        ? {
+            OR: [
+              { AND: [{ verificacionPago: false }, { sinpeTransf: false }] },
+              { cancelado: true },
+            ],
+          }
+        : null,
+    pagoFechaRange
+      ? {
+          fechaPago: {
+            not: null,
+            ...(pagoFechaRange.start ? { gte: pagoFechaRange.start } : {}),
+            ...(pagoFechaRange.end ? { lt: pagoFechaRange.end } : {}),
+          },
+        }
+      : null,
+    !incluirCanceladas ? { cancelado: false } : null,
   ].filter((value): value is NonNullable<typeof value> => value !== null);
 
   const where = {
@@ -197,6 +239,27 @@ function parseDateQuery(value: string) {
   }
 
   return null;
+}
+
+function parsePagoFechaRange(desde: string, hasta: string) {
+  if (!desde && !hasta) return null;
+
+  const parseIsoDate = (value: string) => {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+    const [, year, month, day] = match;
+    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const start = desde ? parseIsoDate(desde) : null;
+  const endInclusive = hasta ? parseIsoDate(hasta) : null;
+  const end = endInclusive
+    ? new Date(endInclusive.getTime() + 24 * 60 * 60 * 1000)
+    : null;
+
+  if (!start && !end) return null;
+  return { start, end };
 }
 
 function parseAmountQuery(value: string) {

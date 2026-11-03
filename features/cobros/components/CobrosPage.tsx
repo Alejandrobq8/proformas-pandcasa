@@ -216,6 +216,11 @@ export function CobrosPage() {
     if (filterMigo) params.set("migo", filterMigo);
     if (filterFactura) params.set("factura", filterFactura);
     if (filterEntrega) params.set("entrega", filterEntrega);
+    if (filterOCStatus) params.set("ocEstado", filterOCStatus);
+    if (filterPagoStatus) params.set("pagoEstado", filterPagoStatus);
+    if (filterPagoDesde) params.set("pagoDesde", filterPagoDesde);
+    if (filterPagoHasta) params.set("pagoHasta", filterPagoHasta);
+    if (!showCancelled) params.set("incluirCanceladas", "0");
     try {
       const res = await fetch(`/api/proformas?${params}`);
       if (!res.ok) throw new Error("error");
@@ -235,6 +240,11 @@ export function CobrosPage() {
     filterMigo,
     filterFactura,
     filterEntrega,
+    filterOCStatus,
+    filterPagoStatus,
+    filterPagoDesde,
+    filterPagoHasta,
+    showCancelled,
   ]);
 
   useEffect(() => {
@@ -242,29 +252,9 @@ export function CobrosPage() {
     return () => clearTimeout(timer);
   }, [fetchProformas]);
 
-  const visibleProformas = useMemo(
-    () =>
-      proformas.filter((p) => {
-        if (filterOCStatus === "con" && !p.ordenCompra) return false;
-        if (filterOCStatus === "sin" && p.ordenCompra) return false;
-        const isPaid = (p.verificacionPago || p.sinpeTransf) && !p.cancelado;
-        if (filterPagoStatus === "pagada" && !isPaid) return false;
-        if (filterPagoStatus === "pendiente" && isPaid) return false;
-        if (filterPagoDesde || filterPagoHasta) {
-          const pagoDate = p.fechaPago ? p.fechaPago.split("T")[0] : null;
-          if (!pagoDate) return false;
-          if (filterPagoDesde && pagoDate < filterPagoDesde) return false;
-          if (filterPagoHasta && pagoDate > filterPagoHasta) return false;
-        }
-        if (!showCancelled && p.cancelado) return false;
-        return true;
-      }),
-    [proformas, filterOCStatus, filterPagoStatus, filterPagoDesde, filterPagoHasta, showCancelled]
-  );
-
   const grouped = useMemo(() => {
     const groups = new Map<string, Proforma[]>();
-    for (const p of visibleProformas) {
+    for (const p of proformas) {
       const key = getMonthKey(p.createdAt);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(p);
@@ -272,7 +262,7 @@ export function CobrosPage() {
     return Array.from(groups.entries())
       .sort(([a], [b]) => b.localeCompare(a))
       .map(([key, items]) => ({ key, label: formatMonthLabel(key), items: [...items].reverse() }));
-  }, [visibleProformas]);
+  }, [proformas]);
 
   useEffect(() => {
     if (!monthsInitialized && grouped.length > 0) {
@@ -408,28 +398,28 @@ export function CobrosPage() {
     filterPagoHasta;
 
   const totalGeneral = useMemo(
-    () => visibleProformas.reduce((sum, p) => sum + Number(p.total), 0),
-    [visibleProformas]
+    () => proformas.reduce((sum, p) => sum + Number(p.total), 0),
+    [proformas]
   );
   const totalCancelado = useMemo(
-    () => visibleProformas.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0),
-    [visibleProformas]
+    () => proformas.filter((p) => p.cancelado).reduce((sum, p) => sum + Number(p.total), 0),
+    [proformas]
   );
   const cancelledCount = useMemo(
-    () => visibleProformas.filter((p) => p.cancelado).length,
-    [visibleProformas]
+    () => proformas.filter((p) => p.cancelado).length,
+    [proformas]
   );
   const saldoRestante = totalGeneral - totalCancelado;
   const totalPorCobrar = useMemo(
     () =>
-      visibleProformas
+      proformas
         .filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf)
         .reduce((sum, p) => sum + Number(p.total), 0),
-    [visibleProformas]
+    [proformas]
   );
   const porCobrarCount = useMemo(
-    () => visibleProformas.filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf).length,
-    [visibleProformas]
+    () => proformas.filter((p) => !p.cancelado && !p.verificacionPago && !p.sinpeTransf).length,
+    [proformas]
   );
 
   const columns = [
@@ -623,12 +613,12 @@ export function CobrosPage() {
 
       {!loading ? (
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-rc-ink/60">
-          {visibleProformas.length} proforma{visibleProformas.length !== 1 ? "s" : ""}{" "}
-          {filtersActive ? "encontrada" + (visibleProformas.length !== 1 ? "s" : "") : "en total"}
+          {proformas.length} proforma{proformas.length !== 1 ? "s" : ""}{" "}
+          {filtersActive ? "encontrada" + (proformas.length !== 1 ? "s" : "") : "en total"}
         </p>
       ) : null}
 
-      {!loading && visibleProformas.length > 0 ? (
+      {!loading && proformas.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Total general" value={formatCRC(totalGeneral)} />
           <Card variant="stat">
