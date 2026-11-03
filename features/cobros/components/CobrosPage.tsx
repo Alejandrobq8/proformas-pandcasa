@@ -187,6 +187,7 @@ export function CobrosPage() {
   const [filterEntrega, setFilterEntrega] = useState("");
   const [filterOCStatus, setFilterOCStatus] = useState<"" | "con" | "sin">("");
   const [filterPagoStatus, setFilterPagoStatus] = useState<"" | "pagada" | "pendiente">("");
+  const [showCancelled, setShowCancelled] = useState(true);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const [proformas, setProformas] = useState<Proforma[]>([]);
@@ -247,9 +248,10 @@ export function CobrosPage() {
         const isPaid = (p.verificacionPago || p.sinpeTransf) && !p.cancelado;
         if (filterPagoStatus === "pagada" && !isPaid) return false;
         if (filterPagoStatus === "pendiente" && isPaid) return false;
+        if (!showCancelled && p.cancelado) return false;
         return true;
       }),
-    [proformas, filterOCStatus, filterPagoStatus]
+    [proformas, filterOCStatus, filterPagoStatus, showCancelled]
   );
 
   const grouped = useMemo(() => {
@@ -366,6 +368,7 @@ export function CobrosPage() {
     setFilterEntrega("");
     setFilterOCStatus("");
     setFilterPagoStatus("");
+    setShowCancelled(true);
   }
 
   const filtersActive =
@@ -378,7 +381,8 @@ export function CobrosPage() {
     filterFactura ||
     filterEntrega ||
     filterOCStatus ||
-    filterPagoStatus;
+    filterPagoStatus ||
+    !showCancelled;
 
   const moreFiltersActive =
     filterAmountMin ||
@@ -438,15 +442,26 @@ export function CobrosPage() {
       />
 
       <Card variant="plain">
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">
             Filtros
           </p>
-          {filtersActive ? (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Limpiar
-            </Button>
-          ) : null}
+          <div className="flex items-center gap-3">
+            <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-rc-ink/80">
+              <input
+                type="checkbox"
+                checked={showCancelled}
+                onChange={(e) => setShowCancelled(e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-[var(--rc-stamp)]"
+              />
+              Mostrar canceladas
+            </label>
+            {filtersActive ? (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Limpiar
+              </Button>
+            ) : null}
+          </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="N° proforma" htmlFor="cobro-filter-number">
