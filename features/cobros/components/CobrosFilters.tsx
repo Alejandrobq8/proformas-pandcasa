@@ -184,6 +184,18 @@ export function CobrosFilters({
               onChange={(e) => setField("pagoHasta", e.target.value)}
             />
           </Field>
+          <Field
+            label="Fecha de entrega"
+            htmlFor="cobro-filter-entrega-fecha"
+            hint="Incluye fechas detectadas en la descripcion del producto o de entrega."
+          >
+            <Input
+              id="cobro-filter-entrega-fecha"
+              type="date"
+              value={filters.entregaFecha}
+              onChange={(e) => setField("entregaFecha", e.target.value)}
+            />
+          </Field>
         </div>
       ) : null}
     </Card>

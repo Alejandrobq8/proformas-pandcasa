@@ -15,6 +15,7 @@ export type CobrosFiltersState = {
   pagoStatus: "" | "pagada" | "pendiente";
   pagoDesde: string;
   pagoHasta: string;
+  entregaFecha: string;
   showCancelled: boolean;
 };
 
@@ -31,6 +32,7 @@ const initialState: CobrosFiltersState = {
   pagoStatus: "",
   pagoDesde: "",
   pagoHasta: "",
+  entregaFecha: "",
   showCancelled: true,
 };
 
@@ -74,6 +76,7 @@ export function useCobrosFilters() {
       filters.pagoStatus ||
       filters.pagoDesde ||
       filters.pagoHasta ||
+      filters.entregaFecha ||
       !filters.showCancelled
   );
 
@@ -86,7 +89,8 @@ export function useCobrosFilters() {
       filters.ocStatus ||
       filters.pagoStatus ||
       filters.pagoDesde ||
-      filters.pagoHasta
+      filters.pagoHasta ||
+      filters.entregaFecha
   );
 
   const buildParams = useCallback(() => {
@@ -103,6 +107,7 @@ export function useCobrosFilters() {
     if (filters.pagoStatus) params.set("pagoEstado", filters.pagoStatus);
     if (filters.pagoDesde) params.set("pagoDesde", filters.pagoDesde);
     if (filters.pagoHasta) params.set("pagoHasta", filters.pagoHasta);
+    if (filters.entregaFecha) params.set("entregaFecha", filters.entregaFecha);
     if (!filters.showCancelled) params.set("incluirCanceladas", "0");
     return params;
   }, [filters]);

@@ -1,3 +1,7 @@
+// Exactly 12 entries, indexed by Date#getUTCMonth() (0 = enero). "setiembre"
+// is a common alternate spelling of "septiembre", not its own month, so it
+// is handled as a regex alternative below instead of an extra array slot
+// (which previously shifted every month after it by one index).
 const MESES = [
   "enero",
   "febrero",
@@ -8,7 +12,6 @@ const MESES = [
   "julio",
   "agosto",
   "septiembre",
-  "setiembre",
   "octubre",
   "noviembre",
   "diciembre",
@@ -38,6 +41,7 @@ export function textMentionsDate(text: string, target: Date): boolean {
   const day = target.getUTCDate();
   const month = target.getUTCMonth() + 1;
   const monthName = MESES[target.getUTCMonth()];
+  const monthPattern = monthName === "septiembre" ? "se?ptiembre" : monthName;
 
   if (/(?<!pasado\s)\bmanana\b/.test(normalized)) return true;
 
@@ -46,7 +50,7 @@ export function textMentionsDate(text: string, target: Date): boolean {
   );
   if (numericPattern.test(normalized)) return true;
 
-  const namedPattern = new RegExp(`\\b0?${day}\\s+de\\s+${monthName}\\b`);
+  const namedPattern = new RegExp(`\\b0?${day}\\s+de\\s+${monthPattern}\\b`);
   if (namedPattern.test(normalized)) return true;
 
   return false;

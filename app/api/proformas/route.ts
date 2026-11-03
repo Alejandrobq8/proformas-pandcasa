@@ -5,6 +5,7 @@ import { calculateTotals } from "@/features/proformas/utils/calculateTotals";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
 import { handleApiError } from "@/shared/lib/apiError";
+import { textMentionsDate } from "@/shared/lib/deliveryDateParser";
 
 function formatNumber(year: number, sequence: number) {
   return `PF-${year}-${String(sequence).padStart(4, "0")}`;
@@ -34,6 +35,7 @@ export async function GET(request: Request) {
   const incluirCanceladasParam = searchParams.get("incluirCanceladas");
   const incluirCanceladas = incluirCanceladasParam !== "0";
   const sinFechaEntregaParam = searchParams.get("sinFechaEntrega") === "1";
+  const entregaFechaParam = searchParams.get("entregaFecha")?.trim() ?? "";
   const take = Number(searchParams.get("take") ?? 10);
   const skip = Number(searchParams.get("skip") ?? 0);
 
@@ -52,6 +54,7 @@ export async function GET(request: Request) {
     pagoDesdeParam ||
     pagoHastaParam ||
     sinFechaEntregaParam ||
+    entregaFechaParam ||
     !incluirCanceladas;
   const dateRange = parseDateQuery(filtersActive ? dateParam : q);
   const amountRangeFilters = filtersActive
@@ -61,6 +64,28 @@ export async function GET(request: Request) {
 
   const migoValue = migoParam || null;
   const pagoFechaRange = parsePagoFechaRange(pagoDesdeParam, pagoHastaParam);
+  const entregaFechaDay = parseIsoDay(entregaFechaParam);
+
+  // Delivery dates sometimes get typed by hand into notes or an item's
+  // description instead of the structured field (the only two places this
+  // happens), so a date search has to catch those too, not just the
+  // structured ProformaDeliveryDate rows.
+  let entregaFechaTextIds: string[] = [];
+  if (entregaFechaDay) {
+    const candidates = await prisma.proforma.findMany({
+      where: { userId: session.user.id },
+      select: { id: true, notes: true, items: { select: { description: true } } },
+    });
+    entregaFechaTextIds = candidates
+      .filter((p) => {
+        const notesMatch = p.notes ? textMentionsDate(p.notes, entregaFechaDay) : false;
+        const itemMatch = p.items.some((item) =>
+          textMentionsDate(item.description, entregaFechaDay)
+        );
+        return notesMatch || itemMatch;
+      })
+      .map((p) => p.id);
+  }
 
   const andFilters = [
     numberParam
@@ -107,6 +132,23 @@ export async function GET(request: Request) {
       ? { numeroFactura: { contains: facturaParam, mode: "insensitive" as const } }
       : null,
     sinFechaEntregaParam ? { deliveryDates: { none: {} } } : null,
+    entregaFechaDay
+      ? {
+          OR: [
+            {
+              deliveryDates: {
+                some: {
+                  date: {
+                    gte: entregaFechaDay,
+                    lt: new Date(entregaFechaDay.getTime() + 24 * 60 * 60 * 1000),
+                  },
+                },
+              },
+            },
+            { id: { in: entregaFechaTextIds } },
+          ],
+        }
+      : null,
     ocEstadoParam === "con"
       ? { ordenCompra: { not: null } }
       : ocEstadoParam === "sin"
@@ -267,6 +309,15 @@ function parsePagoFechaRange(desde: string, hasta: string) {
 
   if (!start && !end) return null;
   return { start, end };
+}
+
+function parseIsoDay(value: string) {
+  if (!value) return null;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function parseAmountQuery(value: string) {
