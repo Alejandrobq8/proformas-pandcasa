@@ -29,10 +29,12 @@ function normalize(text: string) {
  * only two places delivery dates sometimes get typed by hand instead of
  * using the structured date field) mentions a given calendar date.
  *
- * Deliberately narrow: only looks for the literal word "mañana" (not
- * "pasado mañana") and DD/MM or "D de <mes>" patterns that match the
- * target date, since this only needs to answer "is this date mentioned",
- * not parse arbitrary dates.
+ * Deliberately narrow: only looks for DD/MM or "D de <mes>" patterns that
+ * match the exact target date, since this only needs to answer "is this
+ * specific date mentioned", not parse arbitrary dates. Does NOT match the
+ * word "mañana" — that only means the target date when the target is
+ * actually tomorrow, which this function has no way to know (use
+ * textMentionsTomorrow for that case instead).
  */
 export function textMentionsDate(text: string, target: Date): boolean {
   if (!text.trim()) return false;
@@ -43,8 +45,6 @@ export function textMentionsDate(text: string, target: Date): boolean {
   const monthName = MESES[target.getUTCMonth()];
   const monthPattern = monthName === "septiembre" ? "se?ptiembre" : monthName;
 
-  if (/(?<!pasado\s)\bmanana\b/.test(normalized)) return true;
-
   const numericPattern = new RegExp(
     `\\b0?${day}[/-]0?${month}(?:[/-]\\d{2,4})?\\b`
   );
@@ -54,4 +54,19 @@ export function textMentionsDate(text: string, target: Date): boolean {
   if (namedPattern.test(normalized)) return true;
 
   return false;
+}
+
+/**
+ * Same as textMentionsDate, but also matches the literal word "mañana"
+ * (not "pasado mañana"). Only use this when target is actually tomorrow's
+ * date (e.g. the "entregas de mañana" notification) — using it for an
+ * arbitrary user-picked date would wrongly match any text that says
+ * "mañana" regardless of which date was actually meant.
+ */
+export function textMentionsTomorrow(text: string, target: Date): boolean {
+  if (!text.trim()) return false;
+  if (textMentionsDate(text, target)) return true;
+
+  const normalized = normalize(text);
+  return /(?<!pasado\s)\bmanana\b/.test(normalized);
 }

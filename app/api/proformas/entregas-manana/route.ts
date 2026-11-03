@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
-import { textMentionsDate } from "@/shared/lib/deliveryDateParser";
+import { textMentionsTomorrow } from "@/shared/lib/deliveryDateParser";
 
 // Costa Rica is fixed UTC-6 (no DST). Computing "tomorrow" from the server's
 // own clock/timezone would be wrong once deployed (Vercel runs in UTC), so
@@ -74,8 +74,8 @@ export async function GET() {
 
   const detected = candidates
     .filter((p) => {
-      const notesMatch = p.notes ? textMentionsDate(p.notes, tomorrow) : false;
-      const itemMatch = p.items.some((item) => textMentionsDate(item.description, tomorrow));
+      const notesMatch = p.notes ? textMentionsTomorrow(p.notes, tomorrow) : false;
+      const itemMatch = p.items.some((item) => textMentionsTomorrow(item.description, tomorrow));
       return notesMatch || itemMatch;
     })
     .map((p) => ({
