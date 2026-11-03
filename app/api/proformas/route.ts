@@ -4,6 +4,7 @@ import { proformaSchema } from "@/features/proformas/schema";
 import { calculateTotals } from "@/features/proformas/utils/calculateTotals";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
+import { handleApiError } from "@/shared/lib/apiError";
 
 function formatNumber(year: number, sequence: number) {
   return `PF-${year}-${String(sequence).padStart(4, "0")}`;
@@ -326,47 +327,52 @@ export async function POST(request: Request) {
   const { subtotal, total } = calculateTotals(parsed.data);
   const year = new Date().getFullYear();
 
-  const proforma = await prisma.$transaction(async (tx) => {
-    const last = await tx.proforma.findFirst({
-      where: { userId: session.user.id, year },
-      orderBy: { sequence: "desc" },
-      select: { sequence: true },
-    });
-    const sequence = (last?.sequence ?? 0) + 1;
-    const number = formatNumber(year, sequence);
+  let proforma;
+  try {
+    proforma = await prisma.$transaction(async (tx) => {
+      const last = await tx.proforma.findFirst({
+        where: { userId: session.user.id, year },
+        orderBy: { sequence: "desc" },
+        select: { sequence: true },
+      });
+      const sequence = (last?.sequence ?? 0) + 1;
+      const number = formatNumber(year, sequence);
 
-    return tx.proforma.create({
-      data: {
-        userId: session.user.id,
-        clientId: parsed.data.clientId ?? null,
-        clientNombre: parsed.data.clientNombre,
-        clientEmpresa: parsed.data.clientEmpresa ?? "",
-        clientCedulaJuridica: parsed.data.clientCedulaJuridica ?? "",
-        showUnitPrice: parsed.data.showUnitPrice ?? true,
-        status,
-        discount: parsed.data.discount ?? null,
-        notes: parsed.data.notes ?? null,
-        subtotal,
-        total,
-        year,
-        sequence,
-        number,
-        items: {
-          create: parsed.data.items.map((item, index) => ({
-            sortOrder: index,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-          })),
+      return tx.proforma.create({
+        data: {
+          userId: session.user.id,
+          clientId: parsed.data.clientId ?? null,
+          clientNombre: parsed.data.clientNombre,
+          clientEmpresa: parsed.data.clientEmpresa ?? "",
+          clientCedulaJuridica: parsed.data.clientCedulaJuridica ?? "",
+          showUnitPrice: parsed.data.showUnitPrice ?? true,
+          status,
+          discount: parsed.data.discount ?? null,
+          notes: parsed.data.notes ?? null,
+          subtotal,
+          total,
+          year,
+          sequence,
+          number,
+          items: {
+            create: parsed.data.items.map((item, index) => ({
+              sortOrder: index,
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            })),
+          },
         },
-      },
-      include: {
-        items: {
-          orderBy: { sortOrder: "asc" },
+        include: {
+          items: {
+            orderBy: { sortOrder: "asc" },
+          },
         },
-      },
+      });
     });
-  });
+  } catch (error) {
+    return handleApiError(error, "proformas:create", "No se pudo crear la proforma.");
+  }
 
   return NextResponse.json(proforma, { status: 201 });
 }

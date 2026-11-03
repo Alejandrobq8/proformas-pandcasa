@@ -4,6 +4,7 @@ import { proformaSchema } from "@/features/proformas/schema";
 import { calculateTotals } from "@/features/proformas/utils/calculateTotals";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
+import { handleApiError } from "@/shared/lib/apiError";
 
 export async function GET(
   _request: Request,
@@ -71,42 +72,46 @@ export async function PUT(
   const status = parsed.data.status ?? "DRAFT";
   const { subtotal, total } = calculateTotals(parsed.data);
 
-  const proforma = await prisma.$transaction(async (tx) => {
-    await tx.proformaItem.deleteMany({
-      where: { proformaId: id },
+  try {
+    const proforma = await prisma.$transaction(async (tx) => {
+      await tx.proformaItem.deleteMany({
+        where: { proformaId: id },
+      });
+
+      return tx.proforma.update({
+        where: { id },
+        data: {
+          clientId: parsed.data.clientId ?? null,
+          clientNombre: parsed.data.clientNombre,
+          clientEmpresa: parsed.data.clientEmpresa ?? "",
+          clientCedulaJuridica: parsed.data.clientCedulaJuridica ?? "",
+          showUnitPrice: parsed.data.showUnitPrice ?? true,
+          status,
+          discount: parsed.data.discount ?? null,
+          notes: parsed.data.notes ?? null,
+          subtotal,
+          total,
+          items: {
+            create: parsed.data.items.map((item, index) => ({
+              sortOrder: index,
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            })),
+          },
+        },
+        include: {
+          items: {
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      });
     });
 
-    return tx.proforma.update({
-      where: { id },
-      data: {
-        clientId: parsed.data.clientId ?? null,
-        clientNombre: parsed.data.clientNombre,
-        clientEmpresa: parsed.data.clientEmpresa ?? "",
-        clientCedulaJuridica: parsed.data.clientCedulaJuridica ?? "",
-        showUnitPrice: parsed.data.showUnitPrice ?? true,
-        status,
-        discount: parsed.data.discount ?? null,
-        notes: parsed.data.notes ?? null,
-        subtotal,
-        total,
-        items: {
-          create: parsed.data.items.map((item, index) => ({
-            sortOrder: index,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-          })),
-        },
-      },
-      include: {
-        items: {
-          orderBy: { sortOrder: "asc" },
-        },
-      },
-    });
-  });
-
-  return NextResponse.json(proforma);
+    return NextResponse.json(proforma);
+  } catch (error) {
+    return handleApiError(error, "proformas:update", "No se pudo actualizar la proforma.");
+  }
 }
 
 export async function DELETE(
@@ -126,8 +131,12 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await prisma.proforma.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.proforma.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return handleApiError(error, "proformas:delete", "No se pudo eliminar la proforma.");
+  }
 }
 
 

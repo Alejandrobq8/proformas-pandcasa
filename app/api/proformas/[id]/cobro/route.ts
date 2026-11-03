@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
+import { handleApiError } from "@/shared/lib/apiError";
 
 const cobroSchema = z.object({
   ordenCompra: z.string().nullable().optional(),
@@ -59,10 +60,13 @@ export async function PATCH(
     }),
   };
 
-  const proforma = await prisma.proforma.update({
-    where: { id },
-    data,
-  });
-
-  return NextResponse.json(proforma);
+  try {
+    const proforma = await prisma.proforma.update({
+      where: { id },
+      data,
+    });
+    return NextResponse.json(proforma);
+  } catch (error) {
+    return handleApiError(error, "proformas:cobro-update", "No se pudo actualizar el cobro.");
+  }
 }

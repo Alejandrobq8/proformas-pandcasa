@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
+import { handleApiError } from "@/shared/lib/apiError";
 
 function formatNumber(year: number, sequence: number) {
   return `PF-${year}-${String(sequence).padStart(4, "0")}`;
@@ -31,48 +32,52 @@ export async function POST(
 
   const year = new Date().getFullYear();
 
-  const proforma = await prisma.$transaction(async (tx) => {
-    const last = await tx.proforma.findFirst({
-      where: { userId: session.user.id, year },
-      orderBy: { sequence: "desc" },
-      select: { sequence: true },
-    });
-    const sequence = (last?.sequence ?? 0) + 1;
-    const number = formatNumber(year, sequence);
+  try {
+    const proforma = await prisma.$transaction(async (tx) => {
+      const last = await tx.proforma.findFirst({
+        where: { userId: session.user.id, year },
+        orderBy: { sequence: "desc" },
+        select: { sequence: true },
+      });
+      const sequence = (last?.sequence ?? 0) + 1;
+      const number = formatNumber(year, sequence);
 
-    return tx.proforma.create({
-      data: {
-        userId: session.user.id,
-        clientId: source.clientId,
-        clientNombre: source.clientNombre,
-        clientEmpresa: source.clientEmpresa ?? "",
-        clientCedulaJuridica: source.clientCedulaJuridica ?? "",
-        showUnitPrice: source.showUnitPrice,
-        status: "DRAFT",
-        discount: source.discount,
-        notes: source.notes,
-        subtotal: source.subtotal,
-        total: source.total,
-        year,
-        sequence,
-        number,
-        items: {
-          create: source.items.map((item, index) => ({
-            sortOrder: item.sortOrder ?? index,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-          })),
+      return tx.proforma.create({
+        data: {
+          userId: session.user.id,
+          clientId: source.clientId,
+          clientNombre: source.clientNombre,
+          clientEmpresa: source.clientEmpresa ?? "",
+          clientCedulaJuridica: source.clientCedulaJuridica ?? "",
+          showUnitPrice: source.showUnitPrice,
+          status: "DRAFT",
+          discount: source.discount,
+          notes: source.notes,
+          subtotal: source.subtotal,
+          total: source.total,
+          year,
+          sequence,
+          number,
+          items: {
+            create: source.items.map((item, index) => ({
+              sortOrder: item.sortOrder ?? index,
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            })),
+          },
         },
-      },
-      include: {
-        items: {
-          orderBy: { sortOrder: "asc" },
+        include: {
+          items: {
+            orderBy: { sortOrder: "asc" },
+          },
         },
-      },
+      });
     });
-  });
 
-  return NextResponse.json(proforma, { status: 201 });
+    return NextResponse.json(proforma, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, "proformas:duplicate", "No se pudo duplicar la proforma.");
+  }
 }
 

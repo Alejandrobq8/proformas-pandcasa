@@ -3,6 +3,7 @@ import { prisma } from "@/shared/lib/prisma";
 import { menuItemSchema } from "@/features/menu/schema";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
+import { handleApiError } from "@/shared/lib/apiError";
 
 export async function GET(
   _request: Request,
@@ -43,22 +44,26 @@ export async function PUT(
     );
   }
 
-  const updated = await prisma.menuItem.updateMany({
-    where: { id, userId: session.user.id },
-    data: {
-      category: parsed.data.category,
-      name: parsed.data.name,
-      description: parsed.data.description ?? null,
-      price: parsed.data.price,
-    },
-  });
+  try {
+    const updated = await prisma.menuItem.updateMany({
+      where: { id, userId: session.user.id },
+      data: {
+        category: parsed.data.category,
+        name: parsed.data.name,
+        description: parsed.data.description ?? null,
+        price: parsed.data.price,
+      },
+    });
 
-  if (updated.count === 0) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (updated.count === 0) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const item = await prisma.menuItem.findUnique({ where: { id } });
+    return NextResponse.json(item);
+  } catch (error) {
+    return handleApiError(error, "menu-items:update", "No se pudo actualizar el item de menu.");
   }
-
-  const item = await prisma.menuItem.findUnique({ where: { id } });
-  return NextResponse.json(item);
 }
 
 export async function DELETE(
@@ -78,8 +83,12 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await prisma.menuItem.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.menuItem.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return handleApiError(error, "menu-items:delete", "No se pudo eliminar el item de menu.");
+  }
 }
 
 

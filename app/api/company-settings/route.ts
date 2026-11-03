@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { companySettingsSchema } from "@/features/settings/schema";
+import { handleApiError } from "@/shared/lib/apiError";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -41,16 +42,19 @@ export async function PUT(request: Request) {
     );
   }
 
-  const settings = await prisma.companySettings.upsert({
-    where: { userId: session.user.id },
-    update: parsed.data,
-    create: {
-      userId: session.user.id,
-      ...parsed.data,
-    },
-  });
-
-  return NextResponse.json(settings);
+  try {
+    const settings = await prisma.companySettings.upsert({
+      where: { userId: session.user.id },
+      update: parsed.data,
+      create: {
+        userId: session.user.id,
+        ...parsed.data,
+      },
+    });
+    return NextResponse.json(settings);
+  } catch (error) {
+    return handleApiError(error, "company-settings:update", "No se pudo guardar la configuracion.");
+  }
 }
 
 

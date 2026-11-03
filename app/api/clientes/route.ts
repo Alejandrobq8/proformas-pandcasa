@@ -3,7 +3,7 @@ import { prisma } from "@/shared/lib/prisma";
 import { clientSchema } from "@/features/clientes/schema";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
-import { Prisma } from "@prisma/client";
+import { handleApiError } from "@/shared/lib/apiError";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -68,21 +68,11 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(client, { status: 201 });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Ya existe un cliente con esta cedula juridica para este usuario.",
-        },
-        { status: 409 }
-      );
-    }
-    return NextResponse.json(
-      { error: "No se pudo crear el cliente." },
-      { status: 400 }
+    return handleApiError(
+      error,
+      "clientes:create",
+      "No se pudo crear el cliente.",
+      "Ya existe un cliente con esta cedula juridica para este usuario."
     );
   }
 }

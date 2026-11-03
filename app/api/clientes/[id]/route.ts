@@ -3,7 +3,7 @@ import { prisma } from "@/shared/lib/prisma";
 import { clientSchema } from "@/features/clientes/schema";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
-import { Prisma } from "@prisma/client";
+import { handleApiError } from "@/shared/lib/apiError";
 
 export async function GET(
   _request: Request,
@@ -61,21 +61,11 @@ export async function PUT(
     });
     return NextResponse.json(client);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Ya existe un cliente con esta cedula juridica para este usuario.",
-        },
-        { status: 409 }
-      );
-    }
-    return NextResponse.json(
-      { error: "No se pudo actualizar el cliente." },
-      { status: 400 }
+    return handleApiError(
+      error,
+      "clientes:update",
+      "No se pudo actualizar el cliente.",
+      "Ya existe un cliente con esta cedula juridica para este usuario."
     );
   }
 }
@@ -99,11 +89,8 @@ export async function DELETE(
     }
     await prisma.client.delete({ where: { id } });
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json(
-      { error: "No se pudo eliminar el cliente." },
-      { status: 400 }
-    );
+  } catch (error) {
+    return handleApiError(error, "clientes:delete", "No se pudo eliminar el cliente.");
   }
 }
 

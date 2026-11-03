@@ -8,6 +8,7 @@ import {
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth";
 import { Prisma } from "@prisma/client";
+import { handleApiError } from "@/shared/lib/apiError";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -63,17 +64,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const item = await prisma.menuItem.create({
-    data: {
-      userId: session.user.id,
-      category: parsed.data.category,
-      name: parsed.data.name,
-      description: parsed.data.description ?? null,
-      price: parsed.data.price,
-    },
-  });
-
-  return NextResponse.json(item, { status: 201 });
+  try {
+    const item = await prisma.menuItem.create({
+      data: {
+        userId: session.user.id,
+        category: parsed.data.category,
+        name: parsed.data.name,
+        description: parsed.data.description ?? null,
+        price: parsed.data.price,
+      },
+    });
+    return NextResponse.json(item, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, "menu-items:create", "No se pudo crear el item de menu.");
+  }
 }
 
 
