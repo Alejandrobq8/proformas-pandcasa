@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeToggle } from "@/shared/components/theme/ThemeToggle";
+import { NotificationBell } from "./NotificationBell";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -50,13 +51,15 @@ export function TopNav() {
           </div>
         </Link>
 
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-[3px] border border-rc-ink p-2.5 text-rc-ink transition hover:bg-rc-kraft md:hidden"
-          aria-label="Abrir menu"
-          aria-expanded={open}
-          onClick={() => setOpen((prev) => !prev)}
-        >
+        <div className="flex items-center gap-2 md:hidden">
+          <NotificationBell />
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-[3px] border border-rc-ink p-2.5 text-rc-ink transition hover:bg-rc-kraft"
+            aria-label="Abrir menu"
+            aria-expanded={open}
+            onClick={() => setOpen((prev) => !prev)}
+          >
           <svg
             width="20"
             height="20"
@@ -72,10 +75,12 @@ export function TopNav() {
             <line x1="3" y1="12" x2="21" y2="12" />
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
-        </button>
+          </button>
+        </div>
 
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle variant="navbar" />
+          <NotificationBell />
           <nav className="flex items-center gap-1">
             {navItems.map((item) => {
               const active = isActive(pathname, item.href);

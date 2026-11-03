@@ -27,6 +27,9 @@ export default async function ProformaEditPage({
       items: {
         orderBy: { sortOrder: "asc" },
       },
+      deliveryDates: {
+        orderBy: { date: "asc" },
+      },
     },
   });
 
@@ -43,7 +46,10 @@ export default async function ProformaEditPage({
     showUnitPrice: proforma.showUnitPrice,
     discount: toNumber(proforma.discount ?? 0),
     notes: proforma.notes ?? "",
-    fechaEntrega: proforma.fechaEntrega ? proforma.fechaEntrega.toISOString() : null,
+    deliveryDates: proforma.deliveryDates.map((d) => ({
+      date: d.date.toISOString(),
+      note: d.note,
+    })),
     status: proforma.status,
     items: proforma.items.map((item) => ({
       description: item.description,

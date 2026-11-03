@@ -22,6 +22,9 @@ export async function GET(
       items: {
         orderBy: { sortOrder: "asc" },
       },
+      deliveryDates: {
+        orderBy: { date: "asc" },
+      },
     },
   });
   if (!proforma) {
@@ -77,6 +80,9 @@ export async function PUT(
       await tx.proformaItem.deleteMany({
         where: { proformaId: id },
       });
+      await tx.proformaDeliveryDate.deleteMany({
+        where: { proformaId: id },
+      });
 
       return tx.proforma.update({
         where: { id },
@@ -89,7 +95,6 @@ export async function PUT(
           status,
           discount: parsed.data.discount ?? null,
           notes: parsed.data.notes ?? null,
-          fechaEntrega: parsed.data.fechaEntrega ? new Date(parsed.data.fechaEntrega) : null,
           subtotal,
           total,
           items: {
@@ -100,10 +105,19 @@ export async function PUT(
               unitPrice: item.unitPrice,
             })),
           },
+          deliveryDates: {
+            create: (parsed.data.deliveryDates ?? []).map((d) => ({
+              date: new Date(d.date),
+              note: d.note || null,
+            })),
+          },
         },
         include: {
           items: {
             orderBy: { sortOrder: "asc" },
+          },
+          deliveryDates: {
+            orderBy: { date: "asc" },
           },
         },
       });

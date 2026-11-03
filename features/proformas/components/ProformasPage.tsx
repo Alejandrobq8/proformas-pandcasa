@@ -228,9 +228,12 @@ export function ProformasPage() {
                     Total {formatCRC(toNumber(proforma.total))}
                   </p>
                   <p className="mt-0.5 text-xs">
-                    {proforma.fechaEntrega ? (
+                    {proforma.deliveryDates.length > 0 ? (
                       <span className="text-rc-ink/60">
-                        Entrega {formatFechaEntrega(proforma.fechaEntrega)}
+                        Entrega{proforma.deliveryDates.length > 1 ? "s" : ""}{" "}
+                        {proforma.deliveryDates
+                          .map((d) => formatFechaEntrega(d.date))
+                          .join(", ")}
                       </span>
                     ) : (
                       <span className="text-rc-gold-dark">Sin fecha de entrega asignada</span>

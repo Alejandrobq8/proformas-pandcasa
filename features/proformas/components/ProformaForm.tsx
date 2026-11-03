@@ -30,7 +30,7 @@ type ProformaData = {
   showUnitPrice?: boolean;
   discount?: number | null;
   notes?: string | null;
-  fechaEntrega?: string | null;
+  deliveryDates?: { date: string; note?: string | null }[];
   status?: ProformaStatus;
   items: Item[];
 };
@@ -45,7 +45,12 @@ function buildDefaultValues(initial?: ProformaData): ProformaFormValues {
     status: initial?.status ?? "DRAFT",
     discount: initial?.discount ?? 0,
     notes: initial?.notes ?? "",
-    fechaEntrega: initial?.fechaEntrega ? initial.fechaEntrega.split("T")[0] : "",
+    deliveryDates: initial?.deliveryDates?.length
+      ? initial.deliveryDates.map((d) => ({
+          date: d.date.split("T")[0],
+          note: d.note ?? "",
+        }))
+      : [],
     items: initial?.items?.length
       ? initial.items.map(({ description, quantity, unitPrice }) => ({
           description,
@@ -106,6 +111,15 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: "items",
+  });
+
+  const {
+    fields: deliveryDateFields,
+    append: appendDeliveryDate,
+    remove: removeDeliveryDate,
+  } = useFieldArray({
+    control,
+    name: "deliveryDates",
   });
 
   const watchedItems = useWatch({ control, name: "items" });
@@ -216,7 +230,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       showUnitPrice: values.showUnitPrice,
       discount: values.discount || 0,
       notes: values.notes,
-      fechaEntrega: values.fechaEntrega || null,
+      deliveryDates: (values.deliveryDates ?? []).filter((d) => d.date),
       items: values.items,
       status: nextStatus ?? values.status,
     };
@@ -534,14 +548,48 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               placeholder="Detalles de la entrega."
               {...register("notes")}
             />
-            <Field
-              label="Fecha de entrega (opcional)"
-              htmlFor="fecha-entrega"
-              hint="Dejar en blanco si el cliente aun no ha confirmado fecha."
-              className="mt-3"
-            >
-              <Input id="fecha-entrega" type="date" {...register("fechaEntrega")} />
-            </Field>
+            <div className="mt-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-rc-ink/80">
+                Fechas de entrega (opcional)
+              </p>
+              <p className="mt-1 text-xs text-rc-ink/55">
+                Dejar vacio si el cliente aun no ha confirmado fecha. Agrega varias si el
+                pedido se reparte en distintos dias.
+              </p>
+              <div className="mt-2 space-y-2">
+                {deliveryDateFields.map((field, index) => (
+                  <div key={field.id} className="flex flex-wrap items-center gap-2">
+                    <Input
+                      type="date"
+                      className="w-auto"
+                      {...register(`deliveryDates.${index}.date`)}
+                    />
+                    <Input
+                      placeholder="Nota (opcional, ej. tanda de la tarde)"
+                      className="min-w-[180px] flex-1"
+                      {...register(`deliveryDates.${index}.note`)}
+                    />
+                    <Button
+                      type="button"
+                      variant="danger"
+                      size="sm"
+                      onClick={() => removeDeliveryDate(index)}
+                    >
+                      Quitar
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendDeliveryDate({ date: "", note: "" })}
+              >
+                Agregar fecha de entrega
+              </Button>
+            </div>
           </div>
           <Card variant="stat">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rc-gold-dark">

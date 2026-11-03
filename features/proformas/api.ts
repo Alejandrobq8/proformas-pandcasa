@@ -15,7 +15,7 @@ export type ProformaRecord = {
   status: ProformaStatus;
   subtotal: number | string;
   total: number | string;
-  fechaEntrega: string | null;
+  deliveryDates: { id: string; date: string; note: string | null }[];
   items: ProformaItemRecord[];
 };
 

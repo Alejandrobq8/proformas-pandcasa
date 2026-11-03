@@ -8,6 +8,11 @@ export const proformaItemSchema = z.object({
 
 export const proformaStatusSchema = z.enum(["DRAFT", "SENT", "PAID"]);
 
+export const deliveryDateSchema = z.object({
+  date: z.string().min(1, "Fecha requerida"),
+  note: z.string().optional().nullable(),
+});
+
 export const proformaSchema = z.object({
   clientId: z.string().optional().nullable(),
   clientNombre: z.string().min(1),
@@ -16,7 +21,7 @@ export const proformaSchema = z.object({
   showUnitPrice: z.boolean().optional(),
   discount: z.number().nonnegative().optional().nullable(),
   notes: z.string().optional().nullable(),
-  fechaEntrega: z.string().optional().nullable(),
+  deliveryDates: z.array(deliveryDateSchema).optional(),
   status: proformaStatusSchema.optional(),
   items: z.array(proformaItemSchema).min(1),
 });

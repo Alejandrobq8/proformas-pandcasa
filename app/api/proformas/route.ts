@@ -106,7 +106,7 @@ export async function GET(request: Request) {
     facturaParam
       ? { numeroFactura: { contains: facturaParam, mode: "insensitive" as const } }
       : null,
-    sinFechaEntregaParam ? { fechaEntrega: null } : null,
+    sinFechaEntregaParam ? { deliveryDates: { none: {} } } : null,
     ocEstadoParam === "con"
       ? { ordenCompra: { not: null } }
       : ocEstadoParam === "sin"
@@ -185,6 +185,9 @@ export async function GET(request: Request) {
       include: {
         items: {
           orderBy: { sortOrder: "asc" },
+        },
+        deliveryDates: {
+          orderBy: { date: "asc" },
         },
       },
     }),
@@ -352,7 +355,6 @@ export async function POST(request: Request) {
           status,
           discount: parsed.data.discount ?? null,
           notes: parsed.data.notes ?? null,
-          fechaEntrega: parsed.data.fechaEntrega ? new Date(parsed.data.fechaEntrega) : null,
           subtotal,
           total,
           year,
@@ -366,10 +368,19 @@ export async function POST(request: Request) {
               unitPrice: item.unitPrice,
             })),
           },
+          deliveryDates: {
+            create: (parsed.data.deliveryDates ?? []).map((d) => ({
+              date: new Date(d.date),
+              note: d.note || null,
+            })),
+          },
         },
         include: {
           items: {
             orderBy: { sortOrder: "asc" },
+          },
+          deliveryDates: {
+            orderBy: { date: "asc" },
           },
         },
       });
