@@ -29,11 +29,13 @@ function normalize(text: string) {
  * only two places delivery dates sometimes get typed by hand instead of
  * using the structured date field) mentions a given calendar date.
  *
- * Deliberately narrow: only looks for DD/MM or "D de <mes>" patterns that
- * match the exact target date, since this only needs to answer "is this
- * specific date mentioned", not parse arbitrary dates. Does NOT match the
- * word "mañana" — that only means the target date when the target is
- * actually tomorrow, which this function has no way to know (use
+ * Deliberately narrow: only looks for the unambiguous "D de <mes>" pattern
+ * (e.g. "4 de noviembre") that matches the exact target date. A plain
+ * numeric DD/MM pattern was tried and dropped — it false-matched unrelated
+ * numbers in the text (an item code, a quantity, a weight) that happened
+ * to read as e.g. "4-11" with no date intended. Does NOT match the word
+ * "mañana" — that only means the target date when the target is actually
+ * tomorrow, which this function has no way to know (use
  * textMentionsTomorrow for that case instead).
  */
 export function textMentionsDate(text: string, target: Date): boolean {
@@ -41,19 +43,11 @@ export function textMentionsDate(text: string, target: Date): boolean {
   const normalized = normalize(text);
 
   const day = target.getUTCDate();
-  const month = target.getUTCMonth() + 1;
   const monthName = MESES[target.getUTCMonth()];
   const monthPattern = monthName === "septiembre" ? "se?ptiembre" : monthName;
 
-  const numericPattern = new RegExp(
-    `\\b0?${day}[/-]0?${month}(?:[/-]\\d{2,4})?\\b`
-  );
-  if (numericPattern.test(normalized)) return true;
-
   const namedPattern = new RegExp(`\\b0?${day}\\s+de\\s+${monthPattern}\\b`);
-  if (namedPattern.test(normalized)) return true;
-
-  return false;
+  return namedPattern.test(normalized);
 }
 
 /**
