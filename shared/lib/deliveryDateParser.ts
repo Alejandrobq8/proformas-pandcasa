@@ -24,19 +24,45 @@ function normalize(text: string) {
     .replace(/[̀-ͯ]/g, "");
 }
 
+function levenshtein(a: string, b: string): number {
+  const rows = a.length + 1;
+  const cols = b.length + 1;
+  const dp: number[][] = Array.from({ length: rows }, () => new Array(cols).fill(0));
+  for (let i = 0; i < rows; i++) dp[i][0] = i;
+  for (let j = 0; j < cols; j++) dp[0][j] = j;
+  for (let i = 1; i < rows; i++) {
+    for (let j = 1; j < cols; j++) {
+      dp[i][j] =
+        a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[rows - 1][cols - 1];
+}
+
+function monthWordMatches(word: string, canonical: string): boolean {
+  if (word === canonical) return true;
+  if (canonical === "septiembre" && word === "setiembre") return true;
+  // Allow a couple of typo'd letters ("novimebre" for "noviembre") without
+  // being loose enough to confuse two different months with each other.
+  const threshold = canonical.length <= 5 ? 1 : 2;
+  return levenshtein(word, canonical) <= threshold;
+}
+
 /**
  * Checks whether free text (proforma notes or an item description — the
  * only two places delivery dates sometimes get typed by hand instead of
  * using the structured date field) mentions a given calendar date.
  *
  * Deliberately narrow: only looks for the unambiguous "D de <mes>" pattern
- * (e.g. "4 de noviembre") that matches the exact target date. A plain
- * numeric DD/MM pattern was tried and dropped — it false-matched unrelated
- * numbers in the text (an item code, a quantity, a weight) that happened
- * to read as e.g. "4-11" with no date intended. Does NOT match the word
- * "mañana" — that only means the target date when the target is actually
- * tomorrow, which this function has no way to know (use
- * textMentionsTomorrow for that case instead).
+ * (e.g. "4 de noviembre"), tolerating small spelling mistakes in the month
+ * word via edit distance. A plain numeric DD/MM pattern was tried and
+ * dropped — it false-matched unrelated numbers in the text (an item code,
+ * a quantity, a weight) that happened to read as e.g. "4-11" with no date
+ * intended. Does NOT match the word "mañana" — that only means the target
+ * date when the target is actually tomorrow, which this function has no
+ * way to know (use textMentionsTomorrow for that case instead).
  */
 export function textMentionsDate(text: string, target: Date): boolean {
   if (!text.trim()) return false;
@@ -44,10 +70,16 @@ export function textMentionsDate(text: string, target: Date): boolean {
 
   const day = target.getUTCDate();
   const monthName = MESES[target.getUTCMonth()];
-  const monthPattern = monthName === "septiembre" ? "se?ptiembre" : monthName;
 
-  const namedPattern = new RegExp(`\\b0?${day}\\s+de\\s+${monthPattern}\\b`);
-  return namedPattern.test(normalized);
+  const dayWordPattern = /\b0?(\d{1,2})\s+de\s+([a-z]+)\b/g;
+  for (const match of normalized.matchAll(dayWordPattern)) {
+    const [, matchedDay, matchedWord] = match;
+    if (Number(matchedDay) === day && monthWordMatches(matchedWord, monthName)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
