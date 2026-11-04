@@ -43,6 +43,11 @@ function levenshtein(a: string, b: string): number {
 
 function monthWordMatches(word: string, canonical: string): boolean {
   if (word === canonical) return true;
+  // Abbreviations ("nov", "sept", "dic").
+  if (word.length >= 3 && canonical.startsWith(word)) return true;
+  if (canonical === "septiembre" && word.length >= 3 && "setiembre".startsWith(word)) {
+    return true;
+  }
   if (canonical === "septiembre" && word === "setiembre") return true;
   // Allow a couple of typo'd letters ("novimebre" for "noviembre") without
   // being loose enough to confuse two different months with each other.
@@ -55,13 +60,12 @@ function monthWordMatches(word: string, canonical: string): boolean {
  * only two places delivery dates sometimes get typed by hand instead of
  * using the structured date field) mentions a given calendar date.
  *
- * Deliberately narrow: only looks for the unambiguous "D de <mes>" pattern
- * (e.g. "4 de noviembre"), tolerating small spelling mistakes in the month
- * word via edit distance. A plain numeric DD/MM pattern was tried and
- * dropped — it false-matched unrelated numbers in the text (an item code,
- * a quantity, a weight) that happened to read as e.g. "4-11" with no date
- * intended. Does NOT match the word "mañana" — that only means the target
- * date when the target is actually tomorrow, which this function has no
+ * Deliberately narrow: looks for "D [de] <mes>" (e.g. "4 de noviembre",
+ * "4 nov"), tolerating small spelling mistakes in the month word via edit
+ * distance, plus a strict numeric form ("4/11", "4/11/2026", "4-11-2026").
+ * A bare "4-11" is NOT accepted — it false-matched unrelated numbers (an
+ * item code, a quantity, a weight) with no date intended. Does NOT match
+ * the word "mañana" — that only means the target date when the target is actually tomorrow, which this function has no
  * way to know (use textMentionsTomorrow for that case instead).
  */
 export function textMentionsDate(text: string, target: Date): boolean {
@@ -71,7 +75,17 @@ export function textMentionsDate(text: string, target: Date): boolean {
   const day = target.getUTCDate();
   const monthName = MESES[target.getUTCMonth()];
 
-  const dayWordPattern = /\b0?(\d{1,2})\s+de\s+([a-z]+)\b/g;
+  // Numeric form: only "/" (or "-" when a year follows), and not glued to
+  // other digits/separators, so codes or weights like "4-11" or "1.4/11"
+  // are not read as a date.
+  const month = target.getUTCMonth() + 1;
+  const numericPattern = new RegExp(
+    `(?<![\\d/.\\-])0?${day}(?:/0?${month}(?:/\\d{2,4})?|-0?${month}-\\d{2,4})(?![\\d/])`
+  );
+  if (numericPattern.test(normalized)) return true;
+
+  // "4 de noviembre", "4 noviembre", "4 nov", "4 de nov."
+  const dayWordPattern = /\b0?(\d{1,2})\s+(?:de\s+)?([a-z]+)\b/g;
   for (const match of normalized.matchAll(dayWordPattern)) {
     const [, matchedDay, matchedWord] = match;
     if (Number(matchedDay) === day && monthWordMatches(matchedWord, monthName)) {
