@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
@@ -14,7 +14,7 @@
     "db:backup": "tsx prisma/backup.ts",
     "db:restore": "tsx prisma/restore.ts",
     "db:verify": "tsx prisma/verify-transfer.ts",
-    "dev:test": "dotenv -e .env.test -- next dev",
+    "dev:test": "dotenv -e .env.test -- next dev --webpack",
     "prisma:test:deploy": "dotenv -e .env.test -- prisma migrate deploy",
     "prisma:test:seed": "dotenv -e .env.test -- prisma db seed",
     "test:e2e": "playwright test"
