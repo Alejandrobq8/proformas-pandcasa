@@ -9,6 +9,7 @@ export type Proforma = {
   ordenCompra: string | null;
   migo: string | null;
   numeroFactura: string | null;
+  numeroCoupa: string | null;
   fechaPago: string | null;
   verificacionPago: boolean;
   sinpeTransf: boolean;

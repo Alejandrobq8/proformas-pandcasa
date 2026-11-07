@@ -145,6 +145,7 @@ const columns = [
   "Orden de Compra",
   "MIGO",
   "N° Factura",
+  "N° COUPA",
   "Fecha de Pago",
   "Verificado",
   "SINPE/TRANSF.",
@@ -465,6 +466,19 @@ export function CobrosTable({
 
                             <td className="px-3 py-2">
                               <EditableCell
+                                isActive={editing?.id === p.id && editing?.field === "numeroCoupa"}
+                                isSaving={saving.has(`${p.id}:numeroCoupa`)}
+                                displayValue={p.numeroCoupa ?? ""}
+                                inputValue={editValue}
+                                onActivate={() => startEdit(p.id, "numeroCoupa", p.numeroCoupa ?? "")}
+                                onCommit={() => commitEdit(p.id, "numeroCoupa")}
+                                onCancel={() => setEditing(null)}
+                                onChange={setEditValue}
+                              />
+                            </td>
+
+                            <td className="px-3 py-2">
+                              <EditableCell
                                 isActive={editing?.id === p.id && editing?.field === "fechaPago"}
                                 isSaving={saving.has(`${p.id}:fechaPago`)}
                                 displayValue={formatDateShort(p.fechaPago)}
@@ -529,7 +543,7 @@ export function CobrosTable({
                               .reduce((sum, p) => sum + Number(p.total), 0)
                           )}
                         </td>
-                        <td colSpan={9} className="px-3 py-2.5 text-xs text-rc-ink/60">
+                        <td colSpan={10} className="px-3 py-2.5 text-xs text-rc-ink/60">
                           {paid} de {group.items.length} proforma{group.items.length !== 1 ? "s" : ""} pagada
                           {paid !== 1 ? "s" : ""}
                           {cancelled > 0 && ` · ${cancelled} cancelada${cancelled !== 1 ? "s" : ""}`}
@@ -545,7 +559,7 @@ export function CobrosTable({
                         <td className="px-3 py-2 font-mono font-semibold text-rc-ink">
                           {formatCRC(groupTotal)}
                         </td>
-                        <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                        <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                           {group.items.length} proforma{group.items.length !== 1 ? "s" : ""}
                         </td>
                       </tr>
@@ -560,7 +574,7 @@ export function CobrosTable({
                           <td className="px-3 py-2 font-mono font-semibold text-rc-gold-dark">
                             {formatCRC(groupPorCobrar)}
                           </td>
-                          <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                          <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                             {groupPorCobrarCount} pendiente{groupPorCobrarCount !== 1 ? "s" : ""}
                           </td>
                         </tr>
@@ -577,7 +591,7 @@ export function CobrosTable({
                             <td className="px-3 py-2 font-mono font-semibold text-rc-stamp">
                               {formatCRC(groupCancelledTotal)}
                             </td>
-                            <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                            <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                               {cancelled} cancelada{cancelled !== 1 ? "s" : ""}
                             </td>
                           </tr>
@@ -591,7 +605,7 @@ export function CobrosTable({
                             <td className="px-3 py-2 font-mono font-semibold text-[#4a6b46]">
                               {formatCRC(groupSaldo)}
                             </td>
-                            <td colSpan={9} className="px-3 py-2 text-xs text-rc-ink/60">
+                            <td colSpan={10} className="px-3 py-2 text-xs text-rc-ink/60">
                               descontando canceladas
                             </td>
                           </tr>

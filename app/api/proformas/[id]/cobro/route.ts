@@ -10,6 +10,7 @@ const cobroSchema = z.object({
   ordenCompra: z.string().nullable().optional(),
   migo: z.string().nullable().optional(),
   numeroFactura: z.string().nullable().optional(),
+  numeroCoupa: z.string().nullable().optional(),
   fechaPago: z.string().nullable().optional(),
   verificacionPago: z.boolean().optional(),
   sinpeTransf: z.boolean().optional(),
@@ -46,6 +47,7 @@ export async function PATCH(
     ...("ordenCompra" in parsed.data && { ordenCompra: parsed.data.ordenCompra ?? null }),
     ...("migo" in parsed.data && { migo: parsed.data.migo ?? null }),
     ...("numeroFactura" in parsed.data && { numeroFactura: parsed.data.numeroFactura ?? null }),
+    ...("numeroCoupa" in parsed.data && { numeroCoupa: parsed.data.numeroCoupa ?? null }),
     ...("fechaPago" in parsed.data && {
       fechaPago: parsed.data.fechaPago ? new Date(parsed.data.fechaPago) : null,
     }),
