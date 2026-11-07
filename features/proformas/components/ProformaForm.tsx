@@ -30,6 +30,7 @@ type ProformaData = {
   showUnitPrice?: boolean;
   discount?: number | null;
   notes?: string | null;
+  numeroCoupa?: string | null;
   deliveryDates?: { date: string; note?: string | null }[];
   status?: ProformaStatus;
   items: Item[];
@@ -45,6 +46,7 @@ function buildDefaultValues(initial?: ProformaData): ProformaFormValues {
     status: initial?.status ?? "DRAFT",
     discount: initial?.discount ?? 0,
     notes: initial?.notes ?? "",
+    numeroCoupa: initial?.numeroCoupa ?? "",
     deliveryDates: initial?.deliveryDates?.length
       ? initial.deliveryDates.map((d) => ({
           date: d.date.split("T")[0],
@@ -230,6 +232,7 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
       showUnitPrice: values.showUnitPrice,
       discount: values.discount || 0,
       notes: values.notes,
+      numeroCoupa: values.numeroCoupa || null,
       deliveryDates: (values.deliveryDates ?? []).filter((d) => d.date),
       items: values.items,
       status: nextStatus ?? values.status,
@@ -548,6 +551,16 @@ export function ProformaForm({ initial }: { initial?: ProformaData }) {
               placeholder="Detalles de la entrega."
               {...register("notes")}
             />
+            <div className="mt-3">
+              <Field label="N° COUPA (opcional)" htmlFor="numeroCoupa">
+                <Input
+                  id="numeroCoupa"
+                  placeholder="Numero de pedido en COUPA"
+                  {...register("numeroCoupa")}
+                />
+              </Field>
+            </div>
+
             <div className="mt-3">
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-rc-ink/80">
                 Fechas de entrega (opcional)

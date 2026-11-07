@@ -95,6 +95,7 @@ export async function PUT(
           status,
           discount: parsed.data.discount ?? null,
           notes: parsed.data.notes ?? null,
+          numeroCoupa: parsed.data.numeroCoupa ?? null,
           subtotal,
           total,
           items: {

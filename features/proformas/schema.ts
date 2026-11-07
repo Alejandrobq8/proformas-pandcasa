@@ -21,6 +21,7 @@ export const proformaSchema = z.object({
   showUnitPrice: z.boolean().optional(),
   discount: z.number().nonnegative().optional().nullable(),
   notes: z.string().optional().nullable(),
+  numeroCoupa: z.string().optional().nullable(),
   deliveryDates: z.array(deliveryDateSchema).optional(),
   status: proformaStatusSchema.optional(),
   items: z.array(proformaItemSchema).min(1),

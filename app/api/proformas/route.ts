@@ -406,6 +406,7 @@ export async function POST(request: Request) {
           status,
           discount: parsed.data.discount ?? null,
           notes: parsed.data.notes ?? null,
+          numeroCoupa: parsed.data.numeroCoupa ?? null,
           subtotal,
           total,
           year,

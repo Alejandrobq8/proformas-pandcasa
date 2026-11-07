@@ -46,6 +46,7 @@ export default async function ProformaEditPage({
     showUnitPrice: proforma.showUnitPrice,
     discount: toNumber(proforma.discount ?? 0),
     notes: proforma.notes ?? "",
+    numeroCoupa: proforma.numeroCoupa,
     deliveryDates: proforma.deliveryDates.map((d) => ({
       date: d.date.toISOString(),
       note: d.note,
