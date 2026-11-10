@@ -145,8 +145,8 @@ const columns = [
   "Orden de Compra",
   "MIGO",
   "N° Factura",
-  "N° COUPA",
   "Fecha de Pago",
+  "N° COUPA",
   "Verificado",
   "SINPE/TRANSF.",
   "Cancelado",
@@ -466,19 +466,6 @@ export function CobrosTable({
 
                             <td className="px-3 py-2">
                               <EditableCell
-                                isActive={editing?.id === p.id && editing?.field === "numeroCoupa"}
-                                isSaving={saving.has(`${p.id}:numeroCoupa`)}
-                                displayValue={p.numeroCoupa ?? ""}
-                                inputValue={editValue}
-                                onActivate={() => startEdit(p.id, "numeroCoupa", p.numeroCoupa ?? "")}
-                                onCommit={() => commitEdit(p.id, "numeroCoupa")}
-                                onCancel={() => setEditing(null)}
-                                onChange={setEditValue}
-                              />
-                            </td>
-
-                            <td className="px-3 py-2">
-                              <EditableCell
                                 isActive={editing?.id === p.id && editing?.field === "fechaPago"}
                                 isSaving={saving.has(`${p.id}:fechaPago`)}
                                 displayValue={formatDateShort(p.fechaPago)}
@@ -486,6 +473,19 @@ export function CobrosTable({
                                 inputType="date"
                                 onActivate={() => startEdit(p.id, "fechaPago", toInputDate(p.fechaPago))}
                                 onCommit={() => commitEdit(p.id, "fechaPago")}
+                                onCancel={() => setEditing(null)}
+                                onChange={setEditValue}
+                              />
+                            </td>
+
+                            <td className="px-3 py-2">
+                              <EditableCell
+                                isActive={editing?.id === p.id && editing?.field === "numeroCoupa"}
+                                isSaving={saving.has(`${p.id}:numeroCoupa`)}
+                                displayValue={p.numeroCoupa ?? ""}
+                                inputValue={editValue}
+                                onActivate={() => startEdit(p.id, "numeroCoupa", p.numeroCoupa ?? "")}
+                                onCommit={() => commitEdit(p.id, "numeroCoupa")}
                                 onCancel={() => setEditing(null)}
                                 onChange={setEditValue}
                               />
