@@ -3,6 +3,7 @@ import { Work_Sans, Cormorant_Garamond, Fraunces, Space_Mono } from "next/font/g
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Snowfall } from "@/shared/components/motion/Snowfall";
 
 const workSans = Work_Sans({
   variable: "--font-work-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
               "(() => { try { const stored = localStorage.getItem('theme'); if (stored === 'dark') { document.documentElement.classList.add('theme-dark'); } else if (stored === 'light') { document.documentElement.classList.remove('theme-dark'); } } catch (e) {} })();",
           }}
         />
+        <Snowfall />
         <Providers>{children}</Providers>
       </body>
     </html>

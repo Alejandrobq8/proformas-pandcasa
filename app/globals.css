@@ -438,6 +438,46 @@ html.theme-dark .interactive-card:hover {
   animation-delay: 320ms;
 }
 
+.snowfall {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.snowfall-flake {
+  position: absolute;
+  top: -5%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ffffff,
+    color-mix(in srgb, var(--rc-gold) 20%, #ffffff)
+  );
+  box-shadow:
+    0 0 3px rgba(43, 33, 24, 0.35),
+    0 0 6px rgba(255, 255, 255, 0.8);
+  animation-name: snowfall-drop;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes snowfall-drop {
+  from {
+    transform: translate3d(0, -10vh, 0);
+  }
+  to {
+    transform: translate3d(var(--drift, 0px), 110vh, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snowfall {
+    display: none;
+  }
+}
+
 .stagger-children > *:nth-child(5) {
   animation-delay: 390ms;
 }
