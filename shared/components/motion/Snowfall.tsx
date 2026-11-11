@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 const FLAKES = [
   { left: "2%", size: 8, duration: 13, delay: -2, drift: 18, opacity: 0.75 },
   { left: "7%", size: 5, duration: 10, delay: -7, drift: -14, opacity: 0.6 },
@@ -26,6 +30,9 @@ const FLAKES = [
 ] as const;
 
 export function Snowfall() {
+  const pathname = usePathname();
+  if (pathname?.includes("/print")) return null;
+
   return (
     <div className="snowfall" aria-hidden="true">
       {FLAKES.map((flake, i) => (
