@@ -9,7 +9,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/proformas/") && pathname.endsWith("/print-template")) {
+  if (
+    (pathname.startsWith("/proformas/") || pathname.startsWith("/facturas/")) &&
+    pathname.endsWith("/print-template")
+  ) {
     const token = request.nextUrl.searchParams.get("token");
     if (token) {
       return NextResponse.next();
